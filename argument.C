@@ -40,6 +40,7 @@ void ArgumentParser::usage(char** argv)
 {
     std::cerr << "Usage: " << argv[0] << " [options]" << std::endl;
     std::cerr << "Options:" << std::endl;
+    std::cerr << "    --help               print this menu" << std::endl;
     std::cerr << "    --path=<path>        sysfs location to monitor"
               << std::endl;
 }
