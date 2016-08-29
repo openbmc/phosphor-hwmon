@@ -19,7 +19,7 @@ phosphor-hwmon-readd_LIBS += phosphor-hwmon
 #### -----------------------------------------------------------------------####
 
 CXXFLAGS ?= -O3 -g -pipe
-CXXFLAGS += --std=gnu++14 -Wall -flto -fPIC
+CXXFLAGS += --std=gnu++14 -Wall -Werror -flto -fPIC
 
 define __BUILD_EXE
 $1 : $$($1_OBJS) $$(LIBS)
