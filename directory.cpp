@@ -1,7 +1,7 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
-#include "directory.H"
+#include "directory.hpp"
 
 Directory::Directory(const std::string& path) : entry(nullptr)
 {

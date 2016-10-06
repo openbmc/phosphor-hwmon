@@ -1,11 +1,11 @@
 #include <iostream>
 #include <memory>
 #include <thread>
-#include "argument.H"
-#include "sensorset.H"
-#include "sensorcache.H"
-#include "hwmon.H"
-#include "sysfs.H"
+#include "argument.hpp"
+#include "sensorset.hpp"
+#include "sensorcache.hpp"
+#include "hwmon.hpp"
+#include "sysfs.hpp"
 
 static void exit_with_error(const char* err, char** argv)
 {

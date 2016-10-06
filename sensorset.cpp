@@ -1,7 +1,7 @@
 #include <regex>
 #include <iostream>
-#include "sensorset.H"
-#include "directory.H"
+#include "sensorset.hpp"
+#include "directory.hpp"
 
 // TODO: Issue#2 - STL regex generates really bloated code.  Use POSIX regex
 //       interfaces instead.
