@@ -27,8 +27,8 @@ int main(int argc, char** argv)
         exit_with_error("Path not specified.", argv);
     }
 
-    // Finished getting options out, so release the parser.
-    options.release();
+    // Finished getting options out, so cleanup the parser.
+    options.reset();
 
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(path);
