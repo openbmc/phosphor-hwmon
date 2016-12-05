@@ -17,7 +17,7 @@ AC_PROG_MAKE_SET
 
 # Checks for typedefs, structures, and compiler characteristics.
 AX_CXX_COMPILE_STDCXX_14([noext])
-AX_APPEND_COMPILE_FLAGS([-flto -fpic -Wall -Werror], [CXXFLAGS])
+AX_APPEND_COMPILE_FLAGS([-fpic -Wall -Werror], [CXXFLAGS])
 
 # Checks for library functions.
 LT_INIT([shared])
