@@ -22,8 +22,14 @@
 #include "sysfs.hpp"
 #include "mainloop.hpp"
 
-MainLoop::MainLoop(const std::string& path)
-    : _shutdown(false), _path(path)
+MainLoop::MainLoop(
+    const std::string& path,
+    const char* prefix,
+    const char* root)
+    : _shutdown(false),
+      _path(path),
+      _prefix(prefix),
+      _root(root)
 {
 
 }
