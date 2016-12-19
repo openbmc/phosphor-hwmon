@@ -15,23 +15,33 @@
  */
 #include <iostream>
 #include <memory>
-#include <thread>
+#include <cstring>
+#include <cstdlib>
+#include <chrono>
 #include "sensorset.hpp"
 #include "sensorcache.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
 
+using namespace std::literals::chrono_literals;
+
 MainLoop::MainLoop(
+    sdbusplus::bus::bus&& bus,
     const std::string& path,
     const char* prefix,
     const char* root)
-    : _shutdown(false),
+    : _bus(std::move(bus)),
+      _manager(sdbusplus::server::manager::manager(_bus, root)),
+      _shutdown(false),
       _path(path),
       _prefix(prefix),
       _root(root)
 {
-
+    if (_path.back() == '/')
+    {
+        _path.pop_back();
+    }
 }
 
 void MainLoop::shutdown() noexcept
@@ -44,6 +54,20 @@ void MainLoop::run()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_path);
     auto sensor_cache = std::make_unique<SensorCache>();
+
+    {
+        struct Free
+        {
+            void operator()(char* ptr) const
+            {
+                free(ptr);
+            }
+        };
+
+        auto copy = std::unique_ptr<char, Free>(strdup(_path.c_str()));
+        auto busname = std::string(_prefix) + '.' + basename(copy.get());
+        _bus.request_name(busname.c_str());
+    }
 
     // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
     //       ensure the objects all exist?
@@ -73,13 +97,13 @@ void MainLoop::run()
             }
         }
 
+        // Respond to DBus
+        _bus.process_discard();
+
         // Sleep until next interval.
         // TODO: Issue#5 - Make this configurable.
         // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
-        {
-            using namespace std::literals::chrono_literals;
-            std::this_thread::sleep_for(1s);
-        }
+        _bus.wait((1000000us).count());
 
         // TODO: Issue#7 - Should probably periodically check the SensorSet
         //       for new entries.

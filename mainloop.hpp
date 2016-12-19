@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sdbusplus/server.hpp>
 
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
@@ -17,6 +18,7 @@ class MainLoop
 
         /** @brief Constructor
          *
+         *  @param[in] bus - sdbusplus bus client connection.
          *  @param[in] path - hwmon sysfs instance to manage
          *  @param[in] prefix - DBus busname prefix.
          *  @param[in] root - DBus sensors namespace root.
@@ -28,6 +30,7 @@ class MainLoop
          *  the format <prefix>.hwmon<n>.
          */
         MainLoop(
+            sdbusplus::bus::bus&& bus,
             const std::string& path,
             const char* prefix,
             const char* root);
@@ -42,7 +45,10 @@ class MainLoop
         void shutdown() noexcept;
 
     private:
-
+        /** @brief sdbusplus bus client connection. */
+        sdbusplus::bus::bus _bus;
+        /** @brief sdbusplus freedesktop.ObjectManager storage. */
+        sdbusplus::server::manager::manager _manager;
         /** @brief Shutdown requested. */
         volatile bool _shutdown;
         /** @brief Path to hwmon sysfs instance. */
