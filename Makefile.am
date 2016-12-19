@@ -9,3 +9,5 @@ libhwmon_la_SOURCES = \
 	directory.cpp \
 	sensorset.cpp \
 	mainloop.cpp
+
+SUBDIRS = . test
