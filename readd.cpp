@@ -43,6 +43,7 @@ int main(int argc, char** argv)
     options.release();
 
     MainLoop loop(
+        sdbusplus::bus::new_default(),
         path,
         BUSNAME_PREFIX,
         SENSOR_ROOT);
