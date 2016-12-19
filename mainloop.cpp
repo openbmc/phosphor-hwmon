@@ -20,18 +20,30 @@
 #include "sensorcache.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
+#include "mainloop.hpp"
 
-int serverMain(const char* path)
+MainLoop::MainLoop(const std::string& path)
+    : _shutdown(false), _path(path)
+{
+
+}
+
+void MainLoop::shutdown() noexcept
+{
+    _shutdown = true;
+}
+
+void MainLoop::run()
 {
     // Check sysfs for available sensors.
-    auto sensors = std::make_unique<SensorSet>(path);
+    auto sensors = std::make_unique<SensorSet>(_path);
     auto sensor_cache = std::make_unique<SensorCache>();
 
     // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
     //       ensure the objects all exist?
 
     // Polling loop.
-    while (true)
+    while (!_shutdown)
     {
         // Iterate through all the sensors.
         for (auto& i : *sensors)
@@ -40,7 +52,7 @@ int serverMain(const char* path)
             {
                 // Read value from sensor.
                 int value = 0;
-                read_sysfs(make_sysfs_path(path,
+                read_sysfs(make_sysfs_path(_path,
                                            i.first.first, i.first.second,
                                            hwmon::entry::input),
                            value);
@@ -66,8 +78,6 @@ int serverMain(const char* path)
         // TODO: Issue#7 - Should probably periodically check the SensorSet
         //       for new entries.
     }
-
-    return 0;
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
