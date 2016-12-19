@@ -53,10 +53,10 @@ int main(int argc, char** argv)
     //       ensure the objects all exist?
 
     // Polling loop.
-    while(true)
+    while (true)
     {
         // Iterate through all the sensors.
-        for(auto& i : *sensors)
+        for (auto& i : *sensors)
         {
             if (i.second.find(hwmon::entry::input) != i.second.end())
             {

@@ -29,13 +29,16 @@ SensorSet::SensorSet(const std::string& path)
     Directory d(path);
     std::string file;
 
-    while(d.next(file))
+    while (d.next(file))
     {
         std::smatch match;
         std::regex_search(file, match, sensors_regex);
 
-        if (match.size() != sensor_regex_match_count) continue;
+        if (match.size() != sensor_regex_match_count)
+        {
+            continue;
+        }
 
-        container[make_pair(match[1],match[2])].emplace(match[3]);
+        container[make_pair(match[1], match[2])].emplace(match[3]);
     }
 }
