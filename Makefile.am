@@ -7,4 +7,5 @@ noinst_LTLIBRARIES = libhwmon.la
 libhwmon_la_SOURCES = \
 	argument.cpp \
 	directory.cpp \
-	sensorset.cpp
+	sensorset.cpp \
+	mainloop.cpp
