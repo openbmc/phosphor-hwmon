@@ -22,7 +22,7 @@
 ArgumentParser::ArgumentParser(int argc, char** argv)
 {
     int option = 0;
-    while(-1 != (option = getopt_long(argc, argv, optionstr, options, NULL)))
+    while (-1 != (option = getopt_long(argc, argv, optionstr, options, NULL)))
     {
         if ((option == '?') || (option == 'h'))
         {
@@ -31,10 +31,15 @@ ArgumentParser::ArgumentParser(int argc, char** argv)
         }
 
         auto i = &options[0];
-        while ((i->val != option) && (i->val != 0)) ++i;
+        while ((i->val != option) && (i->val != 0))
+        {
+            ++i;
+        }
 
         if (i->val)
+        {
             arguments[i->name] = (i->has_arg ? optarg : true_string);
+        }
     }
 }
 

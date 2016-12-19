@@ -39,14 +39,20 @@ Directory::~Directory()
 
 bool Directory::next(std::string& name)
 {
-    if (!dirp) return false;
+    if (!dirp)
+    {
+        return false;
+    }
 
     dirent entry;
     dirent* result;
 
     auto rc = readdir_r(dirp, &entry, &result);
 
-    if ((rc) || (NULL == result)) return false;
+    if ((rc) || (NULL == result))
+    {
+        return false;
+    }
 
     name = entry.d_name;
     return true;

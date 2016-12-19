@@ -9,7 +9,7 @@ class SensorSet
 {
     public:
         typedef std::map<std::pair<std::string, std::string>,
-                         std::set<std::string>> container_t;
+                std::set<std::string>> container_t;
 
         SensorSet(const std::string& path);
 

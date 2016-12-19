@@ -5,19 +5,19 @@
 
 namespace hwmon
 {
-    using namespace std::literals;
+using namespace std::literals;
 
-    namespace entry
-    {
-        static const std::string input = "input"s;
-    }
+namespace entry
+{
+static const std::string input = "input"s;
+}
 
-    namespace type
-    {
-        static const std::string fan = "fan"s;
-        static const std::string temp = "temp"s;
-        static const std::string volt = "in"s;
-    }
+namespace type
+{
+static const std::string fan = "fan"s;
+static const std::string temp = "temp"s;
+static const std::string volt = "in"s;
+}
 }
 
 #endif
