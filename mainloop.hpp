@@ -18,8 +18,19 @@ class MainLoop
         /** @brief Constructor
          *
          *  @param[in] path - hwmon sysfs instance to manage
+         *  @param[in] prefix - DBus busname prefix.
+         *  @param[in] root - DBus sensors namespace root.
+         *
+         *  Any DBus objects are created relative to the DBus
+         *  sensors namespace root.
+         *
+         *  At startup, the application will own a busname with
+         *  the format <prefix>.hwmon<n>.
          */
-        explicit MainLoop(const std::string& path);
+        MainLoop(
+            const std::string& path,
+            const char* prefix,
+            const char* root);
 
         /** @brief Start polling loop and process dbus traffic. */
         void run();
@@ -36,4 +47,8 @@ class MainLoop
         bool _shutdown;
         /** @brief Path to hwmon sysfs instance. */
         std::string _path;
+        /** @brief DBus busname prefix. */
+        const char* _prefix;
+        /** @brief DBus sensors namespace root. */
+        const char* _root;
 };

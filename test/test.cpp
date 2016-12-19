@@ -42,7 +42,9 @@ int main()
     std::ofstream f{entry};
     f << "1234";
 
-    auto loop = MainLoop(dir);
+    auto loop = MainLoop(
+                    dir,
+                    "xyz.openbmc_project.Testing", "/testing");
 
     pthread_t t;
     {
