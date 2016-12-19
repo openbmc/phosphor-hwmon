@@ -41,7 +41,10 @@ int main(int argc, char** argv)
     // Finished getting options out, so release the parser.
     options.release();
 
-    return serverMain(path.c_str());
+    MainLoop loop(path);
+    loop.run();
+
+    return 0;
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
