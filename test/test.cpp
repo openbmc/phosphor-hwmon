@@ -43,6 +43,7 @@ int main()
     f << "1234";
 
     auto loop = MainLoop(
+                    sdbusplus::bus::new_default(),
                     dir,
                     "xyz.openbmc_project.Testing", "/testing");
 
