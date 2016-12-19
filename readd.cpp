@@ -17,6 +17,7 @@
 #include <memory>
 #include "argument.hpp"
 #include "mainloop.hpp"
+#include "config.h"
 
 static void exit_with_error(const char* err, char** argv)
 {
@@ -41,7 +42,10 @@ int main(int argc, char** argv)
     // Finished getting options out, so release the parser.
     options.release();
 
-    MainLoop loop(path);
+    MainLoop loop(
+        path,
+        BUSNAME_PREFIX,
+        SENSOR_ROOT);
     loop.run();
 
     return 0;
