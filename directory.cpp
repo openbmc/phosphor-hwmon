@@ -57,3 +57,5 @@ bool Directory::next(std::string& name)
     name = entry.d_name;
     return true;
 }
+
+// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

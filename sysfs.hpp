@@ -29,3 +29,5 @@ const std::string make_sysfs_path(const std::string& path,
 }
 
 #endif
+
+// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

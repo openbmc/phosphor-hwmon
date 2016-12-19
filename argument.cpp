@@ -76,3 +76,5 @@ const char* ArgumentParser::optionstr = "p:?h";
 
 const std::string ArgumentParser::true_string = "true";
 const std::string ArgumentParser::empty_string = "";
+
+// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
