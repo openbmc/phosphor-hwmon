@@ -12,5 +12,6 @@ libhwmon_la_SOURCES = \
 	sensorset.cpp \
 	mainloop.cpp \
 	xyz.openbmc_project.Sensor.Value.cpp
+libhwmon_la_LIBADD = -lsensors
 
 SUBDIRS = . test
