@@ -17,12 +17,14 @@
 #include <memory>
 #include <cstring>
 #include <cstdlib>
+#include <utility>
 #include "sensorset.hpp"
 #include "sensorcache.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
 #include "sensors.hpp"
+#include "interface.hpp"
 
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
@@ -49,6 +51,14 @@ void MainLoop::shutdown() noexcept
 
 void MainLoop::run()
 {
+    static constexpr auto unitMap =
+    {
+        std::make_pair("temp", ValueInterface::Unit::DegreesC),
+        std::make_pair("fan", ValueInterface::Unit::RPMS),
+        std::make_pair("in", ValueInterface::Unit::Volts),
+        std::make_pair("power", ValueInterface::Unit::Volts),
+    };
+
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_path);
     auto sensor_cache = std::make_unique<SensorCache>();
