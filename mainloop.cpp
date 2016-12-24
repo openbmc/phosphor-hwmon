@@ -22,6 +22,7 @@
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
+#include "sensors.hpp"
 
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
