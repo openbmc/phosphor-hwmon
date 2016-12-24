@@ -23,6 +23,7 @@
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
+#include "interface.hpp"
 
 using namespace std::literals::chrono_literals;
 
