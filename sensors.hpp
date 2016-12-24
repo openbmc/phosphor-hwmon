@@ -8,6 +8,23 @@
 namespace libsensors
 {
 
+/** @class FeatureException
+ *  @brief For unsupported libsensors features.
+ */
+struct FeatureException : public std::runtime_error
+{
+    FeatureException(const FeatureException&) = default;
+    FeatureException& operator=(const FeatureException&) = default;
+    FeatureException(FeatureException&&) = default;
+    FeatureException& operator=(FeatureException&&) = default;
+    ~FeatureException() = default;
+    FeatureException() = delete;
+    explicit FeatureException(const char* feature)
+        : std::runtime_error(
+              std::string(
+                  "Unexpected libsensors (sub)feature: ") + feature) {}
+};
+
 /** @class LibSensorsException
  *  @brief For non-zero return codes from libsensor APIs.
  */
@@ -29,7 +46,10 @@ namespace details
 {
 
 using ChipName = const sensors_chip_name *;
+using Feature = const sensors_feature *;
 } // namespace details
+
+class Sensor;
 
 /** @class Chip
  *  @brief Provide C++ bindings to libsensor chip_name APIs.
@@ -52,6 +72,14 @@ class Chip final
          */
         std::string path() const;
 
+        /** @brief sensors
+         *
+         *  C++ adapatation of sensors_get_features.
+         *
+         *  @return The sensors implemented by Chip.
+         */
+        std::vector<Sensor> sensors() const;
+
     private:
         /** @brief Constructor
          *
@@ -65,6 +93,55 @@ class Chip final
 
         /** @brief Allow construction by LibSensors. */
         friend class LibSensors;
+        /** @brief Feature APIs require Chip access. */
+        friend class Sensor;
+};
+
+/** @class Sensor
+ *  @brief Provide C++ bindings to libsensor feature APIs.
+ */
+class Sensor final
+{
+    public:
+        Sensor(const Sensor&) = default;
+        Sensor& operator=(const Sensor&) = default;
+        Sensor(Sensor&&) = default;
+        Sensor& operator=(Sensor&&) = default;
+        Sensor() = delete;
+        ~Sensor() = default;
+
+        /** @brief type
+         *
+         *  Provide a string represenation of sensors_feature_type.
+         *
+         *  @return The string representation.
+         */
+        std::string type() const;
+
+        /** @brief label
+         *
+         *  C++ adapatation of sensors_get_label.
+         *
+         *  @return The sensor label.
+         */
+        std::string label() const;
+
+    private:
+        /** @brief Constructor
+         *
+         *  Cannot be constructed directly.  Obtain Sensor instances
+         *  via the Chip class.
+         */
+        Sensor(details::Feature feature, Chip chip) noexcept
+            : feature(feature), chip(chip) {}
+
+        /** @brief The libsensors feature handle. */
+        details::Feature feature;
+        /** @brief The parent chip. */
+        Chip chip;
+
+        /** @brief Allow construction by Chip. */
+        friend class Chip;
 };
 
 /** @class LibSensors
@@ -104,6 +181,22 @@ class LibSensors final
 
 /** @brief Obtain a library access handle. */
 LibSensors loadDefault();
+
+namespace details
+{
+
+/** @struct MallocFree
+ *  @brief A smart pointer deleter type.
+ */
+template <typename T>
+struct MallocFree
+{
+    void operator()(T* ptr) const
+    {
+        free(ptr);
+    }
+};
+} // namespace details
 } // namespace libsensors
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
