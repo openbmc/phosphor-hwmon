@@ -13,11 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <sensors/sensors.h>
+#include <vector>
+#include <string>
 #include "sensors.hpp"
 
 namespace libsensors
 {
+
+std::string Chip::path() const
+{
+    return chip->path;
+}
+
+std::vector<Chip> LibSensors::chips() const
+{
+    auto iter = 0;
+    details::ChipName chip = nullptr;
+    std::vector<Chip> chips;
+
+    while ((chip = sensors_get_detected_chips(nullptr, &iter)))
+    {
+        chips.push_back(decltype(chips)::value_type(chip));
+    }
+
+    return chips;
+}
 
 LibSensors::LibSensors()
 {
