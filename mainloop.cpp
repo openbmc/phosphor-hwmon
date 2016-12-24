@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 #include <iostream>
+#include <algorithm>
 #include <memory>
 #include <cstring>
 #include <cstdlib>
 #include <utility>
+#include <experimental/any>
+#include <vector>
 #include "sensorset.hpp"
 #include "sensorcache.hpp"
 #include "hwmon.hpp"
@@ -62,6 +65,87 @@ void MainLoop::run()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_path);
     auto sensor_cache = std::make_unique<SensorCache>();
+    auto lib = libsensors::loadDefault();
+    std::vector<std::vector<std::experimental::any>> refs;
+
+    {
+        auto chips = lib.chips();
+
+        // Narrow the scope to just our hwmon instance.
+        auto chip = std::find_if(
+                        chips.begin(),
+                        chips.end(),
+                        [&](const auto & e)
+        {
+            return _path == e.path();
+        });
+
+        if (chip == chips.cend())
+        {
+            std::string msg
+            {
+                "Did not find any chips in hwmon instance: " + _path};
+            throw std::runtime_error(msg);
+        }
+
+        for (auto& sensor : chip->sensors())
+        {
+            // Find supported interfaces and
+            // create a dbus object.
+            auto sensorType = sensor.type();
+
+            std::string objectPath{_root};
+            objectPath.append("/");
+            objectPath.append(sensorType);
+            objectPath.append("/");
+            objectPath.append(sensor.label());
+            std::vector<std::experimental::any> interfaces;
+
+            auto attrs = sensor.attributes();
+
+            // Create a value interface if the input
+            // attribute exists.
+            auto input = std::find_if(
+                             attrs.begin(),
+                             attrs.end(),
+                             [](const auto & attr)
+            {
+                return attr.type() == "input";
+            });
+
+            if (input != attrs.cend())
+            {
+                // Create the interface.
+                interfaces.emplace_back(
+                    std::make_shared<ValueObject>(
+                        _bus, objectPath.c_str()));
+
+                // Set the initial values.
+                auto& iface = *std::experimental::any_cast<std::shared_ptr<ValueObject>>
+                              (interfaces.back());
+                iface.value(input->read());
+                iface.scale(input->scale());
+
+                const auto& unit = std::find_if(
+                                       unitMap.begin(),
+                                       unitMap.end(),
+                                       [&](const auto & mapEntry)
+                {
+                    return sensorType == mapEntry.first;
+                });
+                if (unit != unitMap.end())
+                {
+                    iface.unit(unit->second);
+                }
+            }
+
+            // Create the dbus object.
+            if (!interfaces.empty())
+            {
+                refs.emplace_back(std::move(interfaces));
+            }
+        }
+    }
 
     {
         struct Free
