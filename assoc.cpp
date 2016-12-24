@@ -16,6 +16,7 @@
 #include <string>
 #include <cstdlib>
 #include "assoc.hpp"
+#include "interface.hpp"
 
 ObjectSet::ObjectSet(SensorSet&& o)
 {
