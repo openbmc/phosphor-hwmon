@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
 #include <algorithm>
 #include <memory>
 #include <cstring>
@@ -21,10 +20,6 @@
 #include <utility>
 #include <experimental/any>
 #include <vector>
-#include "sensorset.hpp"
-#include "sensorcache.hpp"
-#include "hwmon.hpp"
-#include "sysfs.hpp"
 #include "mainloop.hpp"
 #include "sensors.hpp"
 #include "interface.hpp"
@@ -63,8 +58,6 @@ void MainLoop::run()
     };
 
     // Check sysfs for available sensors.
-    auto sensors = std::make_unique<SensorSet>(_path);
-    auto sensor_cache = std::make_unique<SensorCache>();
     auto lib = libsensors::loadDefault();
     std::vector<std::vector<std::experimental::any>> refs;
     std::vector<std::pair<
@@ -180,27 +173,6 @@ void MainLoop::run()
     while (!_shutdown)
     {
         // Iterate through all the sensors.
-        for (auto& i : *sensors)
-        {
-            if (i.second.find(hwmon::entry::input) != i.second.end())
-            {
-                // Read value from sensor.
-                int value = 0;
-                read_sysfs(make_sysfs_path(_path,
-                                           i.first.first, i.first.second,
-                                           hwmon::entry::input),
-                           value);
-
-                // Update sensor cache.
-                if (sensor_cache->update(i.first, value))
-                {
-                    // TODO: Issue#4 - dbus event here.
-                    std::cout << i.first.first << i.first.second << " = "
-                              << value << std::endl;
-                }
-            }
-        }
-
         for (auto& i : pollMe)
         {
             auto attrType = i.first.type();

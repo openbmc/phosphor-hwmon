@@ -8,8 +8,6 @@ phosphor_hwmon_readd_CFLAGS = $(SYSTEMD_CFLAGS)
 noinst_LTLIBRARIES = libhwmon.la
 libhwmon_la_SOURCES = \
 	argument.cpp \
-	directory.cpp \
-	sensorset.cpp \
 	mainloop.cpp \
 	sensors.cpp \
 	xyz.openbmc_project.Sensor.Value.cpp
