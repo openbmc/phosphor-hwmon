@@ -18,10 +18,53 @@
 #include <algorithm>
 #include <utility>
 #include <memory>
+#include <cmath>
 #include "sensors.hpp"
 
 namespace libsensors
 {
+
+std::string Attribute::type() const
+{
+    std::string type{sub->name};
+    std::string name{sensor.feature->name};
+    std::string::size_type i = type.find(name);
+
+    if (i == std::string::npos)
+    {
+        throw FeatureException(sub->name);
+    }
+
+    type.erase(0, name.length() + 1);
+    return type;
+}
+
+int64_t Attribute::read() const
+{
+    double val = 0;
+    auto rc = sensors_get_value(
+                  chip.chip,
+                  sensor.feature->number,
+                  &val);
+    if (rc)
+    {
+        throw LibSensorsException(rc);
+    }
+
+    return val * pow(10, -_scale);
+}
+
+void Attribute::write(int64_t value) const
+{
+    auto rc = sensors_set_value(
+                  chip.chip,
+                  sensor.feature->number,
+                  static_cast<double>(value) * pow(10, _scale));
+    if (rc)
+    {
+        throw LibSensorsException(rc);
+    }
+}
 
 std::string Sensor::label() const
 {
@@ -65,6 +108,48 @@ std::string Sensor::type() const
     }
 
     return it->first;
+}
+
+std::vector<Attribute> Sensor::attributes() const
+{
+    static constexpr auto scaleMap =
+    {
+        std::make_pair("in", -3),
+        std::make_pair("fan", 0),
+        std::make_pair("temp", -3),
+        std::make_pair("power", -6),
+        std::make_pair("energy", -6),
+        std::make_pair("curr", -3),
+        std::make_pair("humidity", -3),
+        std::make_pair("cpu", -3),
+    };
+
+    auto t = type();
+    auto scaleIt = std::find_if(
+                       scaleMap.begin(),
+                       scaleMap.end(),
+                       [&](const auto & i)
+    {
+        return i.first == t;
+    });
+
+    if (scaleIt == scaleMap.end())
+    {
+        throw FeatureException(feature->name);
+    }
+
+    auto iter = 0;
+    details::SubFeature sub = nullptr;
+    std::vector<Attribute> attributes;
+
+    while ((sub = sensors_get_all_subfeatures(chip.chip, feature, &iter)))
+    {
+        attributes.push_back(
+            decltype(attributes)::value_type(
+                sub, *this, chip, scaleIt->second));
+    }
+
+    return attributes;
 }
 
 std::string Chip::path() const

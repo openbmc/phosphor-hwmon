@@ -47,9 +47,11 @@ namespace details
 
 using ChipName = const sensors_chip_name *;
 using Feature = const sensors_feature *;
+using SubFeature = const sensors_subfeature *;
 } // namespace details
 
 class Sensor;
+class Attribute;
 
 /** @class Chip
  *  @brief Provide C++ bindings to libsensor chip_name APIs.
@@ -95,6 +97,8 @@ class Chip final
         friend class LibSensors;
         /** @brief Feature APIs require Chip access. */
         friend class Sensor;
+        /** @brief SubFeature APIs require Chip access. */
+        friend class Attribute;
 };
 
 /** @class Sensor
@@ -126,6 +130,14 @@ class Sensor final
          */
         std::string label() const;
 
+        /** @brief attributes
+         *
+         *  C++ adapatation of sensors_get_all_subfeatures.
+         *
+         *  @return The attributes implemented by Sensor.
+         */
+        std::vector<Attribute> attributes() const;
+
     private:
         /** @brief Constructor
          *
@@ -142,6 +154,85 @@ class Sensor final
 
         /** @brief Allow construction by Chip. */
         friend class Chip;
+        /** @brief SubFeature APIs require Sensor access. */
+        friend class Attribute;
+};
+
+/** @class Attribute
+ *  @brief Provide C++ bindings to libsensor subfeature APIs.
+ */
+class Attribute final
+{
+    public:
+        Attribute(const Attribute&) = default;
+        Attribute& operator=(const Attribute&) = default;
+        Attribute(Attribute&&) = default;
+        Attribute& operator=(Attribute&&) = default;
+        ~Attribute() = default;
+        Attribute() = delete;
+
+        /** @brief scale
+         *
+         *  Provide the scaling factor for use with the read and write methods.
+         *
+         *  @return The scaling factor.
+         */
+        int64_t scale() const
+        {
+            return _scale;
+        }
+
+        /** @brief type
+         *
+         *  Provide a string represenation of sensors_subfeature_type.
+         *
+         *  @return The string representation.
+         */
+        std::string type() const;
+
+        /** @brief read
+         *
+         *  C++ adapatation of sensors_get_value.
+         *
+         *  @return The read value.
+         */
+        int64_t read() const;
+
+        /** @brief write
+         *
+         *  C++ adapatation of sensors_set_value.
+         *
+         *  @param[in] value - The value to write.
+         */
+        void write(int64_t value) const;
+
+    private:
+        /** @brief Constructor
+         *
+         *  Cannot be constructed directly.  Obtain Attribute instances
+         *  via the Sensor class.
+         */
+        Attribute(
+            details::SubFeature sub,
+            Sensor sensor,
+            Chip chip,
+            int64_t scale) noexcept
+            : sub(sub),
+              sensor(std::move(sensor)),
+              chip(chip),
+              _scale(scale) {}
+
+        /** @brief The libsensors subfeature handle. */
+        details::SubFeature sub;
+        /** @brief The parent sensor. */
+        Sensor sensor;
+        /** @brief The parent chip. */
+        Chip chip;
+        /** @brief The scaling factor. */
+        int64_t _scale;
+
+        /** @brief Allow construction by Sensor. */
+        friend class Sensor;
 };
 
 /** @class LibSensors
