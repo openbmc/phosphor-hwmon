@@ -67,6 +67,9 @@ void MainLoop::run()
     auto sensor_cache = std::make_unique<SensorCache>();
     auto lib = libsensors::loadDefault();
     std::vector<std::vector<std::experimental::any>> refs;
+    std::vector<std::pair<
+    libsensors::Attribute,
+               std::experimental::any>> pollMe;
 
     {
         auto chips = lib.chips();
@@ -137,6 +140,13 @@ void MainLoop::run()
                 {
                     iface.unit(unit->second);
                 }
+
+                // Input attributes are polled, so add
+                // to the polling loop.
+                pollMe.emplace_back(
+                    *input,
+                    std::experimental::any(
+                        interfaces.back()));
             }
 
             // Create the dbus object.
@@ -188,6 +198,19 @@ void MainLoop::run()
                     std::cout << i.first.first << i.first.second << " = "
                               << value << std::endl;
                 }
+            }
+        }
+
+        for (auto& i : pollMe)
+        {
+            auto attrType = i.first.type();
+            auto val = i.first.read();
+
+            if (attrType == "input")
+            {
+                auto& iface = *std::experimental::any_cast <
+                              std::shared_ptr<ValueObject >> (i.second);
+                iface.value(val);
             }
         }
 
