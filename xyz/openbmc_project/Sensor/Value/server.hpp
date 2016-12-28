@@ -44,6 +44,9 @@ class Value
             RPMS,
             Volts,
             Meters,
+            Amperes,
+            Watts,
+            Joules,
         };
 
 
