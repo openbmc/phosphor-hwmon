@@ -255,6 +255,9 @@ static const std::tuple<const char*, Value::Unit> mappingValueUnit[] =
             std::make_tuple( "xyz.openbmc_project.Sensor.Value.Unit.RPMS",                 Value::Unit::RPMS ),
             std::make_tuple( "xyz.openbmc_project.Sensor.Value.Unit.Volts",                 Value::Unit::Volts ),
             std::make_tuple( "xyz.openbmc_project.Sensor.Value.Unit.Meters",                 Value::Unit::Meters ),
+            std::make_tuple( "xyz.openbmc_project.Sensor.Value.Unit.Amperes",                 Value::Unit::Amperes ),
+            std::make_tuple( "xyz.openbmc_project.Sensor.Value.Unit.Watts",                 Value::Unit::Watts ),
+            std::make_tuple( "xyz.openbmc_project.Sensor.Value.Unit.Joules",                 Value::Unit::Joules ),
         };
 
 } // anonymous namespace
