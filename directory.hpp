@@ -1,5 +1,4 @@
-#ifndef __DIRECTORY_H
-#define __DIRECTORY_H
+#pragma once
 
 #include <string>
 #include <dirent.h>
@@ -16,7 +15,5 @@ class Directory
         dirent* entry;
         DIR* dirp;
 };
-
-#endif
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
