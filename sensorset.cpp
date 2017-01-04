@@ -17,6 +17,7 @@
 #include <iostream>
 #include "sensorset.hpp"
 #include "directory.hpp"
+#include "hwmon.hpp"
 
 // TODO: Issue#2 - STL regex generates really bloated code.  Use POSIX regex
 //       interfaces instead.
@@ -35,6 +36,11 @@ SensorSet::SensorSet(const std::string& path)
         std::regex_search(file, match, sensors_regex);
 
         if (match.size() != sensor_regex_match_count)
+        {
+            continue;
+        }
+
+        if (match[3] == hwmon::entry::label)
         {
             continue;
         }
