@@ -1,5 +1,4 @@
-#ifndef __SYSFS_H
-#define __SYSFS_H
+#pragma once
 
 #include <fstream>
 #include <string>
@@ -27,7 +26,5 @@ const std::string make_sysfs_path(const std::string& path,
 
     return path + "/"s + type + id + "_"s + entry;
 }
-
-#endif
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
