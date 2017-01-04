@@ -9,6 +9,7 @@ using namespace std::literals;
 namespace entry
 {
 static const std::string input = "input"s;
+static const std::string label = "label"s;
 }
 
 namespace type
