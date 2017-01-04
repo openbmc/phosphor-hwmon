@@ -1,5 +1,4 @@
-#ifndef __SENSORSET_H
-#define __SENSORSET_H
+#pragma once
 
 #include <map>
 #include <set>
@@ -27,7 +26,5 @@ class SensorSet
         container_t container;
 
 };
-
-#endif
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

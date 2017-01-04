@@ -1,5 +1,4 @@
-#ifndef __SENSORCACHE_H
-#define __SENSORCACHE_H
+#pragma once
 
 #include <map>
 
@@ -26,7 +25,5 @@ class SensorCache
     private:
         container_t container;
 };
-
-#endif
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
