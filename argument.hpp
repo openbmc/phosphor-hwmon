@@ -1,5 +1,5 @@
-#ifndef __ARGUMENT_H
-#define __ARGUMENT_H
+#pragma once
+
 #include <getopt.h>
 #include <map>
 #include <string>
@@ -24,7 +24,5 @@ class ArgumentParser
     private:
         ArgumentParser() {};
 };
-
-#endif
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

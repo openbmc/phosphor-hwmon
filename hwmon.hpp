@@ -1,5 +1,4 @@
-#ifndef __HWMON_H
-#define __HWMON_H
+#pragma once
 
 #include <string>
 
@@ -19,7 +18,5 @@ static const std::string temp = "temp"s;
 static const std::string volt = "in"s;
 }
 }
-
-#endif
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
