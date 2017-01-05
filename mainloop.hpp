@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sdbusplus/server.hpp>
+#include "sensorset.hpp"
 
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
@@ -45,6 +46,9 @@ class MainLoop
         void shutdown() noexcept;
 
     private:
+        using mapped_type = std::tuple<SensorSet::mapped_type>;
+        using SensorState = std::map<SensorSet::key_type, mapped_type>;
+
         /** @brief sdbusplus bus client connection. */
         sdbusplus::bus::bus _bus;
         /** @brief sdbusplus freedesktop.ObjectManager storage. */
@@ -57,4 +61,6 @@ class MainLoop
         const char* _prefix;
         /** @brief DBus sensors namespace root. */
         const char* _root;
+        /** @brief DBus object state. */
+        SensorState state;
 };
