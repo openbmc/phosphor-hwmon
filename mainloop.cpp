@@ -22,6 +22,7 @@
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
+#include "assoc.hpp"
 
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
@@ -51,6 +52,7 @@ void MainLoop::run()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_path);
     auto sensor_cache = std::make_unique<SensorCache>();
+    ObjectSet objs{std::move(*sensors)};
 
     {
         struct Free
@@ -75,9 +77,10 @@ void MainLoop::run()
     while (!_shutdown)
     {
         // Iterate through all the sensors.
-        for (auto& i : *sensors)
+        for (auto& i : objs)
         {
-            if (i.second.find(hwmon::entry::input) != i.second.end())
+            auto& attrs = std::get<0>(i.second);
+            if (attrs.find(hwmon::entry::input) != attrs.end())
             {
                 // Read value from sensor.
                 int value = 0;
