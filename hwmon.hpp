@@ -4,19 +4,24 @@
 
 namespace hwmon
 {
-using namespace std::literals;
-
 namespace entry
 {
-static const std::string input = "input"s;
-static const std::string label = "label"s;
+static constexpr auto cinput = "input";
+static constexpr auto clabel = "label";
+
+static const std::string input = cinput;
+static const std::string label = clabel;
 }
 
 namespace type
 {
-static const std::string fan = "fan"s;
-static const std::string temp = "temp"s;
-static const std::string volt = "in"s;
+static constexpr auto cfan = "fan";
+static constexpr auto ctemp = "temp";
+static constexpr auto cvolt = "in";
+
+static const std::string fan = cfan;
+static const std::string temp = ctemp;
+static const std::string volt = cvolt;
 }
 }
 
