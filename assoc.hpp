@@ -12,7 +12,7 @@
 class ObjectSet
 {
     public:
-        using mapped_type = std::tuple<SensorSet::mapped_type>;
+        using mapped_type = std::tuple<SensorSet::mapped_type, std::string>;
         using container_t = std::map<SensorSet::key_type, mapped_type>;
 
         ~ObjectSet() = default;

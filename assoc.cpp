@@ -14,13 +14,30 @@
  * limitations under the License.
  */
 #include <string>
+#include <cstdlib>
 #include "assoc.hpp"
 
 ObjectSet::ObjectSet(SensorSet&& o)
 {
     for (auto& i : o)
     {
-        auto value = std::make_tuple(std::move(i.second));
+        // Ignore inputs without a label.
+        std::string envKey = "LABEL_" + i.first.first + i.first.second;
+        std::string label;
+
+        auto env = getenv(envKey.c_str());
+
+        if (env)
+        {
+            label.assign(env);
+        }
+
+        if (label.empty())
+        {
+            continue;
+        }
+
+        auto value = std::make_tuple(std::move(i.second), std::move(label));
         container[std::move(i.first)] = std::move(value);
     }
 }
