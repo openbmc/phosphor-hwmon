@@ -28,6 +28,16 @@ class ObjectSet
         */
         explicit ObjectSet(SensorSet&&);
 
+        container_t::iterator begin()
+        {
+            return container.begin();
+        }
+
+        container_t::iterator end()
+        {
+            return container.end();
+        }
+
     private:
         container_t container;
 };
