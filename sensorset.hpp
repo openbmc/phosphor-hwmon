@@ -9,6 +9,8 @@ class SensorSet
     public:
         typedef std::map<std::pair<std::string, std::string>,
                 std::set<std::string>> container_t;
+        using mapped_type = container_t::mapped_type;
+        using key_type = container_t::key_type;
 
         explicit SensorSet(const std::string& path);
         ~SensorSet() = default;
