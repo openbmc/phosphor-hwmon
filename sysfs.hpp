@@ -17,10 +17,10 @@ void write_sysfs(const std::string& path, const T& val)
     s << val;
 }
 
-const std::string make_sysfs_path(const std::string& path,
-                                  const std::string& type,
-                                  const std::string& id,
-                                  const std::string& entry)
+inline const std::string make_sysfs_path(const std::string& path,
+        const std::string& type,
+        const std::string& id,
+        const std::string& entry)
 {
     using namespace std::literals;
 
