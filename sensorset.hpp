@@ -10,7 +10,13 @@ class SensorSet
         typedef std::map<std::pair<std::string, std::string>,
                 std::set<std::string>> container_t;
 
-        SensorSet(const std::string& path);
+        explicit SensorSet(const std::string& path);
+        ~SensorSet() = default;
+        SensorSet() = delete;
+        SensorSet(const SensorSet&) = delete;
+        SensorSet& operator=(const SensorSet&) = delete;
+        SensorSet(SensorSet&&) = default;
+        SensorSet& operator=(SensorSet&&) = default;
 
         container_t::const_iterator begin()
         {
