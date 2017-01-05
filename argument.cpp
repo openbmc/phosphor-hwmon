@@ -58,11 +58,11 @@ const std::string& ArgumentParser::operator[](const std::string& opt)
 
 void ArgumentParser::usage(char** argv)
 {
-    std::cerr << "Usage: " << argv[0] << " [options]" << std::endl;
-    std::cerr << "Options:" << std::endl;
-    std::cerr << "    --help               print this menu" << std::endl;
-    std::cerr << "    --path=<path>        sysfs location to monitor"
-              << std::endl;
+    std::cerr << "Usage: " << argv[0] << " [options]\n";
+    std::cerr << "Options:\n";
+    std::cerr << "    --help               print this menu\n";
+    std::cerr << "    --path=<path>        sysfs location to monitor\n";
+    std::cerr << std::flush;
 }
 
 const option ArgumentParser::options[] =
