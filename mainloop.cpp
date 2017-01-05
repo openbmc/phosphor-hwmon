@@ -20,7 +20,6 @@
 #include <chrono>
 #include <algorithm>
 #include "sensorset.hpp"
-#include "sensorcache.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
@@ -74,7 +73,6 @@ void MainLoop::run()
 {
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_path);
-    auto sensor_cache = std::make_unique<SensorCache>();
 
     for (auto& i : *sensors)
     {
@@ -178,14 +176,6 @@ void MainLoop::run()
                     auto realIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
                                      (iface->second);
                     realIface->value(value);
-                }
-
-                // Update sensor cache.
-                if (sensor_cache->update(i.first, value))
-                {
-                    // TODO: Issue#4 - dbus event here.
-                    std::cout << i.first.first << i.first.second << " = "
-                              << value << std::endl;
                 }
             }
         }
