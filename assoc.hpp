@@ -31,10 +31,12 @@ class ObjectSet
         /** @brief Move import SensorSet constructor.
         *
         *  @param[in] dbusRoot - The DBus namespace root.
+        *  @param[in] sysfsRoot - The sysfs root directory.
         *  @param[in] bus - The sdbusplus bus connection.
         *  @param[in] o - The Sensor set to move import.
         */
-        explicit ObjectSet(const std::string&, sdbusplus::bus::bus&,
+        explicit ObjectSet(const std::string&,
+                           const std::string&, sdbusplus::bus::bus&,
                            SensorSet&&);
 
         container_t::iterator begin()

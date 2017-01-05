@@ -52,7 +52,7 @@ void MainLoop::run()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_path);
     auto sensor_cache = std::make_unique<SensorCache>();
-    ObjectSet objs{_root, _bus, std::move(*sensors)};
+    ObjectSet objs{_root, _path, _bus, std::move(*sensors)};
 
     {
         struct Free

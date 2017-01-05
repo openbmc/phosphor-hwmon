@@ -16,9 +16,12 @@
 #include <string>
 #include <cstdlib>
 #include "assoc.hpp"
+#include "hwmon.hpp"
+#include "sysfs.hpp"
 
 ObjectSet::ObjectSet(
     const std::string& dbusRoot,
+    const std::string& sysfsRoot,
     sdbusplus::bus::bus& bus,
     SensorSet&& o)
 {
@@ -40,6 +43,15 @@ ObjectSet::ObjectSet(
             continue;
         }
 
+        // Get the initial value for the value interface.
+        auto sysfsPath = make_sysfs_path(
+                             sysfsRoot,
+                             i.first.first,
+                             i.first.second,
+                             hwmon::entry::input);
+        int val = 0;
+        read_sysfs(sysfsPath, val);
+
         Object o;
         std::string objectPath{dbusRoot};
 
@@ -49,6 +61,7 @@ ObjectSet::ObjectSet(
         objectPath.append(label);
 
         auto iface = std::make_shared<ValueObject>(bus, objectPath.c_str());
+        iface->value(val);
         o.emplace(InterfaceType::VALUE, iface);
 
         auto value = std::make_tuple(
