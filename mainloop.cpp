@@ -36,7 +36,8 @@ MainLoop::MainLoop(
       _shutdown(false),
       _path(path),
       _prefix(prefix),
-      _root(root)
+      _root(root),
+      state()
 {
     if (_path.back() == '/')
     {
