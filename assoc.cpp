@@ -16,9 +16,11 @@
 #include <string>
 #include <cstdlib>
 #include "assoc.hpp"
-#include "interface.hpp"
 
-ObjectSet::ObjectSet(SensorSet&& o)
+ObjectSet::ObjectSet(
+    const std::string& dbusRoot,
+    sdbusplus::bus::bus& bus,
+    SensorSet&& o)
 {
     for (auto& i : o)
     {
@@ -38,7 +40,21 @@ ObjectSet::ObjectSet(SensorSet&& o)
             continue;
         }
 
-        auto value = std::make_tuple(std::move(i.second), std::move(label));
+        Object o;
+        std::string objectPath{dbusRoot};
+
+        objectPath.append("/");
+        objectPath.append(i.first.first);
+        objectPath.append("/");
+        objectPath.append(label);
+
+        auto iface = std::make_shared<ValueObject>(bus, objectPath.c_str());
+        o.emplace(InterfaceType::VALUE, iface);
+
+        auto value = std::make_tuple(
+                         std::move(i.second),
+                         std::move(label),
+                         std::move(o));
         container[std::move(i.first)] = std::move(value);
     }
 }
