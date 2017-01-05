@@ -22,6 +22,12 @@ class ObjectSet
         ObjectSet(ObjectSet&&) = default;
         ObjectSet& operator=(ObjectSet&&) = default;
 
+        /** @brief Move import SensorSet constructor.
+        *
+        *  @param[in] o - The Sensor set to move import.
+        */
+        explicit ObjectSet(SensorSet&&);
+
     private:
         container_t container;
 };
