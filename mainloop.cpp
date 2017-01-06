@@ -102,13 +102,14 @@ void MainLoop::run()
         int val = 0;
         read_sysfs(sysfsPath, val);
 
-        Object o;
         std::string objectPath{_root};
-
         objectPath.append("/");
         objectPath.append(i.first.first);
         objectPath.append("/");
         objectPath.append(label);
+
+        ObjectInfo info(&_bus, std::move(objectPath), Object());
+        auto& o = std::get<Object>(info);
 
         auto iface = std::make_shared<ValueObject>(_bus, objectPath.c_str());
         iface->value(val);
@@ -131,7 +132,7 @@ void MainLoop::run()
         auto value = std::make_tuple(
                          std::move(i.second),
                          std::move(label),
-                         std::move(o));
+                         std::move(info));
 
         state[std::move(i.first)] = std::move(value);
     }
@@ -161,7 +162,8 @@ void MainLoop::run()
                                            hwmon::entry::input),
                            value);
 
-                auto& obj = std::get<2>(i.second);
+                auto& objInfo = std::get<ObjectInfo>(i.second);
+                auto& obj = std::get<Object>(objInfo);
                 auto iface = obj.find(InterfaceType::VALUE);
 
                 if (iface != obj.end())
