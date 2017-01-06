@@ -22,7 +22,6 @@
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
-#include "interface.hpp"
 
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
@@ -72,7 +71,21 @@ void MainLoop::run()
             continue;
         }
 
-        auto value = std::make_tuple(std::move(i.second), std::move(label));
+        Object o;
+        std::string objectPath{_root};
+
+        objectPath.append("/");
+        objectPath.append(i.first.first);
+        objectPath.append("/");
+        objectPath.append(label);
+
+        auto iface = std::make_shared<ValueObject>(_bus, objectPath.c_str());
+        o.emplace(InterfaceType::VALUE, iface);
+
+        auto value = std::make_tuple(
+                         std::move(i.second),
+                         std::move(label),
+                         std::move(o));
 
         state[std::move(i.first)] = std::move(value);
     }
