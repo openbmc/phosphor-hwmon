@@ -62,17 +62,19 @@ void ArgumentParser::usage(char** argv)
     std::cerr << "Options:\n";
     std::cerr << "    --help               print this menu\n";
     std::cerr << "    --path=<path>        sysfs location to monitor\n";
+    std::cerr << "    --of-name=<path>     open firmware device name to monitor\n";
     std::cerr << std::flush;
 }
 
 const option ArgumentParser::options[] =
 {
     { "path",   required_argument,  NULL,   'p' },
+    { "of-name", required_argument,  NULL,   'o' },
     { "help",   no_argument,        NULL,   'h' },
     { 0, 0, 0, 0},
 };
 
-const char* ArgumentParser::optionstr = "p:?h";
+const char* ArgumentParser::optionstr = "o:p:?h";
 
 const std::string ArgumentParser::true_string = "true";
 const std::string ArgumentParser::empty_string = "";
