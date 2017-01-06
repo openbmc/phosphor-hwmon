@@ -12,6 +12,7 @@ libhwmon_la_SOURCES = \
 	sensorset.cpp \
 	mainloop.cpp \
 	sysfs.cpp \
+	env.cpp \
 	xyz.openbmc_project.Sensor.Value.cpp \
 	xyz.openbmc_project.Sensor.Threshold.Warning.cpp \
 	xyz.openbmc_project.Sensor.Threshold.Critical.cpp
