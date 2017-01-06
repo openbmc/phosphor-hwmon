@@ -25,6 +25,7 @@
 #include "mainloop.hpp"
 #include "util.hpp"
 #include "env.hpp"
+#include "thresholds.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -131,6 +132,9 @@ void MainLoop::run()
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
         auto valueInterface = addValue(i.first, _path, info);
+        auto sensorValue = valueInterface->value();
+        addThreshold<WarningObject>(i.first, sensorValue, info);
+        addThreshold<CriticalObject>(i.first, sensorValue, info);
 
         auto value = std::make_tuple(
                          std::move(i.second),
@@ -167,13 +171,29 @@ void MainLoop::run()
 
                 auto& objInfo = std::get<ObjectInfo>(i.second);
                 auto& obj = std::get<Object>(objInfo);
-                auto iface = obj.find(InterfaceType::VALUE);
 
-                if (iface != obj.end())
+                for (auto& iface : obj)
                 {
-                    auto realIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
-                                     (iface->second);
-                    realIface->value(value);
+                    auto valueIface = std::shared_ptr<ValueObject>();
+                    auto warnIface = std::shared_ptr<WarningObject>();
+                    auto critIface = std::shared_ptr<CriticalObject>();
+
+                    switch (iface.first)
+                    {
+                        case InterfaceType::VALUE:
+                            valueIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
+                                         (iface.second);
+                            valueIface->value(value);
+                            break;
+                        case InterfaceType::WARN:
+                            checkThresholds<WarningObject>(iface.second, value);
+                            break;
+                        case InterfaceType::CRIT:
+                            checkThresholds<CriticalObject>(iface.second, value);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
