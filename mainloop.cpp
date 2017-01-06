@@ -24,6 +24,7 @@
 #include "sysfs.hpp"
 #include "mainloop.hpp"
 #include "util.hpp"
+#include "env.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -77,17 +78,10 @@ void MainLoop::run()
 
     for (auto& i : *sensors)
     {
+        // Get sensor configuration from the environment.
+
         // Ignore inputs without a label.
-        std::string envKey = "LABEL_" + i.first.first + i.first.second;
-        std::string label;
-
-        auto env = getenv(envKey.c_str());
-
-        if (env)
-        {
-            label.assign(env);
-        }
-
+        auto label = getEnv("LABEL", i.first);
         if (label.empty())
         {
             continue;
