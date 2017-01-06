@@ -22,6 +22,7 @@
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
+#include "util.hpp"
 
 static constexpr auto typeAttrMap =
 {
@@ -133,15 +134,7 @@ void MainLoop::run()
     }
 
     {
-        struct Free
-        {
-            void operator()(char* ptr) const
-            {
-                free(ptr);
-            }
-        };
-
-        auto copy = std::unique_ptr<char, Free>(strdup(_path.c_str()));
+        auto copy = std::unique_ptr<char, Free<char>>(strdup(_path.c_str()));
         auto busname = static_cast<std::string>(basename(copy.get()));
         busname.insert(0, ".");
         busname.insert(0, _prefix);
