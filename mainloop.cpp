@@ -17,11 +17,31 @@
 #include <memory>
 #include <cstring>
 #include <cstdlib>
+#include <algorithm>
 #include "sensorset.hpp"
 #include "sensorcache.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
+
+static constexpr auto typeAttrMap =
+{
+    // 1 - hwmon class
+    // 2 - unit
+    // 3 - sysfs scaling factor
+    std::make_tuple(
+        hwmon::type::ctemp,
+        ValueInterface::Unit::DegreesC,
+        -3),
+    std::make_tuple(
+        hwmon::type::cfan,
+        ValueInterface::Unit::RPMS,
+        0),
+    std::make_tuple(
+        hwmon::type::cvolt,
+        ValueInterface::Unit::Volts,
+        -3),
+};
 
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
@@ -90,6 +110,20 @@ void MainLoop::run()
 
         auto iface = std::make_shared<ValueObject>(_bus, objectPath.c_str());
         iface->value(val);
+
+        const auto& attrs = std::find_if(
+                                typeAttrMap.begin(),
+                                typeAttrMap.end(),
+                                [&](const auto & e)
+        {
+            return i.first.first == std::get<0>(e);
+        });
+        if (attrs != typeAttrMap.end())
+        {
+            iface->unit(std::get<1>(*attrs));
+            iface->scale(std::get<2>(*attrs));
+        }
+
         o.emplace(InterfaceType::VALUE, iface);
 
         auto value = std::make_tuple(
