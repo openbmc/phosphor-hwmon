@@ -46,7 +46,7 @@ class MainLoop
         void shutdown() noexcept;
 
     private:
-        using mapped_type = std::tuple<SensorSet::mapped_type>;
+        using mapped_type = std::tuple<SensorSet::mapped_type, std::string>;
         using SensorState = std::map<SensorSet::key_type, mapped_type>;
 
         /** @brief sdbusplus bus client connection. */
