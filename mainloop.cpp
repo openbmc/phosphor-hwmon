@@ -23,6 +23,7 @@
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
+#include "util.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -151,15 +152,8 @@ void MainLoop::run()
     }
 
     {
-        struct Free
-        {
-            void operator()(char* ptr) const
-            {
-                free(ptr);
-            }
-        };
-
-        auto copy = std::unique_ptr<char, Free>(strdup(_path.c_str()));
+        auto copy = std::unique_ptr<char, phosphor::utility::Free<char>>(strdup(
+                        _path.c_str()));
         auto busname = std::string(_prefix) + '.' + basename(copy.get());
         _bus.request_name(busname.c_str());
     }
