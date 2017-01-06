@@ -27,4 +27,17 @@ inline const std::string make_sysfs_path(const std::string& path,
     return path + "/"s + type + id + "_"s + entry;
 }
 
+
+/** @brief Find hwmon instances
+ *
+ *  Look for a matching hwmon instance given an
+ *  open firmware device path.
+ *
+ *  @param[in] ofNode- The open firmware device path.
+ *
+ *  @returns[in] - The hwmon instance path or an empty
+ *                 string if no match is found.
+ */
+std::string findHwmon(const std::string& ofNode);
+
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
