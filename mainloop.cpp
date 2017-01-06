@@ -53,6 +53,12 @@ void MainLoop::run()
     auto sensors = std::make_unique<SensorSet>(_path);
     auto sensor_cache = std::make_unique<SensorCache>();
 
+    for (auto& i : *sensors)
+    {
+        auto value = std::make_tuple(std::move(i.second));
+        state[std::move(i.first)] = std::move(value);
+    }
+
     {
         struct Free
         {
@@ -76,9 +82,10 @@ void MainLoop::run()
     while (!_shutdown)
     {
         // Iterate through all the sensors.
-        for (auto& i : *sensors)
+        for (auto& i : state)
         {
-            if (i.second.find(hwmon::entry::input) != i.second.end())
+            auto& attrs = std::get<0>(i.second);
+            if (attrs.find(hwmon::entry::input) != attrs.end())
             {
                 // Read value from sensor.
                 int value = 0;
