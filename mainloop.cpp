@@ -47,6 +47,42 @@ static constexpr auto typeAttrMap =
         -3),
 };
 
+auto addValue(const SensorSet::key_type& sensor,
+              const std::string& sysfsRoot, ObjectInfo& info)
+{
+    // Get the initial value for the value interface.
+    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
+    auto& obj = std::get<Object>(info);
+    auto& objPath = std::get<std::string>(info);
+
+    auto sysfsPath = make_sysfs_path(
+                         sysfsRoot,
+                         sensor.first,
+                         sensor.second,
+                         hwmon::entry::input);
+    int val = 0;
+    read_sysfs(sysfsPath, val);
+
+    auto iface = std::make_shared<ValueObject>(bus, objPath.c_str());
+    iface->value(val);
+
+    const auto& attrs = std::find_if(
+                            typeAttrMap.begin(),
+                            typeAttrMap.end(),
+                            [&](const auto & e)
+    {
+        return sensor.first == std::get<0>(e);
+    });
+    if (attrs != typeAttrMap.end())
+    {
+        iface->unit(std::get<1>(*attrs));
+        iface->scale(std::get<2>(*attrs));
+    }
+
+    obj[InterfaceType::VALUE] = iface;
+    return iface;
+}
+
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
     const std::string& path,
@@ -87,15 +123,6 @@ void MainLoop::run()
             continue;
         }
 
-        // Get the initial value for the value interface.
-        auto sysfsPath = make_sysfs_path(
-                             _path,
-                             i.first.first,
-                             i.first.second,
-                             hwmon::entry::input);
-        int val = 0;
-        read_sysfs(sysfsPath, val);
-
         std::string objectPath{_root};
         objectPath.append("/");
         objectPath.append(i.first.first);
@@ -103,25 +130,7 @@ void MainLoop::run()
         objectPath.append(label);
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
-        auto& o = std::get<Object>(info);
-
-        auto iface = std::make_shared<ValueObject>(_bus, objectPath.c_str());
-        iface->value(val);
-
-        const auto& attrs = std::find_if(
-                                typeAttrMap.begin(),
-                                typeAttrMap.end(),
-                                [&](const auto & e)
-        {
-            return i.first.first == std::get<0>(e);
-        });
-        if (attrs != typeAttrMap.end())
-        {
-            iface->unit(std::get<1>(*attrs));
-            iface->scale(std::get<2>(*attrs));
-        }
-
-        o.emplace(InterfaceType::VALUE, iface);
+        auto valueInterface = addValue(i.first, _path, info);
 
         auto value = std::make_tuple(
                          std::move(i.second),
