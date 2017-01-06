@@ -18,6 +18,7 @@
 #include "argument.hpp"
 #include "mainloop.hpp"
 #include "config.h"
+#include "sysfs.hpp"
 
 static void exit_with_error(const char* err, char** argv)
 {
@@ -33,10 +34,20 @@ int main(int argc, char** argv)
     auto options = std::make_unique<ArgumentParser>(argc, argv);
 
     // Parse out path argument.
-    auto path = (*options)["path"];
+    auto path = (*options)["of-name"];
+    if (path != ArgumentParser::empty_string)
+    {
+        path = findHwmon(path);
+    }
+
     if (path == ArgumentParser::empty_string)
     {
-        exit_with_error("Path not specified.", argv);
+        path = (*options)["path"];
+    }
+
+    if (path == ArgumentParser::empty_string)
+    {
+        exit_with_error("Path not specified or invalid.", argv);
     }
 
     // Finished getting options out, so release the parser.
