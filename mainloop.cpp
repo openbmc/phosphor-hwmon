@@ -18,6 +18,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <chrono>
+#include <algorithm>
 #include "sensorset.hpp"
 #include "sensorcache.hpp"
 #include "hwmon.hpp"
@@ -25,6 +26,40 @@
 #include "mainloop.hpp"
 
 using namespace std::literals::chrono_literals;
+
+static constexpr auto typeAttrMap =
+{
+    // 1 - hwmon class
+    // 2 - unit
+    // 3 - sysfs scaling factor
+    std::make_tuple(
+        hwmon::type::ctemp,
+        ValueInterface::Unit::DegreesC,
+        -3),
+    std::make_tuple(
+        hwmon::type::cfan,
+        ValueInterface::Unit::RPMS,
+        0),
+    std::make_tuple(
+        hwmon::type::cvolt,
+        ValueInterface::Unit::Volts,
+        -3),
+};
+
+auto getHwmonType(decltype(typeAttrMap)::const_reference attrs)
+{
+    return std::get<0>(attrs);
+}
+
+auto getUnit(decltype(typeAttrMap)::const_reference attrs)
+{
+    return std::get<1>(attrs);
+}
+
+auto getScale(decltype(typeAttrMap)::const_reference attrs)
+{
+    return std::get<2>(attrs);
+}
 
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
@@ -93,6 +128,20 @@ void MainLoop::run()
 
         auto iface = std::make_shared<ValueObject>(_bus, objectPath.c_str());
         iface->value(val);
+
+        const auto& attrs = std::find_if(
+                                typeAttrMap.begin(),
+                                typeAttrMap.end(),
+                                [&](const auto & e)
+        {
+            return i.first.first == getHwmonType(e);
+        });
+        if (attrs != typeAttrMap.end())
+        {
+            iface->unit(getUnit(*attrs));
+            iface->scale(getScale(*attrs));
+        }
+
         o.emplace(InterfaceType::VALUE, iface);
 
         auto value = std::make_tuple(
