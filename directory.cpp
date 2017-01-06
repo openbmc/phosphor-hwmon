@@ -55,6 +55,12 @@ bool Directory::next(std::string& name)
     }
 
     name = entry.d_name;
+
+    if (name == "." || name == "..")
+    {
+        return next(name);
+    }
+
     return true;
 }
 
