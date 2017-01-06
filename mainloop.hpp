@@ -8,6 +8,7 @@
 #include "interface.hpp"
 
 using Object = std::map<InterfaceType, std::experimental::any>;
+using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, Object>;
 
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
@@ -51,7 +52,7 @@ class MainLoop
         void shutdown() noexcept;
 
     private:
-        using mapped_type = std::tuple<SensorSet::mapped_type, std::string, Object>;
+        using mapped_type = std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
         using SensorState = std::map<SensorSet::key_type, mapped_type>;
 
         /** @brief sdbusplus bus client connection. */
