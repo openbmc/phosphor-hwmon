@@ -185,6 +185,16 @@ void MainLoop::run()
                                            hwmon::entry::input),
                            value);
 
+                auto& obj = std::get<Object>(i.second);
+                auto iface = obj.find(InterfaceType::VALUE);
+
+                if (iface != obj.end())
+                {
+                    auto realIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
+                                     (iface->second);
+                    realIface->value(value);
+                }
+
                 // Update sensor cache.
                 if (sensor_cache->update(i.first, value))
                 {
