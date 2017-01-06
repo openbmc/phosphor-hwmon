@@ -71,6 +71,15 @@ void MainLoop::run()
             continue;
         }
 
+        // Get the initial value for the value interface.
+        auto sysfsPath = make_sysfs_path(
+                             _path,
+                             i.first.first,
+                             i.first.second,
+                             hwmon::entry::input);
+        int val = 0;
+        read_sysfs(sysfsPath, val);
+
         Object o;
         std::string objectPath{_root};
 
@@ -80,6 +89,7 @@ void MainLoop::run()
         objectPath.append(label);
 
         auto iface = std::make_shared<ValueObject>(_bus, objectPath.c_str());
+        iface->value(val);
         o.emplace(InterfaceType::VALUE, iface);
 
         auto value = std::make_tuple(
