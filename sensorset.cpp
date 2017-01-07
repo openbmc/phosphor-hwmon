@@ -22,7 +22,8 @@
 // TODO: Issue#2 - STL regex generates really bloated code.  Use POSIX regex
 //       interfaces instead.
 static const std::regex sensors_regex =
-    std::regex("^(fan|in|temp)([0-9]+)_([a-z]*)", std::regex::extended);
+    std::regex("^(fan|in|temp|power|energy|curr)([0-9]+)_([a-z]*)",
+               std::regex::extended);
 static const auto sensor_regex_match_count = 4;
 
 SensorSet::SensorSet(const std::string& path)
