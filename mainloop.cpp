@@ -46,6 +46,18 @@ static constexpr auto typeAttrMap =
         hwmon::type::cvolt,
         ValueInterface::Unit::Volts,
         -3),
+    std::make_tuple(
+        hwmon::type::ccurr,
+        ValueInterface::Unit::Amperes,
+        -3),
+    std::make_tuple(
+        hwmon::type::cenergy,
+        ValueInterface::Unit::Joules,
+        -6),
+    std::make_tuple(
+        hwmon::type::cpower,
+        ValueInterface::Unit::Watts,
+        -6),
 };
 
 using AttributeIterator = decltype(*typeAttrMap.begin());
