@@ -37,27 +37,33 @@ static constexpr auto typeAttrMap =
     std::make_tuple(
         hwmon::type::ctemp,
         ValueInterface::Unit::DegreesC,
-        -3),
+        -3,
+        "temperature"),
     std::make_tuple(
         hwmon::type::cfan,
         ValueInterface::Unit::RPMS,
-        0),
+        0,
+        "fan_tach"),
     std::make_tuple(
         hwmon::type::cvolt,
         ValueInterface::Unit::Volts,
-        -3),
+        -3,
+        "voltage"),
     std::make_tuple(
         hwmon::type::ccurr,
         ValueInterface::Unit::Amperes,
-        -3),
+        -3,
+        "current"),
     std::make_tuple(
         hwmon::type::cenergy,
         ValueInterface::Unit::Joules,
-        -6),
+        -6,
+        "energy"),
     std::make_tuple(
         hwmon::type::cpower,
         ValueInterface::Unit::Watts,
-        -6),
+        -6,
+        "power"),
 };
 
 auto getHwmonType(decltype(typeAttrMap)::const_reference attrs)
@@ -73,6 +79,11 @@ auto getUnit(decltype(typeAttrMap)::const_reference attrs)
 auto getScale(decltype(typeAttrMap)::const_reference attrs)
 {
     return std::get<2>(attrs);
+}
+
+auto getNamespace(decltype(typeAttrMap)::const_reference attrs)
+{
+    return std::get<3>(attrs);
 }
 
 using AttributeIterator = decltype(*typeAttrMap.begin());
@@ -170,9 +181,15 @@ void MainLoop::run()
             continue;
         }
 
+        Attributes attrs;
+        if (!getAttributes(i.first.first, attrs))
+        {
+            continue;
+        }
+
         std::string objectPath{_root};
         objectPath.append("/");
-        objectPath.append(i.first.first);
+        objectPath.append(getNamespace(attrs));
         objectPath.append("/");
         objectPath.append(label);
 
