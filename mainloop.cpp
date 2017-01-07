@@ -63,6 +63,31 @@ auto getScale(decltype(typeAttrMap)::const_reference attrs)
     return std::get<2>(attrs);
 }
 
+using AttributeIterator = decltype(*typeAttrMap.begin());
+using Attributes
+    = std::remove_cv<std::remove_reference<AttributeIterator>::type>::type;
+
+auto getAttributes(const std::string& type, Attributes& attributes)
+{
+    // *INDENT-OFF*
+    auto a = std::find_if(
+                typeAttrMap.begin(),
+                typeAttrMap.end(),
+                [&](const auto & e)
+                {
+                   return type == getHwmonType(e);
+                });
+    // *INDENT-ON*
+
+    if (a == typeAttrMap.end())
+    {
+        return false;
+    }
+
+    attributes = *a;
+    return true;
+}
+
 auto addValue(const SensorSet::key_type& sensor,
               const std::string& sysfsRoot, ObjectInfo& info)
 {
@@ -82,20 +107,11 @@ auto addValue(const SensorSet::key_type& sensor,
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str());
     iface->value(val);
 
-    // *INDENT-OFF*
-    const auto& attrs = std::find_if(
-                            typeAttrMap.begin(),
-                            typeAttrMap.end(),
-                            [&](const auto & e)
-                            {
-                                return sensor.first == getHwmonType(e);
-                            });
-    // *INDENT-ON*
-
-    if (attrs != typeAttrMap.end())
+    Attributes attrs;
+    if (getAttributes(sensor.first, attrs))
     {
-        iface->unit(getUnit(*attrs));
-        iface->scale(getScale(*attrs));
+        iface->unit(getUnit(attrs));
+        iface->scale(getScale(attrs));
     }
 
     obj[InterfaceType::VALUE] = iface;
