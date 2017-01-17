@@ -43,10 +43,10 @@ int main()
     std::ofstream f{entry};
     f << "1234";
 
-    auto loop = MainLoop(
-                    sdbusplus::bus::new_default(),
-                    dir,
-                    "xyz.openbmc_project.Testing", "/testing");
+    MainLoop loop(
+        sdbusplus::bus::new_default(),
+        dir,
+        "xyz.openbmc_project.Testing", "/testing");
     auto t = std::thread(server_thread, &loop);
 
     runTests(loop);
