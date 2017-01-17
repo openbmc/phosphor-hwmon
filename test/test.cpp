@@ -20,15 +20,6 @@
 #include <unistd.h>
 #include <thread>
 
-auto server_thread(void* data)
-{
-    auto mgr = static_cast<MainLoop*>(data);
-
-    mgr->run();
-
-    return static_cast<void*>(nullptr);
-}
-
 void runTests(MainLoop& loop)
 {
     loop.shutdown();
@@ -47,7 +38,12 @@ int main()
         sdbusplus::bus::new_default(),
         dir,
         "xyz.openbmc_project.Testing", "/testing");
-    auto t = std::thread(server_thread, &loop);
+
+    auto threadMain = [](auto loop)
+    {
+        loop->run();
+    };
+    auto t = std::thread(threadMain, &loop);
 
     runTests(loop);
 
