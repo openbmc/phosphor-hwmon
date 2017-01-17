@@ -5,8 +5,8 @@
 #include <xyz/openbmc_project/Sensor/Threshold/Critical/server.hpp>
 #include <sdbusplus/server.hpp>
 
-template <typename T>
-using ServerObject = typename sdbusplus::server::object::object<T>;
+template <typename... T>
+using ServerObject = typename sdbusplus::server::object::object<T...>;
 
 using ValueInterface = sdbusplus::xyz::openbmc_project::Sensor::server::Value;
 using ValueObject = ServerObject<ValueInterface>;
