@@ -92,6 +92,8 @@ template <typename T>
 auto addThreshold(const SensorSet::key_type& sensor,
                   int64_t value, ObjectInfo& info)
 {
+    static constexpr bool deferSignals = true;
+
     auto& bus = *std::get<sdbusplus::bus::bus*>(info);
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<Object>(info);
@@ -100,7 +102,7 @@ auto addThreshold(const SensorSet::key_type& sensor,
     auto tHi = getEnv(Thresholds<T>::envHi, sensor);
     if (!tLo.empty() && !tHi.empty())
     {
-        iface = std::make_shared<T>(bus, objPath.c_str());
+        iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
         auto lo = stoi(tLo);
         auto hi = stoi(tHi);
         (*iface.*Thresholds<T>::setLo)(lo);
