@@ -1,8 +1,8 @@
 #pragma once
 
-#include <xyz/openbmc_project/Sensor/Value/server.hpp>
-#include <xyz/openbmc_project/Sensor/Threshold/Warning/server.hpp>
-#include <xyz/openbmc_project/Sensor/Threshold/Critical/server.hpp>
+#include "xyz/openbmc_project/Sensor/Value/server.hpp"
+#include "xyz/openbmc_project/Sensor/Threshold/Warning/server.hpp"
+#include "xyz/openbmc_project/Sensor/Threshold/Critical/server.hpp"
 #include <sdbusplus/server.hpp>
 
 template <typename... T>
