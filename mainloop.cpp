@@ -114,6 +114,8 @@ auto getAttributes(const std::string& type, Attributes& attributes)
 auto addValue(const SensorSet::key_type& sensor,
               const std::string& sysfsRoot, ObjectInfo& info)
 {
+    static constexpr bool deferSignals = true;
+
     // Get the initial value for the value interface.
     auto& bus = *std::get<sdbusplus::bus::bus*>(info);
     auto& obj = std::get<Object>(info);
@@ -127,7 +129,7 @@ auto addValue(const SensorSet::key_type& sensor,
     int val = 0;
     read_sysfs(sysfsPath, val);
 
-    auto iface = std::make_shared<ValueObject>(bus, objPath.c_str());
+    auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
     Attributes attrs;
@@ -198,6 +200,10 @@ void MainLoop::run()
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
+
+        // All the interfaces have been created.  Go ahead
+        // and emit InterfacesAdded.
+        valueInterface->emit_object_added();
 
         auto value = std::make_tuple(
                          std::move(i.second),
