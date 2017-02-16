@@ -15,6 +15,7 @@
  */
 #include <cstdlib>
 #include <memory>
+#include <phosphor-logging/log.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
 #include "directory.hpp"
@@ -49,6 +50,48 @@ std::string findHwmon(const std::string& ofNode)
     }
 
     return std::string();
+}
+
+int readSysfsWithCallout(const std::string& root,
+                         const std::string& instance,
+                         const std::string& type,
+                         const std::string& id,
+                         const std::string& sensor)
+{
+    int value = 0;
+    std::string instancePath = root + '/' + instance;
+    std::string fullPath = make_sysfs_path(instancePath,
+                                           type, id, sensor);
+    std::ifstream ifs;
+
+    ifs.exceptions(std::ifstream::failbit
+                   | std::ifstream::badbit
+                   | std::ifstream::eofbit);
+    try
+    {
+        ifs.open(fullPath);
+        ifs >> value;
+    }
+    catch (const std::exception& e)
+    {
+        // Too many GCC bugs (53984, 66145) to do
+        // this the right way...
+        using Cleanup = phosphor::utility::Free<char>;
+
+        // errno should still reflect the error from the failing open
+        // or read system calls that got us here.
+        auto rc = errno;
+        std::string devicePath = instancePath + "/device";
+        auto real = std::unique_ptr<char, Cleanup>(
+                        realpath(devicePath.c_str(), nullptr));
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            strerror(rc),
+            phosphor::logging::entry("CALLOUT_DEVICE_PATH=%s", real.get()),
+            phosphor::logging::entry("CALLOUT_ERRNO=%d", rc));
+        exit(EXIT_FAILURE);
+    }
+
+    return value;
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

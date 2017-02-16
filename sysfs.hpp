@@ -40,4 +40,22 @@ inline std::string make_sysfs_path(const std::string& path,
  */
 std::string findHwmon(const std::string& ofNode);
 
+/** @brief Read an hwmon sysfs value.
+ *
+ *  Calls exit(3) with bad status on failure.
+ *
+ *  @param[in] root - The hwmon class root.
+ *  @param[in] instance - The hwmon instance (ex. hwmon1).
+ *  @param[in] type - The hwmon type (ex. temp).
+ *  @param[in] id - The hwmon id (ex. 1).
+ *  @param[in] sensor - The hwmon sensor (ex. input).
+ *
+ *  @returns - The read value.
+ */
+int readSysfsWithCallout(const std::string& root,
+                         const std::string& instance,
+                         const std::string& type,
+                         const std::string& id,
+                         const std::string& sensor);
+
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
