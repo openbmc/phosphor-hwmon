@@ -110,7 +110,9 @@ auto getAttributes(const std::string& type, Attributes& attributes)
 }
 
 auto addValue(const SensorSet::key_type& sensor,
-              const std::string& sysfsRoot, ObjectInfo& info)
+              const std::string& hwmonRoot,
+              const std::string& instance,
+              ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
 
@@ -119,14 +121,11 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    auto sysfsPath = make_sysfs_path(
-                         sysfsRoot,
-                         sensor.first,
-                         sensor.second,
-                         hwmon::entry::input);
-    int val = 0;
-    read_sysfs(sysfsPath, val);
-
+    int val = readSysfsWithCallout(hwmonRoot,
+                                   instance,
+                                   sensor.first,
+                                   sensor.second,
+                                   hwmon::entry::input);
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
@@ -180,8 +179,7 @@ void MainLoop::shutdown() noexcept
 void MainLoop::run()
 {
     // Check sysfs for available sensors.
-    std::string hwmonPath = _hwmonRoot + '/' + _instance;
-    auto sensors = std::make_unique<SensorSet>(hwmonPath);
+    auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
     for (auto& i : *sensors)
     {
@@ -207,7 +205,7 @@ void MainLoop::run()
         objectPath.append(label);
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
-        auto valueInterface = addValue(i.first, hwmonPath, info);
+        auto valueInterface = addValue(i.first, _hwmonRoot, _instance, info);
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
@@ -244,12 +242,11 @@ void MainLoop::run()
             if (attrs.find(hwmon::entry::input) != attrs.end())
             {
                 // Read value from sensor.
-                int value = 0;
-                read_sysfs(make_sysfs_path(hwmonPath,
-                                           i.first.first, i.first.second,
-                                           hwmon::entry::input),
-                           value);
-
+                int value = readSysfsWithCallout(_hwmonRoot,
+                                                 _instance,
+                                                 i.first.first,
+                                                 i.first.second,
+                                                 hwmon::entry::input);
                 auto& objInfo = std::get<ObjectInfo>(i.second);
                 auto& obj = std::get<Object>(objInfo);
 

@@ -15,6 +15,7 @@ AC_PROG_MAKE_SET
 # Checks for libraries.
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus], [], [AC_MSG_ERROR(["sdbusplus required and not found."])])
 PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces], [], [AC_MSG_ERROR(["phosphor-dbus-interfaces required and not found."])])
+PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging], [], [AC_MSG_ERROR(["phosphor-logging required and not found."])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AX_CXX_COMPILE_STDCXX_14([noext])
