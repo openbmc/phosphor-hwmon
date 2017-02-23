@@ -51,7 +51,7 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
 AC_ARG_VAR(BUSNAME_PREFIX, [The DBus busname prefix.])
 AC_ARG_VAR(SENSOR_ROOT, [The DBus sensors namespace root.])
 AS_IF([test "x$BUSNAME_PREFIX" == "x"], [BUSNAME_PREFIX="xyz.openbmc_project.Hwmon"])
-AS_IF([test "x$SENSOR_ROOT" == "x"], [SENSOR_ROOT="/xyz/openbmc_project/Sensors"])
+AS_IF([test "x$SENSOR_ROOT" == "x"], [SENSOR_ROOT="/xyz/openbmc_project/sensors"])
 AC_DEFINE_UNQUOTED([BUSNAME_PREFIX], ["$BUSNAME_PREFIX"], [The DBus busname prefix.])
 AC_DEFINE_UNQUOTED([SENSOR_ROOT], ["$SENSOR_ROOT"], [The DBus sensors namespace root.])
 
