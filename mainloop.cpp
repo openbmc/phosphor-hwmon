@@ -15,7 +15,6 @@
  */
 #include <iostream>
 #include <memory>
-#include <cstring>
 #include <cstdlib>
 #include <chrono>
 #include <algorithm>
@@ -23,7 +22,6 @@
 #include "hwmon.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
-#include "util.hpp"
 #include "env.hpp"
 #include "thresholds.hpp"
 
@@ -151,15 +149,27 @@ MainLoop::MainLoop(
     : _bus(std::move(bus)),
       _manager(sdbusplus::server::manager::manager(_bus, root)),
       _shutdown(false),
-      _path(path),
+      _hwmonRoot(),
+      _instance(),
       _prefix(prefix),
       _root(root),
       state()
 {
-    if (_path.back() == '/')
+    std::string p = path;
+    while (!p.empty() && p.back() == '/')
     {
-        _path.pop_back();
+        p.pop_back();
     }
+
+    auto n = p.rfind('/');
+    if (n != std::string::npos)
+    {
+        _instance.assign(p.substr(n + 1));
+        _hwmonRoot.assign(p.substr(0, n));
+    }
+
+    assert(!_instance.empty());
+    assert(!_hwmonRoot.empty());
 }
 
 void MainLoop::shutdown() noexcept
@@ -170,7 +180,8 @@ void MainLoop::shutdown() noexcept
 void MainLoop::run()
 {
     // Check sysfs for available sensors.
-    auto sensors = std::make_unique<SensorSet>(_path);
+    std::string hwmonPath = _hwmonRoot + '/' + _instance;
+    auto sensors = std::make_unique<SensorSet>(hwmonPath);
 
     for (auto& i : *sensors)
     {
@@ -190,13 +201,13 @@ void MainLoop::run()
         }
 
         std::string objectPath{_root};
-        objectPath.append("/");
+        objectPath.append(1, '/');
         objectPath.append(getNamespace(attrs));
-        objectPath.append("/");
+        objectPath.append(1, '/');
         objectPath.append(label);
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
-        auto valueInterface = addValue(i.first, _path, info);
+        auto valueInterface = addValue(i.first, hwmonPath, info);
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
@@ -214,9 +225,9 @@ void MainLoop::run()
     }
 
     {
-        auto copy = std::unique_ptr<char, phosphor::utility::Free<char>>(strdup(
-                        _path.c_str()));
-        auto busname = std::string(_prefix) + '.' + basename(copy.get());
+        std::string busname{_prefix};
+        busname.append(1, '.');
+        busname.append(_instance);
         _bus.request_name(busname.c_str());
     }
 
@@ -234,7 +245,7 @@ void MainLoop::run()
             {
                 // Read value from sensor.
                 int value = 0;
-                read_sysfs(make_sysfs_path(_path,
+                read_sysfs(make_sysfs_path(hwmonPath,
                                            i.first.first, i.first.second,
                                            hwmon::entry::input),
                            value);

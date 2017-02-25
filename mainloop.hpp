@@ -61,8 +61,10 @@ class MainLoop
         sdbusplus::server::manager::manager _manager;
         /** @brief Shutdown requested. */
         volatile bool _shutdown;
-        /** @brief Path to hwmon sysfs instance. */
-        std::string _path;
+        /** @brief hwmon sysfs class path. */
+        std::string _hwmonRoot;
+        /** @brief hwmon sysfs instance. */
+        std::string _instance;
         /** @brief DBus busname prefix. */
         const char* _prefix;
         /** @brief DBus sensors namespace root. */
