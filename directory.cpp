@@ -44,17 +44,8 @@ bool Directory::next(std::string& name)
         return false;
     }
 
-    dirent entry;
-    dirent* result;
-
-    auto rc = readdir_r(dirp, &entry, &result);
-
-    if ((rc) || (NULL == result))
-    {
-        return false;
-    }
-
-    name = entry.d_name;
+    dirent* entry = readdir(dirp);   
+    name =  entry->d_name;
 
     if (name == "." || name == "..")
     {
