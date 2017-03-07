@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <experimental/filesystem>
 #include <regex>
 #include <iostream>
 #include "sensorset.hpp"
-#include "directory.hpp"
 #include "hwmon.hpp"
 
 // TODO: Issue#2 - STL regex generates really bloated code.  Use POSIX regex
@@ -28,13 +28,13 @@ static const auto sensor_regex_match_count = 4;
 
 SensorSet::SensorSet(const std::string& path)
 {
-    Directory d(path);
-    std::string file;
+    namespace fs = std::experimental::filesystem;
 
-    while (d.next(file))
+    for (const auto& file : fs::directory_iterator(path))
     {
         std::smatch match;
-        std::regex_search(file, match, sensors_regex);
+        auto fileName = file.path().filename();
+        std::regex_search(fileName.native(), match, sensors_regex);
 
         if (match.size() != sensor_regex_match_count)
         {

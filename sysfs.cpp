@@ -14,39 +14,32 @@
  * limitations under the License.
  */
 #include <cstdlib>
+#include <experimental/filesystem>
 #include <memory>
 #include <phosphor-logging/log.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
-#include "directory.hpp"
 
 std::string findHwmon(const std::string& ofNode)
 {
+    namespace fs = std::experimental::filesystem;
     static constexpr auto hwmonRoot = "/sys/class/hwmon";
+    static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
 
-    std::string fullOfPath{"/sys/firmware/devicetree/base"};
-    fullOfPath.append(ofNode);
+    fs::path fullOfPath{ofRoot};
+    fullOfPath /= ofNode;
 
-    std::string hwmonInst;
-    Directory d(hwmonRoot);
-
-    while (d.next(hwmonInst))
+    for (const auto& hwmonInst : fs::directory_iterator(hwmonRoot))
     {
-        std::string hwmonPath{hwmonRoot};
-        hwmonPath.append(1, '/');
-        hwmonPath.append(hwmonInst);
-        std::string path{hwmonPath};
-        path.append(1, '/');
-        path.append("of_node");
+        auto path = hwmonInst.path();
+        path /= "of_node";
 
-        auto real = std::unique_ptr<char, phosphor::utility::Free<char>>(realpath(
-                        path.c_str(), nullptr));
-        if (!real || real.get() != fullOfPath)
+        if (fs::canonical(path) != fullOfPath)
         {
             continue;
         }
 
-        return hwmonPath;
+        return hwmonInst.path();
     }
 
     return std::string();
