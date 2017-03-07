@@ -24,6 +24,7 @@
 #include "mainloop.hpp"
 #include "env.hpp"
 #include "thresholds.hpp"
+#include "targets.hpp"
 
 // Initialization for Warning Objects
 decltype(Thresholds<WarningObject>::setLo) Thresholds<WarningObject>::setLo =
@@ -52,6 +53,12 @@ decltype(Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmL
     &CriticalObject::criticalAlarmLow;
 decltype(Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
+
+// Initialization for Target objects
+decltype(Targets<FanSpeedObject>::setTarget)
+    Targets<FanSpeedObject>::setTarget = &FanSpeedObject::target;
+decltype(Targets<FanSpeedObject>::getTarget)
+    Targets<FanSpeedObject>::getTarget = &FanSpeedObject::target;
 
 
 using namespace std::literals::chrono_literals;
@@ -238,6 +245,9 @@ void MainLoop::run()
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
+        //TODO openbmc/openbmc#1347
+        //     Handle application restarts to set/refresh fan speed values
+        addTarget<FanSpeedObject>(i.first, _hwmonRoot, _instance, info);
 
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.
