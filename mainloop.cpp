@@ -146,7 +146,7 @@ MainLoop::MainLoop(
     const char* prefix,
     const char* root)
     : _bus(std::move(bus)),
-      _manager(sdbusplus::server::manager::manager(_bus, root)),
+      _manager(_bus, root),
       _shutdown(false),
       _hwmonRoot(),
       _instance(),
