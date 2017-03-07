@@ -24,6 +24,7 @@
 #include "mainloop.hpp"
 #include "env.hpp"
 #include "thresholds.hpp"
+#include "targets.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -209,6 +210,8 @@ void MainLoop::run()
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
+        //TODO Set initial target speed to defined max rpm
+        addTarget<FanSpeedObject>(i.first, _hwmonRoot, _instance, info);
 
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.
