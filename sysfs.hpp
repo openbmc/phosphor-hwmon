@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <unistd.h>
 
 inline std::string make_sysfs_path(const std::string& path,
                                    const std::string& type,
@@ -11,6 +12,11 @@ inline std::string make_sysfs_path(const std::string& path,
     using namespace std::literals;
 
     return path + "/"s + type + id + "_"s + entry;
+}
+
+inline bool sysfs_file_exists(const std::string& name)
+{
+    return (access(name.c_str(), F_OK) != -1);
 }
 
 

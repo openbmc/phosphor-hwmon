@@ -24,6 +24,7 @@
 #include "mainloop.hpp"
 #include "env.hpp"
 #include "thresholds.hpp"
+#include "targets.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -220,6 +221,18 @@ void MainLoop::run()
                          std::move(info));
 
         state[std::move(i.first)] = std::move(value);
+
+        // Check if target sysfs file exists
+        auto sysfsFile = make_sysfs_path(_path,
+                                         i.first.first,
+                                         i.first.second,
+                                         hwmon::entry::target);
+        if (sysfs_file_exists(sysfsFile))
+        {
+            //TODO Set target speed to defined max rpm
+            addTarget<FanSpeedObject>(0, info);
+        }
+
     }
 
     {
