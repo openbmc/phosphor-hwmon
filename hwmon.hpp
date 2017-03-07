@@ -8,9 +8,11 @@ namespace entry
 {
 static constexpr auto cinput = "input";
 static constexpr auto clabel = "label";
+static constexpr auto ctarget = "target";
 
 static const std::string input = cinput;
 static const std::string label = clabel;
+static const std::string target = ctarget;
 }
 
 namespace type
