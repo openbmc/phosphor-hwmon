@@ -44,4 +44,18 @@ int readSysfsWithCallout(const std::string& root,
                          const std::string& id,
                          const std::string& sensor);
 
+ /** @brief Write a hwmon sysfs value
+  *
+  *  Calls exit(3) with bad status on failure
+  *
+  *  @param[in] value - The value to be written
+  *  @param[in] targetPath - The hwmon target instance
+  *  @param[in] sysfsFullPath - The full sysfs path of the target instance
+  *
+  *  @returns - The value written
+  */
+int64_t writeSysfsWithCallout(const int64_t& value,
+                              const std::string& targetPath,
+                              const std::string& sysfsFullPath);
+
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
