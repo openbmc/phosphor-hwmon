@@ -21,6 +21,7 @@ libhwmon_la_SOURCES = \
 	sensorset.cpp \
 	mainloop.cpp \
 	sysfs.cpp \
-	env.cpp
+	env.cpp \
+	fan_speed.cpp
 
 SUBDIRS = . test
