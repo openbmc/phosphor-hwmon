@@ -16,9 +16,13 @@
 #include <cstdlib>
 #include <experimental/filesystem>
 #include <memory>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/Control/Device/error.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
+
+using namespace phosphor::logging;
 
 std::string findHwmon(const std::string& ofNode)
 {
@@ -81,6 +85,56 @@ int readSysfsWithCallout(const std::string& root,
             strerror(rc),
             phosphor::logging::entry("CALLOUT_DEVICE_PATH=%s", real.get()),
             phosphor::logging::entry("CALLOUT_ERRNO=%d", rc));
+        exit(EXIT_FAILURE);
+    }
+
+    return value;
+}
+
+uint64_t writeSysfsWithCallout(const uint64_t& value,
+                               const std::string& root,
+                               const std::string& instance,
+                               const std::string& type,
+                               const std::string& id,
+                               const std::string& sensor)
+{
+    namespace fs = std::experimental::filesystem;
+
+    std::string valueStr = std::to_string(value);
+    std::ofstream ofs;
+    fs::path instancePath{root};
+    instancePath /= instance;
+    std::string fullPath = make_sysfs_path(instancePath,
+                                           type, id, sensor);
+
+    ofs.exceptions(std::ofstream::failbit
+                   | std::ofstream::badbit
+                   | std::ofstream::eofbit);
+    try
+    {
+        ofs.open(fullPath);
+        ofs << valueStr;
+    }
+    catch (const std::exception& e)
+    {
+        // errno should still reflect the error from the failing open
+        // or write system calls that got us here.
+        auto rc = errno;
+        instancePath /= "device";
+        using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
+        try
+        {
+            elog<WriteFailure>(
+                xyz::openbmc_project::Control::Device::
+                    WriteFailure::CALLOUT_ERRNO(rc),
+                xyz::openbmc_project::Control::Device::
+                    WriteFailure::CALLOUT_DEVICE_PATH(
+                        fs::canonical(instancePath).c_str()));
+        }
+        catch (WriteFailure& elog)
+        {
+            commit(elog.name());
+        }
         exit(EXIT_FAILURE);
     }
 
