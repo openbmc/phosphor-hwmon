@@ -1,6 +1,7 @@
 #pragma once
 
 #include <experimental/filesystem>
+#include "fan_speed.hpp"
 
 /** @class Targets
  *  @brief Target type traits.
@@ -18,13 +19,9 @@ struct Targets
 
 /**@brief Targets specialization for fan speed. */
 template <>
-struct Targets<FanSpeedObject>
+struct Targets<hwmon::FanSpeed>
 {
     static constexpr InterfaceType type = InterfaceType::FAN_SPEED;
-    static constexpr int64_t (FanSpeedObject::*setTarget)(int64_t) =
-        &FanSpeedObject::target;
-    static constexpr int64_t (FanSpeedObject::*getTarget)() const =
-        &FanSpeedObject::target;
 };
 
 /** @brief addTarget
@@ -53,13 +50,17 @@ void addTarget(const SensorSet::key_type& sensor,
 
     // Check if target sysfs file exists
     std::string targetPath = hwmonRoot + '/' + instance;
-    auto sysfsFile = make_sysfs_path(targetPath,
-                                     sensor.first,
-                                     sensor.second,
-                                     hwmon::entry::target);
-    if (fs::exists(sysfsFile))
+    auto sysfsFullPath = make_sysfs_path(targetPath,
+                                         sensor.first,
+                                         sensor.second,
+                                         hwmon::entry::target);
+    if (fs::exists(sysfsFullPath))
     {
-        auto iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
+        auto iface = std::make_shared<T>(targetPath,
+                                         sysfsFullPath,
+                                         bus,
+                                         objPath.c_str(),
+                                         deferSignals);
         obj[Targets<T>::type] = iface;
     }
 }
