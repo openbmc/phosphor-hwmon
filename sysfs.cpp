@@ -87,4 +87,41 @@ int readSysfsWithCallout(const std::string& root,
     return value;
 }
 
+uint64_t writeSysfsWithCallout(const uint64_t& value,
+                               const std::string& targetPath,
+                               const std::string& sysfsFullPath)
+{
+    std::ofstream ofs;
+    std::string valueStr = std::to_string(value);
+
+    ofs.exceptions(std::ofstream::failbit
+                   | std::ofstream::badbit
+                   | std::ofstream::eofbit);
+    try
+    {
+        ofs.open(sysfsFullPath);
+        ofs << valueStr;
+    }
+    catch (const std::exception& e)
+    {
+        // Too many GCC bugs (53984, 66145) to do
+        // this the right way...
+        using Cleanup = phosphor::utility::Free<char>;
+
+        // errno should still reflect the error from the failing open
+        // or read system calls that got us here.
+        auto rc = errno;
+        std::string devicePath = targetPath + "/device";
+        auto real = std::unique_ptr<char, Cleanup>(
+                        realpath(devicePath.c_str(), nullptr));
+        phosphor::logging::log<phosphor::logging::level::ERR>(
+            strerror(rc),
+            phosphor::logging::entry("CALLOUT_DEVICE_PATH=%s", real.get()),
+            phosphor::logging::entry("CALLOUT_ERRNO=%d", rc));
+        exit(EXIT_FAILURE);
+    }
+
+    return value;
+}
+
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
