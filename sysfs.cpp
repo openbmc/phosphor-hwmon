@@ -16,9 +16,11 @@
 #include <cstdlib>
 #include <experimental/filesystem>
 #include <memory>
-#include <phosphor-logging/log.hpp>
+#include <phosphor-logging/elog.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
+
+using namespace phosphor::logging;
 
 std::string findHwmon(const std::string& ofNode)
 {
@@ -81,6 +83,55 @@ int readSysfsWithCallout(const std::string& root,
             strerror(rc),
             phosphor::logging::entry("CALLOUT_DEVICE_PATH=%s", real.get()),
             phosphor::logging::entry("CALLOUT_ERRNO=%d", rc));
+        exit(EXIT_FAILURE);
+    }
+
+    return value;
+}
+
+uint64_t writeSysfsWithCallout(const uint64_t& value,
+                               const std::string& targetPath,
+                               const std::string& sysfsFullPath)
+{
+    std::ofstream ofs;
+    std::string valueStr = std::to_string(value);
+
+    ofs.exceptions(std::ofstream::failbit
+                   | std::ofstream::badbit
+                   | std::ofstream::eofbit);
+    try
+    {
+        ofs.open(sysfsFullPath);
+        ofs << valueStr;
+    }
+    catch (const std::exception& e)
+    {
+        // Too many GCC bugs (53984, 66145) to do
+        // this the right way...
+        using Cleanup = phosphor::utility::Free<char>;
+
+        // errno should still reflect the error from the failing open
+        // or write system calls that got us here.
+        auto rc = errno;
+        auto devicePath = targetPath + "/device";
+        auto real = std::unique_ptr<char, Cleanup>(
+                        realpath(devicePath.c_str(), nullptr));
+        log<level::ERR>(strerror(rc),
+                        entry("CALLOUT_DEVICE_PATH=%s", real.get()),
+                        entry("CALLOUT_ERRNO=%d", rc));
+        try
+        {
+            elog<xyz::openbmc_project::Control::Device::WriteFailure>(
+                prev_entry<xyz::openbmc_project::Control::
+                           Device::WriteFailure::CALLOUT_ERRNO>(),
+                prev_entry<xyz::openbmc_project::Control::
+                           Device::WriteFailure::CALLOUT_DEVICE_PATH>());
+        }
+        catch (elogException<xyz::openbmc_project::Control::
+                             Device::WriteFailure>& elog)
+        {
+            commit(elog.name());
+        }
         exit(EXIT_FAILURE);
     }
 
