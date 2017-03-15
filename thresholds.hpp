@@ -21,18 +21,12 @@ struct Thresholds<WarningObject>
     static constexpr InterfaceType type = InterfaceType::WARN;
     static constexpr const char* envLo = "WARNLO";
     static constexpr const char* envHi = "WARNHI";
-    static constexpr int64_t (WarningObject::*setLo)(int64_t) =
-        &WarningObject::warningLow;
-    static constexpr int64_t (WarningObject::*setHi)(int64_t) =
-        &WarningObject::warningHigh;
-    static constexpr int64_t (WarningObject::*getLo)() const =
-        &WarningObject::warningLow;
-    static constexpr int64_t (WarningObject::*getHi)() const =
-        &WarningObject::warningHigh;
-    static constexpr bool (WarningObject::*alarmLo)(bool) =
-        &WarningObject::warningAlarmLow;
-    static constexpr bool (WarningObject::*alarmHi)(bool) =
-        &WarningObject::warningAlarmHigh;
+    static int64_t (WarningObject::*const setLo)(int64_t);
+    static int64_t (WarningObject::*const setHi)(int64_t);
+    static int64_t (WarningObject::*const getLo)() const;
+    static int64_t (WarningObject::*const getHi)() const;
+    static bool (WarningObject::*const alarmLo)(bool);
+    static bool (WarningObject::*const alarmHi)(bool);
 };
 
 /**@brief Thresholds specialization for critical thresholds. */
@@ -42,18 +36,12 @@ struct Thresholds<CriticalObject>
     static constexpr InterfaceType type = InterfaceType::CRIT;
     static constexpr const char* envLo = "CRITLO";
     static constexpr const char* envHi = "CRITHI";
-    static constexpr int64_t (CriticalObject::*setLo)(int64_t) =
-        &CriticalObject::criticalLow;
-    static constexpr int64_t (CriticalObject::*setHi)(int64_t) =
-        &CriticalObject::criticalHigh;
-    static constexpr int64_t (CriticalObject::*getLo)() const =
-        &CriticalObject::criticalLow;
-    static constexpr int64_t (CriticalObject::*getHi)() const =
-        &CriticalObject::criticalHigh;
-    static constexpr bool (CriticalObject::*alarmLo)(bool) =
-        &CriticalObject::criticalAlarmLow;
-    static constexpr bool (CriticalObject::*alarmHi)(bool) =
-        &CriticalObject::criticalAlarmHigh;
+    static int64_t (CriticalObject::*const setLo)(int64_t);
+    static int64_t (CriticalObject::*const setHi)(int64_t);
+    static int64_t (CriticalObject::*const getLo)() const;
+    static int64_t (CriticalObject::*const getHi)() const;
+    static bool (CriticalObject::*const alarmLo)(bool);
+    static bool (CriticalObject::*const alarmHi)(bool);
 };
 
 /** @brief checkThresholds

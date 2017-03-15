@@ -25,6 +25,35 @@
 #include "env.hpp"
 #include "thresholds.hpp"
 
+// Initialization for Warning Objects
+decltype(Thresholds<WarningObject>::setLo) Thresholds<WarningObject>::setLo = 
+    &WarningObject::warningLow;
+decltype(Thresholds<WarningObject>::setHi) Thresholds<WarningObject>::setHi = 
+    &WarningObject::warningHigh;
+decltype(Thresholds<WarningObject>::getLo) Thresholds<WarningObject>::getLo = 
+    &WarningObject::warningLow;
+decltype(Thresholds<WarningObject>::getHi) Thresholds<WarningObject>::getHi = 
+    &WarningObject::warningHigh;
+decltype(Thresholds<WarningObject>::alarmLo) Thresholds<WarningObject>::alarmLo = 
+    &WarningObject::warningAlarmLow;
+decltype(Thresholds<WarningObject>::alarmHi) Thresholds<WarningObject>::alarmHi = 
+    &WarningObject::warningAlarmHigh;
+
+// Initialization for Critical Objects
+decltype(Thresholds<CriticalObject>::setLo) Thresholds<CriticalObject>::setLo = 
+    &CriticalObject::criticalLow;
+decltype(Thresholds<CriticalObject>::setHi) Thresholds<CriticalObject>::setHi = 
+    &CriticalObject::criticalHigh;
+decltype(Thresholds<CriticalObject>::getLo) Thresholds<CriticalObject>::getLo = 
+    &CriticalObject::criticalLow;
+decltype(Thresholds<CriticalObject>::getHi) Thresholds<CriticalObject>::getHi = 
+    &CriticalObject::criticalHigh;
+decltype(Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmLo = 
+    &CriticalObject::criticalAlarmLow;
+decltype(Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi = 
+    &CriticalObject::criticalAlarmHigh;
+
+
 using namespace std::literals::chrono_literals;
 
 static constexpr auto typeAttrMap =
