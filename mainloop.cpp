@@ -25,6 +25,35 @@
 #include "env.hpp"
 #include "thresholds.hpp"
 
+// Initialization for Warning Objects
+int64_t (WarningObject::*const setLo)(int64_t) =
+    &WarningObject::warningLow;
+int64_t (WarningObject::*const setHi)(int64_t) =
+    &WarningObject::warningHigh;
+int64_t (WarningObject::*const getLo)() const =
+    &WarningObject::warningLow;
+int64_t (WarningObject::*const getHi)() const =
+    &WarningObject::warningHigh;
+bool (WarningObject::*const alarmLo)(bool) =
+    &WarningObject::warningAlarmLow;
+bool (WarningObject::*const alarmHi)(bool) =
+    &WarningObject::warningAlarmHigh;
+
+// Initialization for Critical Objects
+int64_t (CriticalObject::*const setLo)(int64_t) =
+    &CriticalObject::criticalLow;
+int64_t (CriticalObject::*const setHi)(int64_t) =
+    &CriticalObject::criticalHigh;
+int64_t (CriticalObject::*const getLo)() const =
+    &CriticalObject::criticalLow;
+int64_t (CriticalObject::*const getHi)() const =
+    &CriticalObject::criticalHigh;
+bool (CriticalObject::*const alarmLo)(bool) =
+    &CriticalgObject::criticalAlarmLow;
+bool (CriticalObject::*const alarmHi)(bool) =
+    &CriticalObject::criticalAlarmHigh;
+
+
 using namespace std::literals::chrono_literals;
 
 static constexpr auto typeAttrMap =
