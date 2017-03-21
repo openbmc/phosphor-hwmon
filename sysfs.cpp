@@ -79,10 +79,22 @@ int readSysfsWithCallout(const std::string& root,
         std::string devicePath = instancePath + "/device";
         auto real = std::unique_ptr<char, Cleanup>(
                         realpath(devicePath.c_str(), nullptr));
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            strerror(rc),
-            phosphor::logging::entry("CALLOUT_DEVICE_PATH=%s", real.get()),
-            phosphor::logging::entry("CALLOUT_ERRNO=%d", rc));
+        log<level::ERR>(strerror(rc),
+                        entry("CALLOUT_DEVICE_PATH=%s", real.get()),
+                        entry("CALLOUT_ERRNO=%d", rc));
+        try
+        {
+            elog<xyz::openbmc_project::Sensor::Device::ReadFailure>(
+                prev_entry<xyz::openbmc_project::Sensor::
+                           Device::ReadFailure::CALLOUT_ERRNO>(),
+                prev_entry<xyz::openbmc_project::Sensor::
+                           Device::ReadFailure::CALLOUT_DEVICE_PATH>());
+        }
+        catch (elogException<xyz::openbmc_project::Sensor::
+                             Device::ReadFailure>& elog)
+        {
+            commit(elog.name());
+        }
         exit(EXIT_FAILURE);
     }
 
