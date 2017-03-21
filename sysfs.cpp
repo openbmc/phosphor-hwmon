@@ -19,6 +19,7 @@
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Control/Device/error.hpp>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
 
@@ -81,10 +82,19 @@ int readSysfsWithCallout(const std::string& root,
         std::string devicePath = instancePath + "/device";
         auto real = std::unique_ptr<char, Cleanup>(
                         realpath(devicePath.c_str(), nullptr));
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-            strerror(rc),
-            phosphor::logging::entry("CALLOUT_DEVICE_PATH=%s", real.get()),
-            phosphor::logging::entry("CALLOUT_ERRNO=%d", rc));
+        using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
+        try
+        {
+            elog<ReadFailure>(
+                xyz::openbmc_project::Sensor::Device::
+                    ReadFailure::CALLOUT_ERRNO(rc),
+                xyz::openbmc_project::Sensor::Device::
+                    ReadFailure::CALLOUT_DEVICE_PATH(real.get()));
+        }
+        catch (ReadFailure& elog)
+        {
+            commit(elog.name());
+        }
         exit(EXIT_FAILURE);
     }
 
