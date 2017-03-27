@@ -1,0 +1,54 @@
+# Example sensor monitoring definitions
+
+groups:
+    - name: core_temp_group
+      description: Group of core temp sensors
+      type: core_input
+      members:
+          - core0
+          - core1
+          - core2
+          - core3
+
+triggers:
+    - name: app_start
+      description: The sensor group manager application started
+      type: start
+    - name: temp_changed
+      description: A temperature change dbus signal
+      type: dbus
+      signature:
+          interface: org.freedesktop.DBus.Properties
+          member: PropertiesChanged
+
+conditions:
+    - name: number_of_cores_at_or_above_temp
+      type: number_in_group
+      interface: xyz.openbmc_project.Sensor.Value
+      property: value
+      count: 3
+      op: >=
+      value:
+          value: 115
+          type: uint32
+
+actions:
+    - name: log_error
+      type: log_error
+    - name: shutdown
+      type: shutdown
+
+events:
+    - name: cores_overtemp
+      groups:
+          - core_temp_group
+      triggers:
+          - name: startup
+            conditions:
+                - too_many_zone_members_hot
+          - name: temp_changed
+            conditions:
+                - number_of_cores_at_or_above_temp
+      actions:
+          - name: log_error
+          - name: shutdown
