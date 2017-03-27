@@ -51,11 +51,14 @@ int readSysfsWithCallout(const std::string& root,
                          const std::string& id,
                          const std::string& sensor)
 {
+    namespace fs = std::experimental::filesystem;
+
     int value = 0;
-    std::string instancePath = root + '/' + instance;
+    std::ifstream ifs;
+    fs::path instancePath{root};
+    instancePath /= instance;
     std::string fullPath = make_sysfs_path(instancePath,
                                            type, id, sensor);
-    std::ifstream ifs;
 
     ifs.exceptions(std::ifstream::failbit
                    | std::ifstream::badbit
@@ -69,17 +72,16 @@ int readSysfsWithCallout(const std::string& root,
     {
         // Too many GCC bugs (53984, 66145) to do
         // this the right way...
-        using Cleanup = phosphor::utility::Free<char>;
 
         // errno should still reflect the error from the failing open
         // or read system calls that got us here.
         auto rc = errno;
-        std::string devicePath = instancePath + "/device";
-        auto real = std::unique_ptr<char, Cleanup>(
-                        realpath(devicePath.c_str(), nullptr));
+        instancePath /= "device";
         phosphor::logging::log<phosphor::logging::level::ERR>(
             strerror(rc),
-            phosphor::logging::entry("CALLOUT_DEVICE_PATH=%s", real.get()),
+            phosphor::logging::entry(
+                "CALLOUT_DEVICE_PATH=%s",
+                fs::canonical(instancePath).c_str()),
             phosphor::logging::entry("CALLOUT_ERRNO=%d", rc));
         exit(EXIT_FAILURE);
     }
