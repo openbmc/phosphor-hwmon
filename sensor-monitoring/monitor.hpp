@@ -23,10 +23,21 @@ class Monitor
 
         Monitor(sdbusplus::bus::bus& bus);
 
+        void processStart() noexcept;
+
+        void handleEvent(sdbusplus::message::message& msg,
+                         const Event& event,
+                         const std::tuple<std::vector<std::shared_ptr<Event>>,
+                                    std::vector<Action>>& eventDef);
+
         void log_error(const char* msg);
 
     private:
         sdbusplus::bus::bus& bus;
+
+        static const std::vector<
+            std::tuple<std::vector<std::shared_ptr<Event>>,
+                       std::vector<Action>>> events;
 
 };
 
