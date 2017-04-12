@@ -8,12 +8,6 @@ namespace sensor
 namespace monitoring
 {
 
-// TODO Remove when generated.cpp included
-const std::vector<std::tuple<std::vector<std::shared_ptr<Event>>,
-                             std::vector<Action>>>
-    Monitor::events
-{};
-
 using namespace phosphor::logging;
 
 Monitor::Monitor(sdbusplus::bus::bus& bus) :
