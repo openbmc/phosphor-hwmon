@@ -7,12 +7,6 @@ namespace sensor
 namespace monitoring
 {
 
-// TODO Remove when generated.cpp included
-const std::vector<std::tuple<std::vector<std::shared_ptr<Event>>,
-                             std::vector<Action>>>
-    Monitor::events
-{};
-
 Monitor::Monitor(sdbusplus::bus::bus& bus) :
     bus(bus)
 {
