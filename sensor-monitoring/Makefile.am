@@ -5,7 +5,8 @@ sbin_PROGRAMS = phosphor-sensor-monitor
 
 phosphor_sensor_monitor_SOURCES = \
 	main.cpp \
-	monitor.cpp
+	monitor.cpp \
+	functor.cpp
 phosphor_sensor_monitor_LDADD = \
 	$(SDBUSPLUS_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS)
