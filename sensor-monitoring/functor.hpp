@@ -23,6 +23,59 @@ auto make_action(T&& action)
     return Action(std::forward<T>(action));
 }
 
+template <typename T, typename U>
+struct PropertyChangedCondition
+{
+    PropertyChangedCondition() = delete;
+    ~PropertyChangedCondition() = default;
+    PropertyChangedCondition(const PropertyChangedCondition&) = default;
+    PropertyChangedCondition& operator=(const PropertyChangedCondition&) =
+        default;
+    PropertyChangedCondition(PropertyChangedCondition&&) = default;
+    PropertyChangedCondition& operator=(PropertyChangedCondition&&) =
+        default;
+    PropertyChangedCondition(const char* iface, const char* property,
+                             U&& condition) :
+        _iface(iface),
+        _property(property),
+        _condition(std::forward<U>(condition)) { }
+
+    /** @brief Test a property value.
+     *
+     * Extract the property from the PropertiesChanged
+     * message and run the condition test.
+     */
+    bool operator()(
+        sdbusplus::bus::bus&,
+        sdbusplus::message::message& msg,
+        Monitor&) const
+    {
+        std::map<std::string, sdbusplus::message::variant<T>> properties;
+        const char* iface = nullptr;
+
+        msg.read(iface);
+        if (!iface || strcmp(iface, _iface))
+        {
+            return false;
+        }
+
+        msg.read(properties);
+        auto it = properties.find(_property);
+        if (it == properties.cend())
+        {
+            return false;
+        }
+
+        return _condition(
+                   std::forward<T>(it->second.template get<T>()));
+    }
+
+private:
+    const char* _iface;
+    const char* _property;
+    U _condition;
+};
+
 struct PropertyConditionBase
 {
     PropertyConditionBase() = delete;
@@ -123,6 +176,16 @@ struct PropertyCondition final : public PropertyConditionBase
 private:
     U _condition;
 };
+
+template <typename T, typename U>
+auto propertySignal(const char* iface,
+                    const char* property,
+                    U&& condition)
+{
+    return PropertyChangedCondition<T, U>(iface,
+                                          property,
+                                          std::move(condition));
+}
 
 template <typename T, typename U>
 auto propertyStart(const char* path,
