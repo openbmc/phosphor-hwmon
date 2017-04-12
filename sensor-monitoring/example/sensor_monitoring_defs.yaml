@@ -1,0 +1,55 @@
+# Example sensor monitoring definition
+groups:
+    - name: fan_zone_group
+      description: Group of fan tach sensors
+      type: fan_tach
+      members:
+          - fan0
+          - fan1
+          - fan2
+          - fan3
+
+triggers:
+    - name: app_start
+      description: The sensor group manager application started
+      type: start
+    - name: properties_changed
+      description: A property change dbus signal
+      type: signal
+      signature:
+          interface: org.freedesktop.DBus.Properties
+          member: PropertiesChanged
+
+conditions:
+    - name: fans_at_or_above_speed
+      type: countAtOrAbove
+      interface: xyz.openbmc_project.Sensor.Value
+      property: Value
+      parameters:
+          group: name
+          group: member
+          count: 3
+          value:
+              value: 8000
+              type: int64
+
+actions:
+    - name: log_error
+      type: log_error
+      parameters:
+          message: string
+
+events:
+    - name: fans_over_speed
+      groups:
+          - fan_zone_group
+      triggers:
+          - name: app_start
+            conditions:
+                - fans_at_or_above_speed
+          - name: properties_changed
+            conditions:
+                - fans_at_or_above_speed
+      actions:
+          - name: log_error
+            message: "ERROR: Number of fans at or above 8000rpms reached"
