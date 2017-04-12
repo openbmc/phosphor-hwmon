@@ -24,4 +24,4 @@ libhwmon_la_SOURCES = \
 	env.cpp \
 	fan_speed.cpp
 
-SUBDIRS = . test
+SUBDIRS = . sensor-monitoring test
