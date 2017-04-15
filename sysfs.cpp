@@ -83,19 +83,13 @@ int readSysfsWithCallout(const std::string& root,
         auto rc = errno;
         instancePath /= "device";
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
-        try
-        {
-            elog<ReadFailure>(
-                xyz::openbmc_project::Sensor::Device::
-                    ReadFailure::CALLOUT_ERRNO(rc),
-                xyz::openbmc_project::Sensor::Device::
-                    ReadFailure::CALLOUT_DEVICE_PATH(
-                        fs::canonical(instancePath).c_str()));
-        }
-        catch (ReadFailure& elog)
-        {
-            commit(elog.name());
-        }
+        report<ReadFailure>(
+            xyz::openbmc_project::Sensor::Device::
+                ReadFailure::CALLOUT_ERRNO(rc),
+            xyz::openbmc_project::Sensor::Device::
+                ReadFailure::CALLOUT_DEVICE_PATH(
+                    fs::canonical(instancePath).c_str()));
+
         exit(EXIT_FAILURE);
     }
 
@@ -133,19 +127,13 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
         auto rc = errno;
         instancePath /= "device";
         using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
-        try
-        {
-            elog<WriteFailure>(
-                xyz::openbmc_project::Control::Device::
-                    WriteFailure::CALLOUT_ERRNO(rc),
-                xyz::openbmc_project::Control::Device::
-                    WriteFailure::CALLOUT_DEVICE_PATH(
-                        fs::canonical(instancePath).c_str()));
-        }
-        catch (WriteFailure& elog)
-        {
-            commit(elog.name());
-        }
+        report<WriteFailure>(
+            xyz::openbmc_project::Control::Device::
+                WriteFailure::CALLOUT_ERRNO(rc),
+            xyz::openbmc_project::Control::Device::
+                WriteFailure::CALLOUT_DEVICE_PATH(
+                    fs::canonical(instancePath).c_str()));
+
         exit(EXIT_FAILURE);
     }
 
