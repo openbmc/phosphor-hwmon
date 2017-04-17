@@ -6,7 +6,8 @@ sbin_PROGRAMS = phosphor-sensor-monitor
 phosphor_sensor_monitor_SOURCES = \
 	main.cpp \
 	monitor.cpp \
-	functor.cpp \
+	functor.cpp
+nodist_phosphor_sensor_monitor_SOURCES = \
 	generated.cpp
 phosphor_sensor_monitor_LDFLAGS = \
 	$(SDBUSPLUS_LIBS) \
@@ -14,3 +15,6 @@ phosphor_sensor_monitor_LDFLAGS = \
 phosphor_sensor_monitor_CXXFLAGS = \
 	$(SDBUSPLUS_CFLAGS) \
 	$(PHOSPHOR_LOGGING_CFLAGS)
+
+generated.cpp:
+	$(AM_V_GEN)$(PYTHON) ${srcdir}/gen-sensor-group-defs.py -y ${srcdir}/example/sensor_monitoring_defs.yaml -o ${builddir}
