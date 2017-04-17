@@ -11,6 +11,8 @@ AC_PROG_CXX
 AM_PROG_AR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
+AM_PATH_PYTHON([2.7], [AC_SUBST([PYTHON], [echo "$PYTHON"])],
+[AC_MSG_ERROR([Could not find python-2.7 installed...python-2.7 is required])])
 
 # Checks for libraries.
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus], [], [AC_MSG_ERROR(["sdbusplus required and not found."])])
