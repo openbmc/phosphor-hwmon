@@ -11,18 +11,39 @@ namespace monitoring
 
 class Monitor;
 
+/**
+ * @brief Create a condition function object
+ *
+ * @param[in] condition - The condition being created
+ *
+ * @return - The created condition funtion object
+ */
 template <typename T>
 auto make_condition(T&& condition)
 {
     return Condition(std::forward<T>(condition));
 }
 
+/**
+ * @brief Create an action function object
+ *
+ * @param[in] action - The action being created
+ *
+ * @return - The created action funtion object
+ */
 template <typename T>
 auto make_action(T&& action)
 {
     return Action(std::forward<T>(action));
 }
 
+/**
+ * @struct Property Changed Condtion
+ * @brief A match filter functor to test Dbus property value changed signals
+ *
+ * @tparam T - The type of the property value
+ * @tparam U - The type of the condition
+ */
 template <typename T, typename U>
 struct PropertyChangedCondition
 {
@@ -76,6 +97,12 @@ private:
     U _condition;
 };
 
+/**
+ * @struct Property Condition Base
+ * @brief A match filter functor to test property values
+ * @details The base property condition struct that retrieves the property value
+ * for a property condition
+ */
 struct PropertyConditionBase
 {
     PropertyConditionBase() = delete;
@@ -128,6 +155,13 @@ private:
     const char* _service;
 };
 
+/**
+ * @struct Property Condtion
+ * @brief A match filter functor to test property values
+ *
+ * @tparam T - The type of the property value
+ * @tparam U - The type of the condition
+ */
 template <typename T, typename U>
 struct PropertyCondition final : public PropertyConditionBase
 {
@@ -177,6 +211,16 @@ private:
     U _condition;
 };
 
+/**
+ * @brief Used to process a Dbus property changed signal event
+ *
+ * @param[in] iface - Sensor value interface
+ * @param[in] property - Sensor value property
+ * @param[in] condition - Condition function to perform
+ *
+ * @tparam T - The type of the property
+ * @tparam U - The type of the condition
+ */
 template <typename T, typename U>
 auto propertySignal(const char* iface,
                     const char* property,
@@ -187,6 +231,18 @@ auto propertySignal(const char* iface,
                                           std::move(condition));
 }
 
+/**
+ * @brief Used to process condtions on a start event
+ *
+ * @param[in] path - Sensor's Dbus path
+ * @param[in] iface - Sensor value interface
+ * @param[in] property - Sensor value property
+ * @param[in] condition - Condition function to perform
+ * @param[in] service - Service to lookup sensor Dbus object
+ *
+ * @tparam T - The type of the property
+ * @tparam U - The type of the condition
+ */
 template <typename T, typename U>
 auto propertyStart(const char* path,
                    const char* iface,
