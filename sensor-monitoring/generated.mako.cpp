@@ -12,6 +12,11 @@ namespace sensor
 {
 namespace monitoring
 {
+<%def name="get(key, data)">\
+<% for i, j in enumerate(events[data]):
+    if j['name'] == key:
+        return j %>\
+</%def>\
 
 % for g in events["groups"]:
 static Group ${g['name']} = {
@@ -28,7 +33,31 @@ const std::vector<std::tuple<std::vector<std::shared_ptr<Event>>,
                              std::vector<Action>>>
     Monitor::events
 {
+    % for e in events["events"]:
+    {std::make_tuple(std::vector<std::shared_ptr<Event>>(
+        { // ${e['name']}
 
+        }),
+        std::vector<Action>(
+        {
+            % for a in e["actions"]:
+<% dict = get(key=a['name'], data='actions') %>\
+            // ${e['name']} - ${a['name']}
+            make_action(
+                action::${dict['type']}(
+                    % for p, v in sorted(dict['parameters'].items()):
+                    % if v == "string":
+                    "${a[p]}"
+                    % else:
+                    ${a[p]}
+                    % endif
+                    % endfor
+                )
+            )
+            % endfor
+        })
+    )}
+    % endfor
 };
 
 } // namespace monitoring
