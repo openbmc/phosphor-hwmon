@@ -242,7 +242,13 @@ void MainLoop::run()
         addThreshold<CriticalObject>(i.first, sensorValue, info);
         //TODO openbmc/openbmc#1347
         //     Handle application restarts to set/refresh fan speed values
-        addTarget<hwmon::FanSpeed>(i.first, _hwmonRoot, _instance, info);
+        auto target = addTarget<hwmon::FanSpeed>(
+                i.first, _hwmonRoot, _instance, info);
+
+        if (target)
+        {
+            target->enable();
+        }
 
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.

@@ -1,6 +1,7 @@
 #include "fan_speed.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
+#include <experimental/filesystem>
 
 namespace hwmon
 {
@@ -22,5 +23,29 @@ uint64_t FanSpeed::target(uint64_t value)
 
     return FanSpeedObject::target(value);
 }
+
+
+void FanSpeed::enable()
+{
+    namespace fs = std::experimental::filesystem;
+
+    auto path = sysfsRoot + "/" + instance;
+    auto fullPath = make_sysfs_path(path,
+                                    type::pwm,
+                                    id,
+                                    entry::enable);
+
+    if (fs::exists(fullPath))
+    {
+        //This class always uses RPM mode
+        writeSysfsWithCallout(enable::rpmMode,
+                              sysfsRoot,
+                              instance,
+                              type::pwm,
+                              id,
+                              entry::enable);
+    }
+}
+
 
 } // namespace hwmon
