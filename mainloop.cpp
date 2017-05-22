@@ -16,7 +16,6 @@
 #include <iostream>
 #include <memory>
 #include <cstdlib>
-#include <chrono>
 #include <algorithm>
 #include "sensorset.hpp"
 #include "hwmon.hpp"
@@ -56,7 +55,6 @@ decltype(Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmH
     &CriticalObject::criticalAlarmHigh;
 
 
-using namespace std::literals::chrono_literals;
 
 static constexpr auto typeAttrMap =
 {
@@ -269,6 +267,14 @@ void MainLoop::run()
         _bus.request_name(busname.c_str());
     }
 
+    {
+        auto interval = getenv("INTERVAL");
+        if (interval)
+        {
+            _interval = strtoull(interval, NULL, 10);
+        }
+    }
+
     // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
     //       ensure the objects all exist?
 
@@ -320,9 +326,8 @@ void MainLoop::run()
         _bus.process_discard();
 
         // Sleep until next interval.
-        // TODO: Issue#5 - Make this configurable.
         // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
-        _bus.wait((1000000us).count());
+        _bus.wait(_interval);
 
         // TODO: Issue#7 - Should probably periodically check the SensorSet
         //       for new entries.
