@@ -7,6 +7,8 @@
 #include "sensorset.hpp"
 #include "interface.hpp"
 
+#define DEFAULT_INTERVAL 1000000
+
 using Object = std::map<InterfaceType, std::experimental::any>;
 using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, Object>;
 
@@ -71,4 +73,6 @@ class MainLoop
         const char* _root;
         /** @brief DBus object state. */
         SensorState state;
+        /** @brief Sleep interval in microseconds. */
+        uint64_t _interval = DEFAULT_INTERVAL;
 };
