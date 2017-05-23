@@ -262,6 +262,12 @@ void MainLoop::run()
         state[std::move(i.first)] = std::move(value);
     }
 
+    /* If there are no sensors specified by labels, exit. */
+    if (0 == state.size())
+    {
+    	return;
+    }
+
     {
         std::string busname{_prefix};
         busname.append(1, '.');
