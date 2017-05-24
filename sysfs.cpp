@@ -22,14 +22,105 @@
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
+#include <fstream>
 
 using namespace phosphor::logging;
+namespace fs = std::experimental::filesystem;
+
+static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
+
+/**
+ * @brief Return the path to the phandle file matching value in io-channels.
+ *
+ * This function will take two passed in paths.
+ * One path is used to find the io-channels file.
+ * The other path is used to find the phandle file.
+ * The 4 byte phandle value is read from the phandle file(s).
+ * The 4 byte phandle value and 4 byte index value is read from io-channels.
+ * When a match is found, the path to the matching phandle file is returned.
+ *
+ * @param[in] iochanneldir - Path to look in for io-channels file
+ * @param[in] phandledir - Path to look in for phandle file
+ *
+ * @return Path to the matching phandle file (or empty string)
+ */
+std::string findPhandleMatch(const std::string& iochanneldir,
+                             const std::string& phandledir)
+{
+    for (const auto& ofInst : fs::recursive_directory_iterator(phandledir))
+    {
+        auto path = ofInst.path();
+        if ("phandle" == ofInst.path().filename())
+        {
+            auto ioChannelsPath = iochanneldir + "/io-channels";
+            if (fs::exists(ioChannelsPath))
+            {
+                auto fullOfPathPhandle = ofInst.path();
+                std::ifstream ioChannelsFile(ioChannelsPath);
+                std::ifstream pHandleFile(fullOfPathPhandle);
+
+                // io-channels file has a phandle value, and an index
+                // Variable to read the phandle value into from io-channels file
+                uint32_t ioChannelsValue;
+
+                // Variable to read in the phandle value from phandle file.
+                uint32_t pHandleValue;
+
+                try
+                {
+                    ioChannelsFile.read(reinterpret_cast<char*>(&ioChannelsValue),
+                                        sizeof(ioChannelsValue));
+                    pHandleFile.read(reinterpret_cast<char*>(&pHandleValue),
+                                     sizeof(pHandleValue));
+
+                    if (ioChannelsValue == pHandleValue)
+                    {
+                        return ofInst.path();
+                    }
+                }
+                catch (const std::exception& e)
+                {
+                    log<level::INFO>(e.what());
+                    continue;
+                }
+
+            }
+        }
+    }
+
+    return std::string();
+}
+
+/**
+ * @brief Return the path to use for a call out.
+ *
+ * If the path does not contain iio-hwmon, assume passed in path is the call
+ * out path.
+ *
+ * @param[in] ofPath - Open firmware path to search for matching phandle value
+ *
+ * @return Matching path to use for call out.
+ */
+std::string findCalloutPath(const std::string& ofPath)
+{
+    static constexpr auto iioHwmonStr = "iio-hwmon";
+
+    if (ofPath.find(iioHwmonStr) != std::string::npos)
+    {
+        auto matchpath = findPhandleMatch(ofPath, ofRoot);
+        auto n = matchpath.rfind('/');
+        if (n != std::string::npos)
+        {
+            return matchpath.substr(0, n);
+        }
+    }
+
+    return ofPath;
+}
 
 std::string findHwmon(const std::string& ofNode)
 {
-    namespace fs = std::experimental::filesystem;
     static constexpr auto hwmonRoot = "/sys/class/hwmon";
-    static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
 
     fs::path fullOfPath{ofRoot};
     fullOfPath /= ofNode;
@@ -38,10 +129,20 @@ std::string findHwmon(const std::string& ofNode)
     {
         auto path = hwmonInst.path();
         path /= "of_node";
-
         if (fs::canonical(path) != fullOfPath)
         {
-            continue;
+            // Try to find HWMON instance via phandle values.
+            // Used for IIO device drivers.
+            auto ofpath = fullOfPath.string();
+            auto matchpath = findPhandleMatch(path, ofpath);
+            if (!std::string(matchpath).empty())
+            {
+                return hwmonInst.path();
+            }
+            else
+            {
+                continue;
+            }
         }
 
         return hwmonInst.path();
@@ -64,6 +165,8 @@ int readSysfsWithCallout(const std::string& root,
     instancePath /= instance;
     std::string fullPath = make_sysfs_path(instancePath,
                                            type, id, sensor);
+
+    auto callOutPath = findCalloutPath(fs::canonical(instancePath));
 
     ifs.exceptions(std::ifstream::failbit
                    | std::ifstream::badbit
@@ -88,7 +191,7 @@ int readSysfsWithCallout(const std::string& root,
                 ReadFailure::CALLOUT_ERRNO(rc),
             xyz::openbmc_project::Sensor::Device::
                 ReadFailure::CALLOUT_DEVICE_PATH(
-                    fs::canonical(instancePath).c_str()));
+                    fs::canonical(callOutPath).c_str()));
 
         exit(EXIT_FAILURE);
     }
@@ -112,6 +215,8 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
     std::string fullPath = make_sysfs_path(instancePath,
                                            type, id, sensor);
 
+    auto callOutPath = findCalloutPath(fs::canonical(instancePath));
+
     ofs.exceptions(std::ofstream::failbit
                    | std::ofstream::badbit
                    | std::ofstream::eofbit);
@@ -132,7 +237,7 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
                 WriteFailure::CALLOUT_ERRNO(rc),
             xyz::openbmc_project::Control::Device::
                 WriteFailure::CALLOUT_DEVICE_PATH(
-                    fs::canonical(instancePath).c_str()));
+                    fs::canonical(callOutPath).c_str()));
 
         exit(EXIT_FAILURE);
     }
