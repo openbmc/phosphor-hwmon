@@ -22,6 +22,7 @@
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
+#include <fstream>
 
 using namespace phosphor::logging;
 
@@ -33,6 +34,8 @@ std::string findHwmon(const std::string& ofNode)
 
     fs::path fullOfPath{ofRoot};
     fullOfPath /= ofNode;
+    fs::path fullOfPathPhandle{fullOfPath};
+    fullOfPathPhandle /= "phandle";
 
     for (const auto& hwmonInst : fs::directory_iterator(hwmonRoot))
     {
@@ -41,6 +44,38 @@ std::string findHwmon(const std::string& ofNode)
 
         if (fs::canonical(path) != fullOfPath)
         {
+            // Try to find HWMON instance via phandle values.
+            // Used for IIO device drivers.
+            path /= "io-channels";
+            if (fs::exists(path) && fs::exists(fullOfPathPhandle))
+            {
+                std::ifstream ioChannelsFile(path,
+                                             std::ios::in | std::ios::binary);
+                std::ifstream pHandleFile(fullOfPathPhandle,
+                                          std::ios::in | std::ios::binary);
+
+                std::unique_ptr<char[]> ioChannelsValue(new char[sizeof(
+                        uint32_t)]); //FIXME - phandle size?
+                std::unique_ptr<char[]> pHandleValue(new char[sizeof(
+                        uint32_t)]); //FIXME - phandle size?
+
+                ioChannelsFile.read(ioChannelsValue.get(), sizeof(uint32_t));
+                pHandleFile.read(pHandleValue.get(), sizeof(uint32_t));
+
+                ioChannelsFile.close();
+                pHandleFile.close();
+
+                if (0 == memcmp(ioChannelsValue.get(), pHandleValue.get(),
+                                sizeof(uint32_t)))
+                {
+                    return hwmonInst.path();
+                }
+                else
+                {
+                    continue;
+                }
+
+            }
             continue;
         }
 
@@ -85,10 +120,10 @@ int readSysfsWithCallout(const std::string& root,
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_ERRNO(rc),
+            ReadFailure::CALLOUT_ERRNO(rc),
             xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_DEVICE_PATH(
-                    fs::canonical(instancePath).c_str()));
+            ReadFailure::CALLOUT_DEVICE_PATH(
+                fs::canonical(instancePath).c_str()));
 
         exit(EXIT_FAILURE);
     }
@@ -129,10 +164,10 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
         using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
         report<WriteFailure>(
             xyz::openbmc_project::Control::Device::
-                WriteFailure::CALLOUT_ERRNO(rc),
+            WriteFailure::CALLOUT_ERRNO(rc),
             xyz::openbmc_project::Control::Device::
-                WriteFailure::CALLOUT_DEVICE_PATH(
-                    fs::canonical(instancePath).c_str()));
+            WriteFailure::CALLOUT_DEVICE_PATH(
+                fs::canonical(instancePath).c_str()));
 
         exit(EXIT_FAILURE);
     }
