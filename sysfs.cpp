@@ -22,6 +22,7 @@
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 #include "sysfs.hpp"
 #include "util.hpp"
+#include <fstream>
 
 using namespace phosphor::logging;
 
@@ -33,6 +34,8 @@ std::string findHwmon(const std::string& ofNode)
 
     fs::path fullOfPath{ofRoot};
     fullOfPath /= ofNode;
+    fs::path fullOfPathPhandle{fullOfPath};
+    fullOfPathPhandle /= "phandle";
 
     for (const auto& hwmonInst : fs::directory_iterator(hwmonRoot))
     {
@@ -41,6 +44,36 @@ std::string findHwmon(const std::string& ofNode)
 
         if (fs::canonical(path) != fullOfPath)
         {
+            // Try to find HWMON instance via phandle values.
+            // Used for IIO device drivers.
+            path /= "io-channels";
+            if (fs::exists(path) && fs::exists(fullOfPathPhandle))
+            {
+                std::ifstream ioChannelsFile(path);
+                std::ifstream pHandleFile(fullOfPathPhandle);
+
+                uint32_t ioChannelsValue;
+                uint32_t pHandleValue;
+
+                try
+                {
+                    ioChannelsFile.read(reinterpret_cast<char*>(&ioChannelsValue),
+                                        sizeof(ioChannelsValue));
+                    pHandleFile.read(reinterpret_cast<char*>(&pHandleValue),
+                                     sizeof(pHandleValue));
+
+                    if (ioChannelsValue == pHandleValue)
+                    {
+                        return hwmonInst.path();
+                    }
+                }
+                catch (const std::exception& e)
+                {
+                    log<level::INFO>(e.what());
+                }
+
+
+            }
             continue;
         }
 
