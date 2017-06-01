@@ -54,10 +54,10 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
 
     // Check if target sysfs file exists
     auto targetPath = hwmonRoot + '/' + instance;
-    auto sysfsFullPath = make_sysfs_path(targetPath,
-                                         sensor.first,
-                                         sensor.second,
-                                         hwmon::entry::target);
+    auto sysfsFullPath = sysfs::make_sysfs_path(targetPath,
+                                                sensor.first,
+                                                sensor.second,
+                                                hwmon::entry::target);
     if (fs::exists(sysfsFullPath))
     {
         target = std::make_shared<T>(hwmonRoot,
