@@ -2,6 +2,9 @@
 
 #include <fstream>
 #include <string>
+#include <stdexcept>
+
+namespace sysfs {
 
 inline std::string make_sysfs_path(const std::string& path,
                                    const std::string& type,
@@ -12,6 +15,14 @@ inline std::string make_sysfs_path(const std::string& path,
 
     return path + "/"s + type + id + "_"s + entry;
 }
+
+
+class IOException : public std::runtime_error {
+    public:
+        IOException(std::string& what)
+        : std::runtime_error(what.c_str())
+        { }
+};
 
 
 /** @brief Find hwmon instances
@@ -63,5 +74,7 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
                                const std::string& type,
                                const std::string& id,
                                const std::string& sensor);
+
+}
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
