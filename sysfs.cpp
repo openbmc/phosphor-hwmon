@@ -27,6 +27,8 @@
 using namespace phosphor::logging;
 namespace fs = std::experimental::filesystem;
 
+namespace sysfs {
+
 static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
 
 /**
@@ -193,14 +195,14 @@ int readSysfsWithCallout(const std::string& root,
         instancePath /= "device";
         auto callOutPath = findCalloutPath(fs::canonical(instancePath));
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
-        report<ReadFailure>(
+
+        // this throws a ReadFailure.
+        elog<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::
                 ReadFailure::CALLOUT_ERRNO(rc),
             xyz::openbmc_project::Sensor::Device::
                 ReadFailure::CALLOUT_DEVICE_PATH(
                     fs::canonical(callOutPath).c_str()));
-
-        exit(EXIT_FAILURE);
     }
 
     return value;
@@ -251,4 +253,5 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
     return value;
 }
 
+}
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
