@@ -25,6 +25,8 @@
 
 using namespace phosphor::logging;
 
+namespace sysfs {
+
 std::string findHwmon(const std::string& ofNode)
 {
     namespace fs = std::experimental::filesystem;
@@ -89,8 +91,9 @@ int readSysfsWithCallout(const std::string& root,
             xyz::openbmc_project::Sensor::Device::
                 ReadFailure::CALLOUT_DEVICE_PATH(
                     fs::canonical(instancePath).c_str()));
-
-        exit(EXIT_FAILURE);
+        std::string p{"Unable to read: "};
+        p += fs::canonical(instancePath).c_str();
+        throw IOException(p);
     }
 
     return value;
@@ -140,4 +143,5 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
     return value;
 }
 
+}
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
