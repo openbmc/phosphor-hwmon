@@ -90,7 +90,7 @@ int readSysfsWithCallout(const std::string& root,
                 ReadFailure::CALLOUT_DEVICE_PATH(
                     fs::canonical(instancePath).c_str()));
 
-        exit(EXIT_FAILURE);
+        return -errno;
     }
 
     return value;
