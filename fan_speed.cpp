@@ -12,13 +12,13 @@ uint64_t FanSpeed::target(uint64_t value)
 
     if (curValue != value)
     {
-        //Write target out to sysfs
-        curValue = writeSysfsWithCallout(value,
-                                         sysfsRoot,
-                                         instance,
-                                         type,
-                                         id,
-                                         entry::target);
+        // Write target out to sysfs
+        curValue = sysfs::writeSysfsWithCallout(value,
+                                                sysfsRoot,
+                                                instance,
+                                                type,
+                                                id,
+                                                entry::target);
     }
 
     return FanSpeedObject::target(value);
@@ -30,20 +30,20 @@ void FanSpeed::enable()
     namespace fs = std::experimental::filesystem;
 
     auto path = sysfsRoot + "/" + instance;
-    auto fullPath = make_sysfs_path(path,
-                                    type::pwm,
-                                    id,
-                                    entry::enable);
+    auto fullPath = sysfs::make_sysfs_path(path,
+                                           type::pwm,
+                                           id,
+                                           entry::enable);
 
     if (fs::exists(fullPath))
     {
-        //This class always uses RPM mode
-        writeSysfsWithCallout(enable::rpmMode,
-                              sysfsRoot,
-                              instance,
-                              type::pwm,
-                              id,
-                              entry::enable);
+        // This class always uses RPM mode
+        sysfs::writeSysfsWithCallout(enable::rpmMode,
+                                     sysfsRoot,
+                                     instance,
+                                     type::pwm,
+                                     id,
+                                     entry::enable);
     }
 }
 
