@@ -140,7 +140,7 @@ auto getAttributes(const std::string& type, Attributes& attributes)
     return true;
 }
 
-auto addValue(const SensorSet::key_type& sensor,
+std::shared_ptr<ValueObject> addValue(const SensorSet::key_type& sensor,
               const std::string& hwmonRoot,
               const std::string& instance,
               ObjectInfo& info)
@@ -157,6 +157,10 @@ auto addValue(const SensorSet::key_type& sensor,
                                    sensor.first,
                                    sensor.second,
                                    hwmon::entry::input);
+    if (val < 0)
+    {
+    	return nullptr;
+    }
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
@@ -237,6 +241,10 @@ void MainLoop::run()
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
         auto valueInterface = addValue(i.first, _hwmonRoot, _instance, info);
+        if (nullptr == valueInterface)
+        {
+        	continue; /* skip adding this sensor for now. */
+        }
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
@@ -293,6 +301,11 @@ void MainLoop::run()
                                                  i.first.first,
                                                  i.first.second,
                                                  hwmon::entry::input);
+                if (value < 0)
+                {
+                	continue;
+                }
+
                 auto& objInfo = std::get<ObjectInfo>(i.second);
                 auto& obj = std::get<Object>(objInfo);
 
