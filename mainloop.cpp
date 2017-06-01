@@ -150,11 +150,20 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    int val = readSysfsWithCallout(hwmonRoot,
-                                   instance,
-                                   sensor.first,
-                                   sensor.second,
-                                   hwmon::entry::input);
+    int val;
+    try
+    {
+        val = sysfs::readSysfsWithCallout(hwmonRoot,
+                                          instance,
+                                          sensor.first,
+                                          sensor.second,
+                                          hwmon::entry::input);
+    }
+    catch(const std::exception& ioe)
+    {
+        return static_cast<std::shared_ptr<ValueObject>>(nullptr);
+    }
+
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
@@ -256,6 +265,10 @@ void MainLoop::run()
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
         auto valueInterface = addValue(i.first, _hwmonRoot, _instance, info);
+        if (!valueInterface)
+        {
+            continue; /* skip adding this sensor for now. */
+        }
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
@@ -308,6 +321,7 @@ void MainLoop::run()
     // Polling loop.
     while (!_shutdown)
     {
+        std::vector<SensorSet::key_type> destroy;
         // Iterate through all the sensors.
         for (auto& i : state)
         {
@@ -315,38 +329,52 @@ void MainLoop::run()
             if (attrs.find(hwmon::entry::input) != attrs.end())
             {
                 // Read value from sensor.
-                int value = readSysfsWithCallout(_hwmonRoot,
-                                                 _instance,
-                                                 i.first.first,
-                                                 i.first.second,
-                                                 hwmon::entry::input);
-                auto& objInfo = std::get<ObjectInfo>(i.second);
-                auto& obj = std::get<Object>(objInfo);
-
-                for (auto& iface : obj)
+                int value;
+                try
                 {
-                    auto valueIface = std::shared_ptr<ValueObject>();
-                    auto warnIface = std::shared_ptr<WarningObject>();
-                    auto critIface = std::shared_ptr<CriticalObject>();
+                    value = sysfs::readSysfsWithCallout(_hwmonRoot,
+                                                        _instance,
+                                                        i.first.first,
+                                                        i.first.second,
+                                                        hwmon::entry::input);
 
-                    switch (iface.first)
+                    auto& objInfo = std::get<ObjectInfo>(i.second);
+                    auto& obj = std::get<Object>(objInfo);
+
+                    for (auto& iface : obj)
                     {
-                        case InterfaceType::VALUE:
-                            valueIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
-                                         (iface.second);
-                            valueIface->value(value);
-                            break;
-                        case InterfaceType::WARN:
-                            checkThresholds<WarningObject>(iface.second, value);
-                            break;
-                        case InterfaceType::CRIT:
-                            checkThresholds<CriticalObject>(iface.second, value);
-                            break;
-                        default:
-                            break;
+                        auto valueIface = std::shared_ptr<ValueObject>();
+                        auto warnIface = std::shared_ptr<WarningObject>();
+                        auto critIface = std::shared_ptr<CriticalObject>();
+
+                        switch (iface.first)
+                        {
+                            case InterfaceType::VALUE:
+                                valueIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
+                                            (iface.second);
+                                valueIface->value(value);
+                                break;
+                            case InterfaceType::WARN:
+                                checkThresholds<WarningObject>(iface.second, value);
+                                break;
+                            case InterfaceType::CRIT:
+                                checkThresholds<CriticalObject>(iface.second, value);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
+                catch (const std::exception& ioe)
+                {
+                    destroy.push_back(i.first);
+                }
             }
+        }
+
+        for (auto &i : destroy)
+        {
+            state.erase(i);
         }
 
         // Respond to DBus
