@@ -214,13 +214,30 @@ void MainLoop::run()
 
     for (auto& i : *sensors)
     {
-        // Get sensor configuration from the environment.
+        std::string label;
 
-        // Ignore inputs without a label.
-        auto label = getEnv("LABEL", i.first);
-        if (label.empty())
+        // Check if the MODE_% for the sensor is "label", then go ahead and read
+        // the label file and get the sensor number. Read the environment
+        // variable with the LABEL_<sensor_number> sensor.
+        auto mode = getEnv("MODE", i.first);
+        if (!mode.compare(hwmon::entry::label))
         {
-            continue;
+            label = getIndirectLabelEnv("LABEL",
+                                        _hwmonRoot + '/' + _instance + '/',
+                                        i.first);
+            if (label.empty())
+            {
+                continue;
+            }
+        }
+        else
+        {
+            // Ignore inputs without a label.
+            label = getEnv("LABEL", i.first);
+            if (label.empty())
+            {
+                continue;
+            }
         }
 
         Attributes attrs;
