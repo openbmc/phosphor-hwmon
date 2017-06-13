@@ -180,6 +180,18 @@ int readSysfsWithCallout(const std::string& root,
         // errno should still reflect the error from the failing open
         // or read system calls that got us here.
         auto rc = errno;
+
+        // If the directory disappeared then this application should gracefully
+        // exit.  There are race conditions between the unloading of a hwmon
+        // driver and the stopping of this service by systemd.  To prevent
+        // this application from falsely failing in these scenarios, it will
+        // simply exit if the directory or file can not be found.  It is up
+        // to the user(s) of this provided hwmon object to log the appropriate
+        // errors if the object disappears when it should not.
+        if (rc == ENOENT)
+        {
+            exit(0);
+        }
         instancePath /= "device";
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
