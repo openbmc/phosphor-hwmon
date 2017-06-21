@@ -162,8 +162,6 @@ int readSysfsWithCallout(const std::string& root,
     std::string fullPath = make_sysfs_path(instancePath,
                                            type, id, sensor);
 
-    auto callOutPath = findCalloutPath(fs::canonical(instancePath));
-
     ifs.exceptions(std::ifstream::failbit
                    | std::ifstream::badbit
                    | std::ifstream::eofbit);
@@ -193,6 +191,7 @@ int readSysfsWithCallout(const std::string& root,
             exit(0);
         }
         instancePath /= "device";
+        auto callOutPath = findCalloutPath(fs::canonical(instancePath));
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::
@@ -223,8 +222,6 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
     std::string fullPath = make_sysfs_path(instancePath,
                                            type, id, sensor);
 
-    auto callOutPath = findCalloutPath(fs::canonical(instancePath));
-
     ofs.exceptions(std::ofstream::failbit
                    | std::ofstream::badbit
                    | std::ofstream::eofbit);
@@ -239,6 +236,7 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
         // or write system calls that got us here.
         auto rc = errno;
         instancePath /= "device";
+        auto callOutPath = findCalloutPath(fs::canonical(instancePath));
         using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
         report<WriteFailure>(
             xyz::openbmc_project::Control::Device::
