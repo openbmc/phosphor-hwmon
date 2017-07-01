@@ -161,6 +161,10 @@ int readSysfsWithCallout(const std::string& root,
     instancePath /= instance;
     std::string fullPath = make_sysfs_path(instancePath,
                                            type, id, sensor);
+    if (!fs::exists(instancePath))
+    {
+        exit(0);
+    }
 
     ifs.exceptions(std::ifstream::failbit
                    | std::ifstream::badbit
@@ -221,6 +225,10 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
     instancePath /= instance;
     std::string fullPath = make_sysfs_path(instancePath,
                                            type, id, sensor);
+    if (!fs::exists(instancePath))
+    {
+        exit(0);
+    }
 
     ofs.exceptions(std::ofstream::failbit
                    | std::ofstream::badbit
