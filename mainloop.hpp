@@ -24,6 +24,7 @@ class MainLoop
         MainLoop(MainLoop&&) = default;
         MainLoop& operator=(MainLoop&&) = default;
         ~MainLoop() = default;
+        static void IncomingThread(void *mp);
 
         /** @brief Constructor
          *

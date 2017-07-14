@@ -17,6 +17,9 @@
 #include <memory>
 #include <cstdlib>
 #include <algorithm>
+#include <string>
+#include <thread>
+#include <unistd.h>
 #include "sensorset.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
@@ -169,6 +172,17 @@ auto addValue(const SensorSet::key_type& sensor,
     return iface;
 }
 
+void MainLoop::IncomingThread(void *mp)
+{
+    MainLoop *m = static_cast<MainLoop*>(mp);
+
+    while (!m->_shutdown) {
+        // Respond to DBus
+        m->_bus.process_discard();
+        m->_bus.wait(); // Wait indefinitely for incoming requests.
+    }
+}
+
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
     const std::string& path,
@@ -302,6 +316,8 @@ void MainLoop::run()
         }
     }
 
+    std::thread lt(IncomingThread, this);
+
     // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
     //       ensure the objects all exist?
 
@@ -349,16 +365,11 @@ void MainLoop::run()
             }
         }
 
-        // Respond to DBus
-        _bus.process_discard();
-
-        // Sleep until next interval.
-        // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
-        _bus.wait(_interval);
-
-        // TODO: Issue#7 - Should probably periodically check the SensorSet
-        //       for new entries.
+        // Sleep
+        usleep(_interval);
     }
+
+    lt.join();
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
