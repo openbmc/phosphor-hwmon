@@ -153,7 +153,8 @@ int readSysfsWithCallout(const std::string& root,
                          const std::string& instance,
                          const std::string& type,
                          const std::string& id,
-                         const std::string& sensor)
+                         const std::string& sensor,
+                         bool throwDeviceBusy)
 {
     namespace fs = std::experimental::filesystem;
 
@@ -180,6 +181,11 @@ int readSysfsWithCallout(const std::string& root,
         // errno should still reflect the error from the failing open
         // or read system calls that got us here.
         auto rc = errno;
+
+        if ((rc == EAGAIN) && throwDeviceBusy)
+        {
+            throw DeviceBusyException(fullPath);
+        }
 
         // If the directory disappeared then this application should gracefully
         // exit.  There are race conditions between the unloading of a hwmon
