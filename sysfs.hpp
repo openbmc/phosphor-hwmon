@@ -1,7 +1,39 @@
 #pragma once
 
+#include <exception>
 #include <fstream>
 #include <string>
+
+/**
+ * @class DeviceBusyException
+ *
+ * An internal exception which will be thrown when 
+ * readSysfsWithCallout() hits an EAGAIN.  Will never bubble
+ * up to terminate the application, nor does it need to be
+ * reported.
+ */
+class DeviceBusyException : public std::runtime_error
+{
+    public:
+
+        DeviceBusyException(std::string& path) :
+            std::runtime_error("Device busy"),
+            path(path)
+        {
+        }
+
+        virtual const char* what() const throw()
+        {
+            std::string msg = std::runtime_error::what();
+            msg += ": " + path;
+            return msg.c_str();
+        }
+
+    private:
+
+        std::string path;
+};
+
 
 inline std::string make_sysfs_path(const std::string& path,
                                    const std::string& type,
@@ -35,6 +67,8 @@ std::string findHwmon(const std::string& ofNode);
  *  @param[in] type - The hwmon type (ex. temp).
  *  @param[in] id - The hwmon id (ex. 1).
  *  @param[in] sensor - The hwmon sensor (ex. input).
+ *  @param[in] throwDeviceBusy - will throw a DeviceBusyException
+ *             on an EGAIN errno instead of an error log exception.
  *
  *  @returns - The read value.
  */
@@ -42,7 +76,8 @@ int readSysfsWithCallout(const std::string& root,
                          const std::string& instance,
                          const std::string& type,
                          const std::string& id,
-                         const std::string& sensor);
+                         const std::string& sensor,
+                         bool throwDeviceBusy = true);
 
  /** @brief Write a hwmon sysfs value
   *

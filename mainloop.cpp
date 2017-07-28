@@ -150,11 +150,33 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    int val = readSysfsWithCallout(hwmonRoot,
-                                   instance,
-                                   sensor.first,
-                                   sensor.second,
-                                   hwmon::entry::input);
+    int val = 0;
+    bool retry = true;
+    size_t count = 10;
+
+    //The code depends on this read to work to be able to set initial
+    //values in DBUS, so give it up to a second.
+
+    while (retry)
+    {
+        try
+        {
+            val = readSysfsWithCallout(hwmonRoot,
+                    instance,
+                    sensor.first,
+                    sensor.second,
+                    hwmon::entry::input,
+                    count > 0); //throw DeviceBusy until last attempt
+        }
+        catch (DeviceBusyException& e)
+        {
+            count--;
+            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+            continue;
+        }
+        retry = false;
+    }
+
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
@@ -315,11 +337,21 @@ void MainLoop::run()
             if (attrs.find(hwmon::entry::input) != attrs.end())
             {
                 // Read value from sensor.
-                int value = readSysfsWithCallout(_hwmonRoot,
+                int value = 0;
+                try
+                {
+                    value = readSysfsWithCallout(_hwmonRoot,
                                                  _instance,
                                                  i.first.first,
                                                  i.first.second,
                                                  hwmon::entry::input);
+                }
+                catch (DeviceBusyException& e)
+                {
+                    //Just go with the current values and try again later
+                    continue;
+                }
+
                 auto& objInfo = std::get<ObjectInfo>(i.second);
                 auto& obj = std::get<Object>(objInfo);
 
