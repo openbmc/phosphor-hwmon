@@ -156,21 +156,38 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    int val;
-    try
-    {
-        val = sysfs::readSysfsWithCallout(hwmonRoot,
-                                          instance,
-                                          sensor.first,
-                                          sensor.second,
-                                          hwmon::entry::input);
-    }
-    catch(const std::exception& ioe)
-    {
-        using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
-        commit<ReadFailure>();
+    int val = 0;
+    bool retry = true;
+    size_t count = 10;
 
-        return static_cast<std::shared_ptr<ValueObject>>(nullptr);
+
+    //Retry for up to a second if device is busy
+
+    while (retry)
+    {
+        try
+        {
+            val = sysfs::readSysfsWithCallout(hwmonRoot,
+                    instance,
+                    sensor.first,
+                    sensor.second,
+                    hwmon::entry::input,
+                    count > 0); //throw DeviceBusy until last attempt
+        }
+        catch (sysfs::DeviceBusyException& e)
+        {
+            count--;
+            std::this_thread::sleep_for(std::chrono::milliseconds{100});
+            continue;
+        }
+        catch(const std::exception& ioe)
+        {
+            using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
+            commit<ReadFailure>();
+
+            return static_cast<std::shared_ptr<ValueObject>>(nullptr);
+        }
+        retry = false;
     }
 
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
@@ -341,11 +358,19 @@ void MainLoop::run()
                 int value;
                 try
                 {
-                    value = sysfs::readSysfsWithCallout(_hwmonRoot,
-                                                        _instance,
-                                                        i.first.first,
-                                                        i.first.second,
-                                                        hwmon::entry::input);
+                    try
+                    {
+                        value = sysfs::readSysfsWithCallout(_hwmonRoot,
+                                _instance,
+                                i.first.first,
+                                i.first.second,
+                                hwmon::entry::input);
+                    }
+                    catch (sysfs::DeviceBusyException& e)
+                    {
+                        //Just go with the current values and try again later
+                        continue;
+                    }
 
                     auto& objInfo = std::get<ObjectInfo>(i.second);
                     auto& obj = std::get<Object>(objInfo);
