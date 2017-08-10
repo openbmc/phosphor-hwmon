@@ -50,6 +50,17 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
     AC_SUBST([OESDK_TESTCASE_FLAGS], [$testcase_flags])
 )
 
+AC_ARG_ENABLE([remove-from-dbus-on-fail],
+    AS_HELP_STRING([--enable-remove-from-dbus-on-fail], [Remove properties from D-Bus on access failures])
+)
+
+AC_ARG_VAR(REMOVE_ON_FAIL, [Remove properties from D-Bus on access failures])
+
+AS_IF([test "x$enable_remove_from_dbus_on_fail" == "xyes"],
+      [REMOVE_ON_FAIL="yes"]
+      AC_DEFINE_UNQUOTED([REMOVE_ON_FAIL], ["$REMOVE_ON_FAIL"], [Remove properties from D-Bus on access failures])
+)
+
 AC_ARG_VAR(BUSNAME_PREFIX, [The DBus busname prefix.])
 AC_ARG_VAR(SENSOR_ROOT, [The DBus sensors namespace root.])
 AS_IF([test "x$BUSNAME_PREFIX" == "x"], [BUSNAME_PREFIX="xyz.openbmc_project.Hwmon"])

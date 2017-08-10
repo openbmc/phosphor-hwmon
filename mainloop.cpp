@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include <phosphor-logging/elog-errors.hpp>
+#include "config.h"
 #include "sensorset.hpp"
 #include "hwmon.hpp"
 #include "sysfs.hpp"
@@ -347,7 +348,9 @@ void MainLoop::run()
     // Polling loop.
     while (!_shutdown)
     {
+#ifdef REMOVE_ON_FAIL
         std::vector<SensorSet::key_type> destroy;
+#endif
         // Iterate through all the sensors.
         for (auto& i : state)
         {
@@ -406,15 +409,21 @@ void MainLoop::run()
                     using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
                     commit<ReadFailure>();
 
+#ifdef REMOVE_ON_FAIL
                     destroy.push_back(i.first);
+#else
+                    exit(EXIT_FAILURE);
+#endif
                 }
             }
         }
 
+#ifdef REMOVE_ON_FAIL
         for (auto& i : destroy)
         {
             state.erase(i);
         }
+#endif
 
         // Respond to DBus
         _bus.process_discard();
