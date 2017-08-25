@@ -83,31 +83,83 @@ std::string findPhandleMatch(
     return emptyString;
 }
 
-/**
- * @brief Return the path to use for a call out.
- *
- * If the path does not contain iio-hwmon, assume passed in path is the call
- * out path.
- *
- * @param[in] ofPath - Open firmware path to search for matching phandle value
- *
- * @return Path to use for call out
- */
-std::string findCalloutPath(const std::string& ofPath)
+std::string findCalloutPath(const std::string& instancePath)
 {
-    static constexpr auto iioHwmonStr = "iio-hwmon";
+    // Follow the hwmon instance (/sys/class/hwmon/hwmon<N>)
+    // /sys/devices symlink.
+    fs::path devPath{instancePath};
+    devPath /= "device";
 
-    if (ofPath.find(iioHwmonStr) != std::string::npos)
+    try
     {
-        auto matchpath = findPhandleMatch(ofPath, ofRoot);
-        auto n = matchpath.rfind('/');
+        devPath = fs::canonical(devPath);
+    }
+    catch (const std::system_error& e)
+    {
+        return emptyString;
+    }
+
+    // See if the device is backed by the iio-hwmon driver.
+    fs::path p{devPath};
+    p /= "driver";
+    p = fs::canonical(p);
+
+    if (p.filename() != "iio_hwmon")
+    {
+        // Not backed by iio-hwmon.  The device pointed to
+        // is the callout device.
+        return devPath;
+    }
+
+    // Find the DT path to the iio-hwmon platform device.
+    fs::path ofDevPath{devPath};
+    ofDevPath /= "of_node";
+
+    try
+    {
+        ofDevPath = fs::canonical(ofDevPath);
+    }
+    catch (const std::system_error& e)
+    {
+        return emptyString;
+    }
+
+    // Search /sys/bus/iio/devices for the phandle in io-channels.
+    // If a match is found, use the corresponding /sys/devices
+    // iio device as the callout device.
+    static constexpr auto iioDevices = "/sys/bus/iio/devices";
+    for (const auto& iioDev: fs::recursive_directory_iterator(iioDevices))
+    {
+        p = iioDev.path();
+        p /= "of_node";
+
+        try
+        {
+            p = fs::canonical(p);
+        }
+        catch (const std::system_error& e)
+        {
+            continue;
+        }
+
+        auto match = findPhandleMatch(ofDevPath, p);
+        auto n = match.rfind('/');
         if (n != std::string::npos)
         {
-            return matchpath.substr(0, n);
+            // This is the iio device referred to by io-channels.
+            // Remove iio:device<N>.
+            try
+            {
+                return fs::canonical(iioDev).parent_path();
+            }
+            catch (const std::system_error& e)
+            {
+                return emptyString;
+            }
         }
     }
 
-    return ofPath;
+    return emptyString;
 }
 
 std::string findHwmon(const std::string& ofNode)
@@ -201,7 +253,7 @@ int readSysfsWithCallout(const std::string& root,
             exit(0);
         }
         instancePath /= "device";
-        auto callOutPath = findCalloutPath(fs::canonical(instancePath));
+        auto callOutPath = findCalloutPath(instancePath);
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
 
         // this throws a ReadFailure.
@@ -209,8 +261,7 @@ int readSysfsWithCallout(const std::string& root,
             xyz::openbmc_project::Sensor::Device::
                 ReadFailure::CALLOUT_ERRNO(rc),
             xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_DEVICE_PATH(
-                    fs::canonical(callOutPath).c_str()));
+                ReadFailure::CALLOUT_DEVICE_PATH(callOutPath.c_str()));
     }
 
     return value;
@@ -246,14 +297,13 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
         // or write system calls that got us here.
         auto rc = errno;
         instancePath /= "device";
-        auto callOutPath = findCalloutPath(fs::canonical(instancePath));
+        auto callOutPath = findCalloutPath(instancePath);
         using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
         report<WriteFailure>(
             xyz::openbmc_project::Control::Device::
                 WriteFailure::CALLOUT_ERRNO(rc),
             xyz::openbmc_project::Control::Device::
-                WriteFailure::CALLOUT_DEVICE_PATH(
-                    fs::canonical(callOutPath).c_str()));
+                WriteFailure::CALLOUT_DEVICE_PATH(callOutPath.c_str()));
 
         exit(EXIT_FAILURE);
     }
