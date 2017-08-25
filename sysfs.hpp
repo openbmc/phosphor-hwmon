@@ -116,6 +116,81 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
                                const std::string& id,
                                const std::string& sensor);
 
+namespace hwmonio
+{
+
+/** @class HwmonIO
+ *  @brief Convenience wrappers for HWMON sysfs attribute IO.
+ *
+ *  Unburden the rest of the application from having to check
+ *  ENOENT after every hwmon attribute io operation.  Hwmon
+ *  device drivers can be unbound at any time; the program
+ *  cannot always be terminated externally before we try to
+ *  do an io.
+ */
+class HwmonIO
+{
+    public:
+        HwmonIO() = delete;
+        HwmonIO(const HwmonIO&) = default;
+        HwmonIO(HwmonIO&&) = default;
+        HwmonIO& operator=(const HwmonIO&) = default;
+        HwmonIO& operator=(HwmonIO&&) = default;
+        ~HwmonIO() = default;
+
+        /** @brief Constructor
+         *
+         *  @param[in] path - hwmon instance root - eg:
+         *      /sys/class/hwmon/hwmon<N>
+         */
+        explicit HwmonIO(const std::string& path);
+
+        /** @brief Perform formatted hwmon sysfs read.
+         *
+         *  Propogates any exceptions other than ENOENT.
+         *  ENOENT will result in a call to exit(0) in case
+         *  the underlying hwmon driver is unbound and
+         *  the program is inadvertently left running.
+         *
+         *  @param[in] type - The hwmon type (ex. temp).
+         *  @param[in] id - The hwmon id (ex. 1).
+         *  @param[in] sensor - The hwmon sensor (ex. input).
+         *
+         *  @return val - The read value.
+         */
+        uint32_t read(
+                const std::string& type,
+                const std::string& id,
+                const std::string& sensor) const;
+
+        /** @brief Perform formatted hwmon sysfs write.
+         *
+         *  Propogates any exceptions other than ENOENT.
+         *  ENOENT will result in a call to exit(0) in case
+         *  the underlying hwmon driver is unbound and
+         *  the program is inadvertently left running.
+         *
+         *  @param[in] val - The value to be written.
+         *  @param[in] type - The hwmon type (ex. fan).
+         *  @param[in] id - The hwmon id (ex. 1).
+         *  @param[in] sensor - The hwmon sensor (ex. target).
+         */
+        void write(
+                uint32_t val,
+                const std::string& type,
+                const std::string& id,
+                const std::string& sensor) const;
+
+        /** @brief Hwmon instance path access.
+         *
+         *  @return path - The hwmon instance path.
+         */
+        std::string path() const;
+
+    private:
+        std::string p;
+};
+} // namespace hwmonio
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

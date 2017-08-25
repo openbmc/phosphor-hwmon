@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <cerrno>
 #include <cstdlib>
 #include <experimental/filesystem>
 #include <fstream>
@@ -311,5 +312,108 @@ uint64_t writeSysfsWithCallout(const uint64_t& value,
     return value;
 }
 
+namespace hwmonio
+{
+
+HwmonIO::HwmonIO(const std::string& path) : p(path)
+{
+
+}
+
+uint32_t HwmonIO::read(
+        const std::string& type,
+        const std::string& id,
+        const std::string& sensor) const
+{
+    uint32_t val;
+    std::ifstream ifs;
+    auto fullPath = sysfs::make_sysfs_path(
+            p, type, id, sensor);
+
+    ifs.exceptions(
+            std::ifstream::failbit |
+                std::ifstream::badbit |
+                std::ifstream::eofbit);
+    try
+    {
+        ifs.open(fullPath);
+        ifs >> val;
+    }
+    catch (const std::exception& e)
+    {
+        auto rc = errno;
+
+        if (rc == ENOENT)
+        {
+            // If the directory disappeared then this application should
+            // gracefully exit.  There are race conditions between the
+            // unloading of a hwmon driver and the stopping of this service
+            // by systemd.  To prevent this application from falsely failing
+            // in these scenarios, it will simply exit if the directory or
+            // file can not be found.  It is up to the user(s) of this
+            // provided hwmon object to log the appropriate errors if the
+            // object disappears when it should not.
+            exit(0);
+        }
+
+        if (rc)
+        {
+            // Work around GCC bugs 53984 and 66145 for callers by
+            // explicitly raising system_error here.
+            throw std::system_error(rc, std::generic_category());
+        }
+
+        throw;
+    }
+    return val;
+}
+
+void HwmonIO::write(
+        uint32_t val,
+        const std::string& type,
+        const std::string& id,
+        const std::string& sensor) const
+{
+    std::ofstream ofs;
+    auto fullPath = sysfs::make_sysfs_path(
+            p, type, id, sensor);
+
+    ofs.exceptions(
+            std::ofstream::failbit |
+                std::ofstream::badbit |
+                std::ofstream::eofbit);
+
+    // See comments in the read method for an explanation of the odd exception
+    // handling behavior here.
+
+    try
+    {
+        ofs.open(fullPath);
+        ofs << val;
+    }
+    catch (const std::exception& e)
+    {
+        auto rc = errno;
+
+        if (rc == ENOENT)
+        {
+            exit(0);
+        }
+
+        if (rc)
+        {
+            throw std::system_error(rc, std::generic_category());
+        }
+
+        throw;
+    }
+}
+
+std::string HwmonIO::path() const
+{
+    return p;
+}
+
+} // namespace hwmonio
 }
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
