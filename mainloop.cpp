@@ -208,6 +208,7 @@ auto addValue(const SensorSet::key_type& sensor,
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
     const std::string& path,
+    const std::string& devPath,
     const char* prefix,
     const char* root)
     : _bus(std::move(bus)),
@@ -215,6 +216,7 @@ MainLoop::MainLoop(
       _shutdown(false),
       _hwmonRoot(),
       _instance(),
+      _devPath(devPath),
       _prefix(prefix),
       _root(root),
       state()

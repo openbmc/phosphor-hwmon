@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <experimental/filesystem>
 #include <iostream>
 #include <memory>
 #include "argument.hpp"
 #include "mainloop.hpp"
 #include "config.h"
 #include "sysfs.hpp"
+
+namespace fs = std::experimental::filesystem;
 
 static void exit_with_error(const char* err, char** argv)
 {
@@ -53,9 +56,17 @@ int main(int argc, char** argv)
     // Finished getting options out, so cleanup the parser.
     options.reset();
 
+    // Determine the physical device sysfs path.
+    auto calloutPath = sysfs::findCalloutPath(path);
+    if (calloutPath.empty())
+    {
+        exit_with_error("Unable to determine callout path.", argv);
+    }
+
     MainLoop loop(
         sdbusplus::bus::new_default(),
         path,
+        calloutPath,
         BUSNAME_PREFIX,
         SENSOR_ROOT);
     loop.run();

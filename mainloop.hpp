@@ -29,6 +29,7 @@ class MainLoop
          *
          *  @param[in] bus - sdbusplus bus client connection.
          *  @param[in] path - hwmon sysfs instance to manage
+         *  @param[in] devPath - physical device sysfs path.
          *  @param[in] prefix - DBus busname prefix.
          *  @param[in] root - DBus sensors namespace root.
          *
@@ -41,6 +42,7 @@ class MainLoop
         MainLoop(
             sdbusplus::bus::bus&& bus,
             const std::string& path,
+            const std::string& devPath,
             const char* prefix,
             const char* root);
 
@@ -67,6 +69,8 @@ class MainLoop
         std::string _hwmonRoot;
         /** @brief hwmon sysfs instance. */
         std::string _instance;
+        /** @brief physical device sysfs path. */
+        std::string _devPath;
         /** @brief DBus busname prefix. */
         const char* _prefix;
         /** @brief DBus sensors namespace root. */
