@@ -37,6 +37,7 @@ int main()
     MainLoop loop(
         sdbusplus::bus::new_default(),
         dir,
+        dir,
         "xyz.openbmc_project.Testing", "/testing");
 
     auto threadMain = [](auto loop)
