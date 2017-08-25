@@ -64,6 +64,17 @@ std::string findPhandleMatch(
  */
 std::string findHwmon(const std::string& ofNode);
 
+/** @brief Return the path to use for a call out.
+ *
+ *  Return an empty string if a callout path cannot be
+ *  found.
+ *
+ *  @param[in] instancePath - /sys/class/hwmon/hwmon<N> path.
+ *
+ *  @return Path to use for call out
+ */
+std::string findCalloutPath(const std::string& instancePath);
+
 /** @brief Read an hwmon sysfs value.
  *
  *  Calls exit(3) with bad status on failure.
