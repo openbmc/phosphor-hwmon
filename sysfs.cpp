@@ -24,68 +24,63 @@
 #include "sysfs.hpp"
 
 using namespace phosphor::logging;
+using namespace std::string_literals;
 namespace fs = std::experimental::filesystem;
 
 namespace sysfs {
 
+static const auto emptyString = ""s;
 static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
 
-/**
- * @brief Return the path to the phandle file matching value in io-channels.
- *
- * This function will take two passed in paths.
- * One path is used to find the io-channels file.
- * The other path is used to find the phandle file.
- * The 4 byte phandle value is read from the phandle file(s).
- * The 4 byte phandle value and 4 byte index value is read from io-channels.
- * When a match is found, the path to the matching phandle file is returned.
- *
- * @param[in] iochanneldir - Path to file for getting phandle from io-channels
- * @param[in] phandledir - Path to use for reading from phandle file
- *
- * @return Path to phandle file with value matching that in io-channels
- */
-std::string findPhandleMatch(const std::string& iochanneldir,
-                             const std::string& phandledir)
+std::string findPhandleMatch(
+        const std::string& iochanneldir,
+        const std::string& phandledir)
 {
+    // TODO: At the moment this method only supports device trees
+    // with iio-hwmon nodes with a single sensor.  Typically
+    // device trees are defined with all the iio sensors in a
+    // single iio-hwmon node so it would be nice to add support
+    // for lists of phandles (with variable sized entries) via
+    // libfdt or something like that, so that users are not
+    // forced into implementing unusual looking device trees
+    // with multiple iio-hwmon nodes - one for each sensor.
+
+    fs::path ioChannelsPath{iochanneldir};
+    ioChannelsPath /= "io-channels";
+
+    if (!fs::exists(ioChannelsPath))
+    {
+        return emptyString;
+    }
+
+    uint32_t ioChannelsValue;
+    std::ifstream ioChannelsFile(ioChannelsPath);
+
+    ioChannelsFile.read(
+            reinterpret_cast<char*>(&ioChannelsValue),
+            sizeof(ioChannelsValue));
+
     for (const auto& ofInst : fs::recursive_directory_iterator(phandledir))
     {
         auto path = ofInst.path();
-        if ("phandle" == ofInst.path().filename())
+        if ("phandle" != path.filename())
         {
-            auto ioChannelsPath = iochanneldir + "/io-channels";
-            if (fs::exists(ioChannelsPath))
-            {
-                auto fullOfPathPhandle = ofInst.path();
-                std::ifstream ioChannelsFile(path);
-                std::ifstream pHandleFile(fullOfPathPhandle);
+            continue;
+        }
+        std::ifstream pHandleFile(path);
+        uint32_t pHandleValue;
 
-                uint32_t ioChannelsValue;
-                uint32_t pHandleValue;
+        pHandleFile.read(
+                reinterpret_cast<char*>(&pHandleValue),
+                sizeof(pHandleValue));
 
-                try
-                {
-                    ioChannelsFile.read(reinterpret_cast<char*>(&ioChannelsValue),
-                                        sizeof(ioChannelsValue));
-                    pHandleFile.read(reinterpret_cast<char*>(&pHandleValue),
-                                     sizeof(pHandleValue));
-
-                    if (ioChannelsValue == pHandleValue)
-                    {
-                        return ofInst.path();
-                    }
-                }
-                catch (const std::exception& e)
-                {
-                    log<level::INFO>(e.what());
-                    continue;
-                }
-
-            }
+        if (ioChannelsValue == pHandleValue)
+        {
+            return path;
         }
     }
 
-    return std::string();
+    return emptyString;
 }
 
 /**

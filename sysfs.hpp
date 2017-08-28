@@ -34,6 +34,23 @@ inline std::string make_sysfs_path(const std::string& path,
     return path + "/"s + type + id + "_"s + entry;
 }
 
+/** @brief Return the path to the phandle file matching value in io-channels.
+ *
+ *  This function will take two passed in paths.
+ *  One path is used to find the io-channels file.
+ *  The other path is used to find the phandle file.
+ *  The 4 byte phandle value is read from the phandle file(s).
+ *  The 4 byte phandle value and 4 byte index value is read from io-channels.
+ *  When a match is found, the path to the matching phandle file is returned.
+ *
+ *  @param[in] iochanneldir - Path to file for getting phandle from io-channels
+ *  @param[in] phandledir - Path to use for reading from phandle file
+ *
+ *  @return Path to phandle file with value matching that in io-channels
+ */
+std::string findPhandleMatch(
+        const std::string& iochanneldir,
+        const std::string& phandledir);
 
 /** @brief Find hwmon instances
  *
