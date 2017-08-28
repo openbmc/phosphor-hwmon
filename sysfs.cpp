@@ -121,26 +121,34 @@ std::string findHwmon(const std::string& ofNode)
     {
         auto path = hwmonInst.path();
         path /= "of_node";
-        if (fs::canonical(path) != fullOfPath)
+
+        try
         {
-            // Try to find HWMON instance via phandle values.
-            // Used for IIO device drivers.
-            auto ofpath = fullOfPath.string();
-            auto matchpath = findPhandleMatch(path, ofpath);
-            if (!std::string(matchpath).empty())
-            {
-                return hwmonInst.path();
-            }
-            else
-            {
-                continue;
-            }
+            path = fs::canonical(path);
+        }
+        catch (const std::system_error& e)
+        {
+            // realpath may encounter ENOENT (Hwmon
+            // instances have a nasty habit of
+            // going away without warning).
+            continue;
         }
 
-        return hwmonInst.path();
+        if (path == fullOfPath)
+        {
+            return hwmonInst.path();
+        }
+
+        // Try to find HWMON instance via phandle values.
+        // Used for IIO device drivers.
+        auto matchpath = findPhandleMatch(path, fullOfPath);
+        if (!std::string(matchpath).empty())
+        {
+            return hwmonInst.path();
+        }
     }
 
-    return std::string();
+    return emptyString;
 }
 
 int readSysfsWithCallout(const std::string& root,
