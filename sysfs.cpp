@@ -15,14 +15,13 @@
  */
 #include <cstdlib>
 #include <experimental/filesystem>
+#include <fstream>
 #include <memory>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Control/Device/error.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 #include "sysfs.hpp"
-#include "util.hpp"
-#include <fstream>
 
 using namespace phosphor::logging;
 namespace fs = std::experimental::filesystem;
