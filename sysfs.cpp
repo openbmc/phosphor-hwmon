@@ -18,13 +18,8 @@
 #include <experimental/filesystem>
 #include <fstream>
 #include <memory>
-#include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/elog-errors.hpp>
-#include <xyz/openbmc_project/Control/Device/error.hpp>
-#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 #include "sysfs.hpp"
 
-using namespace phosphor::logging;
 using namespace std::string_literals;
 namespace fs = std::experimental::filesystem;
 
@@ -202,114 +197,6 @@ std::string findHwmon(const std::string& ofNode)
     }
 
     return emptyString;
-}
-
-int readSysfsWithCallout(const std::string& root,
-                         const std::string& instance,
-                         const std::string& type,
-                         const std::string& id,
-                         const std::string& sensor,
-                         bool throwDeviceBusy)
-{
-    namespace fs = std::experimental::filesystem;
-
-    int value = 0;
-    std::ifstream ifs;
-    fs::path instancePath{root};
-    instancePath /= instance;
-    std::string fullPath = make_sysfs_path(instancePath,
-                                           type, id, sensor);
-
-    ifs.exceptions(std::ifstream::failbit
-                   | std::ifstream::badbit
-                   | std::ifstream::eofbit);
-    try
-    {
-        ifs.open(fullPath);
-        ifs >> value;
-    }
-    catch (const std::exception& e)
-    {
-        // Too many GCC bugs (53984, 66145) to do
-        // this the right way...
-
-        // errno should still reflect the error from the failing open
-        // or read system calls that got us here.
-        auto rc = errno;
-
-        if ((rc == EAGAIN) && throwDeviceBusy)
-        {
-            throw DeviceBusyException(fullPath);
-        }
-
-        // If the directory disappeared then this application should gracefully
-        // exit.  There are race conditions between the unloading of a hwmon
-        // driver and the stopping of this service by systemd.  To prevent
-        // this application from falsely failing in these scenarios, it will
-        // simply exit if the directory or file can not be found.  It is up
-        // to the user(s) of this provided hwmon object to log the appropriate
-        // errors if the object disappears when it should not.
-        if (rc == ENOENT)
-        {
-            exit(0);
-        }
-        instancePath /= "device";
-        auto callOutPath = findCalloutPath(instancePath);
-        using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
-
-        // this throws a ReadFailure.
-        elog<ReadFailure>(
-            xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_ERRNO(rc),
-            xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_DEVICE_PATH(callOutPath.c_str()));
-    }
-
-    return value;
-}
-
-uint64_t writeSysfsWithCallout(const uint64_t& value,
-                               const std::string& root,
-                               const std::string& instance,
-                               const std::string& type,
-                               const std::string& id,
-                               const std::string& sensor)
-{
-    namespace fs = std::experimental::filesystem;
-
-    std::string valueStr = std::to_string(value);
-    std::ofstream ofs;
-    fs::path instancePath{root};
-    instancePath /= instance;
-    std::string fullPath = make_sysfs_path(instancePath,
-                                           type, id, sensor);
-
-    ofs.exceptions(std::ofstream::failbit
-                   | std::ofstream::badbit
-                   | std::ofstream::eofbit);
-    try
-    {
-        ofs.open(fullPath);
-        ofs << valueStr;
-    }
-    catch (const std::exception& e)
-    {
-        // errno should still reflect the error from the failing open
-        // or write system calls that got us here.
-        auto rc = errno;
-        instancePath /= "device";
-        auto callOutPath = findCalloutPath(instancePath);
-        using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
-        report<WriteFailure>(
-            xyz::openbmc_project::Control::Device::
-                WriteFailure::CALLOUT_ERRNO(rc),
-            xyz::openbmc_project::Control::Device::
-                WriteFailure::CALLOUT_DEVICE_PATH(callOutPath.c_str()));
-
-        exit(EXIT_FAILURE);
-    }
-
-    return value;
 }
 
 namespace hwmonio
