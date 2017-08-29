@@ -5,6 +5,7 @@
 #include <experimental/any>
 #include <sdbusplus/server.hpp>
 #include "sensorset.hpp"
+#include "sysfs.hpp"
 #include "interface.hpp"
 
 static constexpr auto default_interval = 1000000;
@@ -79,4 +80,6 @@ class MainLoop
         SensorState state;
         /** @brief Sleep interval in microseconds. */
         uint64_t _interval = default_interval;
+        /** @brief Hwmon sysfs access. */
+        sysfs::hwmonio::HwmonIO ioAccess;
 };

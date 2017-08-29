@@ -31,8 +31,7 @@ struct Targets<hwmon::FanSpeed>
  *  @tparam T - The target type
  *
  *  @param[in] sensor - A sensor type and name
- *  @param[in] hwmonRoot - The root hwmon path
- *  @param[in] instance - The target instance name
+ *  @param[in] instance - The target instance path
  *  @param[in] info - The sdbusplus server connection and interfaces
  *
  *  @return A shared pointer to the target interface object
@@ -40,8 +39,8 @@ struct Targets<hwmon::FanSpeed>
  */
 template <typename T>
 std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
-                             const std::string& hwmonRoot,
-                             const std::string& instance,
+                             const std::string& instancePath,
+                             const std::string& devPath,
                              ObjectInfo& info)
 {
     std::shared_ptr<T> target;
@@ -53,15 +52,14 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
     auto& objPath = std::get<std::string>(info);
 
     // Check if target sysfs file exists
-    auto targetPath = hwmonRoot + '/' + instance;
-    auto sysfsFullPath = sysfs::make_sysfs_path(targetPath,
+    auto sysfsFullPath = sysfs::make_sysfs_path(instancePath,
                                                 sensor.first,
                                                 sensor.second,
                                                 hwmon::entry::target);
     if (fs::exists(sysfsFullPath))
     {
-        target = std::make_shared<T>(hwmonRoot,
-                                     instance,
+        target = std::make_shared<T>(instancePath,
+                                     devPath,
                                      sensor.second,
                                      bus,
                                      objPath.c_str(),
