@@ -146,8 +146,8 @@ auto getAttributes(const std::string& type, Attributes& attributes)
 }
 
 auto addValue(const SensorSet::key_type& sensor,
-              const std::string& hwmonRoot,
-              const std::string& instance,
+              const std::string& devPath,
+              sysfs::hwmonio::HwmonIO& ioAccess,
               ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
@@ -157,38 +157,59 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    int val = 0;
-    bool retry = true;
-    size_t count = 10;
-
-
-    //Retry for up to a second if device is busy
-
-    while (retry)
+    auto readWithRetry = [&ioAccess](
+            const auto& type,
+            const auto& id,
+            const auto& sensor,
+            auto retries,
+            const auto& delay)
     {
-        try
-        {
-            val = sysfs::readSysfsWithCallout(hwmonRoot,
-                    instance,
-                    sensor.first,
-                    sensor.second,
-                    hwmon::entry::input,
-                    count > 0); //throw DeviceBusy until last attempt
-        }
-        catch (sysfs::DeviceBusyException& e)
-        {
-            count--;
-            std::this_thread::sleep_for(std::chrono::milliseconds{100});
-            continue;
-        }
-        catch(const std::exception& ioe)
-        {
-            using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
-            commit<ReadFailure>();
+        auto value = 0;
 
-            return static_cast<std::shared_ptr<ValueObject>>(nullptr);
+        while(true)
+        {
+            try
+            {
+                value = ioAccess.read(type, id, sensor);
+            }
+            catch (const std::system_error& e)
+            {
+                if (e.code().value() != EAGAIN || !retries)
+                {
+                    throw;
+                }
+
+                --retries;
+                std::this_thread::sleep_for(delay);
+                continue;
+            }
+            break;
         }
-        retry = false;
+        return value;
+    };
+
+    static constexpr auto retries = 10;
+    auto val = 0;
+    try
+    {
+        // Retry for up to a second if device is busy
+        val = readWithRetry(
+                sensor.first,
+                sensor.second,
+                hwmon::entry::input,
+                retries,
+                std::chrono::milliseconds{100});
+    }
+    catch (const std::system_error& e)
+    {
+        using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
+        report<ReadFailure>(
+            xyz::openbmc_project::Sensor::Device::
+                ReadFailure::CALLOUT_ERRNO(e.code().value()),
+            xyz::openbmc_project::Sensor::Device::
+                ReadFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
+
+        return static_cast<std::shared_ptr<ValueObject>>(nullptr);
     }
 
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
@@ -219,7 +240,8 @@ MainLoop::MainLoop(
       _devPath(devPath),
       _prefix(prefix),
       _root(root),
-      state()
+      state(),
+      ioAccess(path)
 {
     std::string p = path;
     while (!p.empty() && p.back() == '/')
@@ -293,7 +315,7 @@ void MainLoop::run()
         objectPath.append(label);
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
-        auto valueInterface = addValue(i.first, _hwmonRoot, _instance, info);
+        auto valueInterface = addValue(i.first, _devPath, ioAccess, info);
         if (!valueInterface)
         {
 #ifdef REMOVE_ON_FAIL
@@ -308,7 +330,7 @@ void MainLoop::run()
         //TODO openbmc/openbmc#1347
         //     Handle application restarts to set/refresh fan speed values
         auto target = addTarget<hwmon::FanSpeed>(
-                i.first, _hwmonRoot, _instance, info);
+                i.first, ioAccess.path(), _devPath, info);
 
         if (target)
         {
@@ -367,21 +389,10 @@ void MainLoop::run()
                 int value;
                 try
                 {
-                    try
-                    {
-                        value = sysfs::readSysfsWithCallout(_hwmonRoot,
-                                _instance,
-                                i.first.first,
-                                i.first.second,
-                                hwmon::entry::input);
-                    }
-                    catch (sysfs::DeviceBusyException& e)
-                    {
-                        //Just go with the current values and try again later.
-                        //TODO: openbmc/openbmc#2048 could keep an eye on
-                        //how long the device is actually busy.
-                        continue;
-                    }
+                    value = ioAccess.read(
+                            i.first.first,
+                            i.first.second,
+                            hwmon::entry::input);
 
                     auto& objInfo = std::get<ObjectInfo>(i.second);
                     auto& obj = std::get<Object>(objInfo);
@@ -410,10 +421,24 @@ void MainLoop::run()
                         }
                     }
                 }
-                catch (const std::exception& e)
+                catch (const std::system_error& e)
                 {
-                    using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
-                    commit<ReadFailure>();
+                    if (e.code().value() == EAGAIN)
+                    {
+                        //Just go with the current values and try again later.
+                        //TODO: openbmc/openbmc#2048 could keep an eye on
+                        //how long the device is actually busy.
+                        continue;
+                    }
+
+                    using namespace sdbusplus::xyz::openbmc_project::
+                        Sensor::Device::Error;
+                    report<ReadFailure>(
+                            xyz::openbmc_project::Sensor::Device::
+                                ReadFailure::CALLOUT_ERRNO(e.code().value()),
+                            xyz::openbmc_project::Sensor::Device::
+                                ReadFailure::CALLOUT_DEVICE_PATH(
+                                    _devPath.c_str()));
 
 #ifdef REMOVE_ON_FAIL
                     destroy.push_back(i.first);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interface.hpp"
+#include "sysfs.hpp"
 
 namespace hwmon
 {
@@ -18,22 +19,23 @@ class FanSpeed : public FanSpeedObject
         /**
          * @brief Constructs FanSpeed Object
          *
-         * @param[in] sysfsRoot - The hwmon class root
-         * @param[in] instance - The hwmon instance (ex. hwmon1)
+         * @param[in] instancePath - The hwmon instance path
+         *     (ex. /sys/class/hwmon/hwmon1)
+         * @param[in] devPath - The /sys/devices sysfs path
          * @param[in] id - The hwmon id
          * @param[in] bus - Dbus bus object
          * @param[in] objPath - Dbus object path
          * @param[in] defer - Dbus object registration defer
          */
-        FanSpeed(const std::string& sysfsRoot,
-                 const std::string& instance,
+        FanSpeed(const std::string& instancePath,
+                 const std::string& devPath,
                  const std::string& id,
                  sdbusplus::bus::bus& bus,
                  const char* objPath,
                  bool defer) : FanSpeedObject(bus, objPath, defer),
-                    sysfsRoot(sysfsRoot),
-                    instance(instance),
-                    id(id)
+                    id(id),
+                    ioAccess(instancePath),
+                    devPath(devPath)
         {
             // Nothing to do here
         }
@@ -51,14 +53,15 @@ class FanSpeed : public FanSpeedObject
         void enable();
 
     private:
-        /** @brief hwmon class root */
-        std::string sysfsRoot;
-        /** @brief hwmon instance */
-        std::string instance;
         /** @brief hwmon type */
         static constexpr auto type = "fan";
         /** @brief hwmon id */
         std::string id;
+        /** @brief Hwmon sysfs access. */
+        sysfs::hwmonio::HwmonIO ioAccess;
+        /** @brief Physical device path. */
+        std::string devPath;
+
 };
 
 } // namespace hwmon
