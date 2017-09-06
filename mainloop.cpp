@@ -212,6 +212,20 @@ auto addValue(const SensorSet::key_type& sensor,
         return static_cast<std::shared_ptr<ValueObject>>(nullptr);
     }
 
+    auto gain = getEnv("GAIN", sensor);
+    if (gain.empty())
+    {
+        gain = "1.0";
+    }
+
+    auto offset = getEnv("OFFSET", sensor);
+    if (offset.empty())
+    {
+        offset = "0";
+    }
+
+    val = val * stof(gain) + stoi(offset, NULL, 10);
+
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
@@ -393,6 +407,20 @@ void MainLoop::run()
                             i.first.first,
                             i.first.second,
                             hwmon::entry::input);
+
+                    auto gain = getEnv("GAIN", i.first);
+                    if (gain.empty())
+                    {
+                        gain = "1.0";
+                    }
+
+                    auto offset = getEnv("OFFSET", i.first);
+                    if (offset.empty())
+                    {
+                        offset = "0";
+                    }
+
+                    value = value * stof(gain) + stoi(offset, NULL, 10);
 
                     auto& objInfo = std::get<ObjectInfo>(i.second);
                     auto& obj = std::get<Object>(objInfo);
