@@ -61,7 +61,15 @@ decltype(Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmL
 decltype(Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
 
+// The gain and offset to adjust a value
+struct valueAdjust
+{
+    float gain = 1.0f;
+    int offset = 0;
+};
 
+// Store the valueAdjust for sensors
+std::map<SensorSet::key_type, valueAdjust> sensorAdjusts;
 
 static constexpr auto typeAttrMap =
 {
@@ -145,6 +153,18 @@ auto getAttributes(const std::string& type, Attributes& attributes)
     return true;
 }
 
+int adjustValue(const SensorSet::key_type& sensor, int value)
+{
+    const auto& it = sensorAdjusts.find(sensor);
+    if (it != sensorAdjusts.end())
+    {
+        // Adjust based on gain and offset
+        value = static_cast<float>(value) * it->second.gain
+                  + it->second.offset;
+    }
+    return value;
+}
+
 auto addValue(const SensorSet::key_type& sensor,
               const std::string& devPath,
               sysfs::hwmonio::HwmonIO& ioAccess,
@@ -211,6 +231,20 @@ auto addValue(const SensorSet::key_type& sensor,
 
         return static_cast<std::shared_ptr<ValueObject>>(nullptr);
     }
+
+    auto gain = getEnv("GAIN", sensor);
+    if (!gain.empty())
+    {
+        sensorAdjusts[sensor].gain = stof(gain);
+    }
+
+    auto offset = getEnv("OFFSET", sensor);
+    if (!offset.empty())
+    {
+        sensorAdjusts[sensor].offset = stoi(offset, nullptr, 10);
+    }
+
+    val = adjustValue(sensor, val);
 
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
@@ -393,6 +427,8 @@ void MainLoop::run()
                             i.first.first,
                             i.first.second,
                             hwmon::entry::input);
+
+                    value = adjustValue(i.first, value);
 
                     auto& objInfo = std::get<ObjectInfo>(i.second);
                     auto& obj = std::get<Object>(objInfo);
