@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <exception>
 #include <fstream>
 #include <string>
@@ -59,6 +60,8 @@ std::string findCalloutPath(const std::string& instancePath);
 
 namespace hwmonio
 {
+static constexpr auto retries = 10;
+static constexpr auto delay = std::chrono::milliseconds{100};
 
 /** @class HwmonIO
  *  @brief Convenience wrappers for HWMON sysfs attribute IO.
@@ -93,16 +96,23 @@ class HwmonIO
          *  the underlying hwmon driver is unbound and
          *  the program is inadvertently left running.
          *
+         *  For possibly transient errors will retry up to
+         *  the specified number of times.
+         *
          *  @param[in] type - The hwmon type (ex. temp).
          *  @param[in] id - The hwmon id (ex. 1).
          *  @param[in] sensor - The hwmon sensor (ex. input).
+         *  @param[in] retries - The number of times to retry.
+         *  @param[in] delay - The time to sleep between retry attempts.
          *
          *  @return val - The read value.
          */
         uint32_t read(
                 const std::string& type,
                 const std::string& id,
-                const std::string& sensor) const;
+                const std::string& sensor,
+                size_t retries,
+                std::chrono::milliseconds delay) const;
 
         /** @brief Perform formatted hwmon sysfs write.
          *
@@ -111,16 +121,23 @@ class HwmonIO
          *  the underlying hwmon driver is unbound and
          *  the program is inadvertently left running.
          *
+         *  For possibly transient errors will retry up to
+         *  the specified number of times.
+         *
          *  @param[in] val - The value to be written.
          *  @param[in] type - The hwmon type (ex. fan).
          *  @param[in] id - The hwmon id (ex. 1).
-         *  @param[in] sensor - The hwmon sensor (ex. target).
+         *  @param[in] retries - The number of times to retry.
+         *  @param[in] delay - The time to sleep between retry attempts.
          */
         void write(
                 uint32_t val,
                 const std::string& type,
                 const std::string& id,
-                const std::string& sensor) const;
+                const std::string& sensor,
+                size_t retries,
+                std::chrono::milliseconds delay) const;
+
 
         /** @brief Hwmon instance path access.
          *
