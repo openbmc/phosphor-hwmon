@@ -13,17 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <experimental/filesystem>
 #include <fstream>
 #include <memory>
+#include <thread>
 #include "sysfs.hpp"
 
 using namespace std::string_literals;
 namespace fs = std::experimental::filesystem;
 
 namespace sysfs {
+
+static constexpr auto retryableErrors = {
+    /*
+     * Retry on bus or device errors or timeouts in case
+     * they are transient.
+     */
+    EIO,
+    ETIMEDOUT,
+
+    /*
+     * Retry CRC errors.
+     */
+    EBADMSG,
+
+    /*
+     * Some hwmon drivers do this when they aren't ready
+     * instead of blocking.  Retry.
+     */
+    EAGAIN,
+    /*
+     * We'll see this when for example i2c devices are
+     * unplugged but the driver is still bound.  Retry
+     * rather than exit on the off chance the device is
+     * plugged back in and the driver doesn't do a
+     * remove/probe.  If a remove does occur, we'll
+     * eventually get ENOENT.
+     */
+    ENXIO,
+};
 
 static const auto emptyString = ""s;
 static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
@@ -210,7 +241,9 @@ HwmonIO::HwmonIO(const std::string& path) : p(path)
 uint32_t HwmonIO::read(
         const std::string& type,
         const std::string& id,
-        const std::string& sensor) const
+        const std::string& sensor,
+        size_t retries,
+        std::chrono::milliseconds delay) const
 {
     uint32_t val;
     std::ifstream ifs;
@@ -221,37 +254,59 @@ uint32_t HwmonIO::read(
             std::ifstream::failbit |
                 std::ifstream::badbit |
                 std::ifstream::eofbit);
-    try
+
+    while (true)
     {
-        ifs.open(fullPath);
-        ifs >> val;
-    }
-    catch (const std::exception& e)
-    {
-        auto rc = errno;
-
-        if (rc == ENOENT)
+        try
         {
-            // If the directory disappeared then this application should
-            // gracefully exit.  There are race conditions between the
-            // unloading of a hwmon driver and the stopping of this service
-            // by systemd.  To prevent this application from falsely failing
-            // in these scenarios, it will simply exit if the directory or
-            // file can not be found.  It is up to the user(s) of this
-            // provided hwmon object to log the appropriate errors if the
-            // object disappears when it should not.
-            exit(0);
+            if (!ifs.is_open())
+                ifs.open(fullPath);
+            ifs.clear();
+            ifs.seekg(0);
+            ifs >> val;
         }
-
-        if (rc)
+        catch (const std::exception& e)
         {
-            // Work around GCC bugs 53984 and 66145 for callers by
-            // explicitly raising system_error here.
-            throw std::system_error(rc, std::generic_category());
-        }
+            auto rc = errno;
 
-        throw;
+            if (!rc)
+            {
+                throw;
+            }
+
+            if (rc == ENOENT)
+            {
+                // If the directory disappeared then this application should
+                // gracefully exit.  There are race conditions between the
+                // unloading of a hwmon driver and the stopping of this service
+                // by systemd.  To prevent this application from falsely failing
+                // in these scenarios, it will simply exit if the directory or
+                // file can not be found.  It is up to the user(s) of this
+                // provided hwmon object to log the appropriate errors if the
+                // object disappears when it should not.
+                exit(0);
+            }
+
+            if (0 == std::count(
+                        retryableErrors.begin(),
+                        retryableErrors.end(),
+                        rc) ||
+                    !retries)
+            {
+                // Not a retryable error or out of retries.
+
+                // Work around GCC bugs 53984 and 66145 for callers by
+                // explicitly raising system_error here.
+                throw std::system_error(rc, std::generic_category());
+            }
+
+            --retries;
+            std::this_thread::sleep_for(delay);
+            continue;
+        }
+        break;
     }
+
     return val;
 }
 
@@ -259,7 +314,10 @@ void HwmonIO::write(
         uint32_t val,
         const std::string& type,
         const std::string& id,
-        const std::string& sensor) const
+        const std::string& sensor,
+        size_t retries,
+        std::chrono::milliseconds delay) const
+
 {
     std::ofstream ofs;
     auto fullPath = sysfs::make_sysfs_path(
@@ -273,26 +331,49 @@ void HwmonIO::write(
     // See comments in the read method for an explanation of the odd exception
     // handling behavior here.
 
-    try
+    while (true)
     {
-        ofs.open(fullPath);
-        ofs << val;
-    }
-    catch (const std::exception& e)
-    {
-        auto rc = errno;
-
-        if (rc == ENOENT)
+        try
         {
-            exit(0);
+            if (!ofs.is_open())
+                ofs.open(fullPath);
+            ofs.clear();
+            ofs.seekp(0);
+            ofs << val;
+            ofs.flush();
         }
-
-        if (rc)
+        catch (const std::exception& e)
         {
-            throw std::system_error(rc, std::generic_category());
-        }
+            auto rc = errno;
 
-        throw;
+            if (!rc)
+            {
+                throw;
+            }
+
+            if (rc == ENOENT)
+            {
+                exit(0);
+            }
+
+            if (0 == std::count(
+                        retryableErrors.begin(),
+                        retryableErrors.end(),
+                        rc) ||
+                    !retries)
+            {
+                // Not a retryable error or out of retries.
+
+                // Work around GCC bugs 53984 and 66145 for callers by
+                // explicitly raising system_error here.
+                throw std::system_error(rc, std::generic_category());
+            }
+
+            --retries;
+            std::this_thread::sleep_for(delay);
+            continue;
+        }
+        break;
     }
 }
 

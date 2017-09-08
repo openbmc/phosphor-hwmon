@@ -32,11 +32,16 @@ int main(int argc, char* argv[])
 
     if ("read"s == argv[1])
     {
-        std::cout << io.read(argv[3], argv[4], argv[5]) << std::endl;
+        std::cout << io.read(argv[3], argv[4], argv[5],
+                sysfs::hwmonio::retries, sysfs::hwmonio::delay) <<
+            std::endl;
     }
     else
     {
-        io.write(strtol(argv[6], nullptr, 0), argv[3], argv[4], argv[5]);
+        io.write(
+                strtol(argv[6], nullptr, 0),
+                argv[3], argv[4], argv[5], sysfs::hwmonio::retries,
+                sysfs::hwmonio::delay);
     }
 
     return 0;
