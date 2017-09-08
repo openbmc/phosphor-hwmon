@@ -30,13 +30,19 @@ int main(int argc, char* argv[])
 
     sysfs::hwmonio::HwmonIO io(argv[2]);
 
+    static constexpr auto retries = 10;
+    static constexpr std::chrono::milliseconds delay{100};
+
     if ("read"s == argv[1])
     {
-        std::cout << io.read(argv[3], argv[4], argv[5]) << std::endl;
+        std::cout << io.read(argv[3], argv[4], argv[5], retries, delay) <<
+            std::endl;
     }
     else
     {
-        io.write(strtol(argv[6], nullptr, 0), argv[3], argv[4], argv[5]);
+        io.write(
+                strtol(argv[6], nullptr, 0),
+                argv[3], argv[4], argv[5], retries, delay);
     }
 
     return 0;

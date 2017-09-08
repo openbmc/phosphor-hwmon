@@ -10,6 +10,9 @@ using namespace phosphor::logging;
 namespace hwmon
 {
 
+static constexpr auto retries = 10;
+static constexpr auto delay = std::chrono::milliseconds{100};
+
 uint64_t FanSpeed::target(uint64_t value)
 {
     auto curValue = FanSpeedObject::target();
@@ -23,7 +26,10 @@ uint64_t FanSpeed::target(uint64_t value)
                     value,
                     type,
                     id,
-                    entry::target);
+                    entry::target,
+                    retries,
+                    delay);
+
         }
         catch (const std::system_error& e)
         {
@@ -60,7 +66,9 @@ void FanSpeed::enable()
                     enable::rpmMode,
                     type::pwm,
                     id,
-                    entry::enable);
+                    entry::enable,
+                    retries,
+                    delay);
         }
         catch (const std::system_error& e)
         {

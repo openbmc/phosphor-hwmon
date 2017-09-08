@@ -16,7 +16,6 @@
 #include <iostream>
 #include <memory>
 #include <cstdlib>
-#include <algorithm>
 
 #include <phosphor-logging/elog-errors.hpp>
 #include "config.h"
@@ -61,7 +60,8 @@ decltype(Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmL
 decltype(Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
 
-
+static constexpr auto retries = 10;
+static constexpr auto delay = std::chrono::milliseconds{100};
 
 static constexpr auto typeAttrMap =
 {
@@ -157,48 +157,17 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    auto readWithRetry = [&ioAccess](
-            const auto& type,
-            const auto& id,
-            const auto& sensor,
-            auto retries,
-            const auto& delay)
-    {
-        auto value = 0;
-
-        while(true)
-        {
-            try
-            {
-                value = ioAccess.read(type, id, sensor);
-            }
-            catch (const std::system_error& e)
-            {
-                if (e.code().value() != EAGAIN || !retries)
-                {
-                    throw;
-                }
-
-                --retries;
-                std::this_thread::sleep_for(delay);
-                continue;
-            }
-            break;
-        }
-        return value;
-    };
-
-    static constexpr auto retries = 10;
     auto val = 0;
     try
     {
         // Retry for up to a second if device is busy
-        val = readWithRetry(
+        // or has a transient error.
+        val = ioAccess.read(
                 sensor.first,
                 sensor.second,
-                hwmon::entry::input,
+                hwmon::entry::cinput,
                 retries,
-                std::chrono::milliseconds{100});
+                delay);
     }
     catch (const std::system_error& e)
     {
@@ -389,10 +358,15 @@ void MainLoop::run()
                 int value;
                 try
                 {
+                    // Retry for up to a second if device is busy
+                    // or has a transient error.
+
                     value = ioAccess.read(
                             i.first.first,
                             i.first.second,
-                            hwmon::entry::input);
+                            hwmon::entry::cinput,
+                            retries,
+                            delay);
 
                     auto& objInfo = std::get<ObjectInfo>(i.second);
                     auto& obj = std::get<Object>(objInfo);
@@ -423,14 +397,6 @@ void MainLoop::run()
                 }
                 catch (const std::system_error& e)
                 {
-                    if (e.code().value() == EAGAIN)
-                    {
-                        //Just go with the current values and try again later.
-                        //TODO: openbmc/openbmc#2048 could keep an eye on
-                        //how long the device is actually busy.
-                        continue;
-                    }
-
                     using namespace sdbusplus::xyz::openbmc_project::
                         Sensor::Device::Error;
                     report<ReadFailure>(
@@ -439,7 +405,6 @@ void MainLoop::run()
                             xyz::openbmc_project::Sensor::Device::
                                 ReadFailure::CALLOUT_DEVICE_PATH(
                                     _devPath.c_str()));
-
 #ifdef REMOVE_ON_FAIL
                     destroy.push_back(i.first);
 #else
