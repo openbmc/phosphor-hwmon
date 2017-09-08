@@ -23,7 +23,10 @@ uint64_t FanSpeed::target(uint64_t value)
                     value,
                     type,
                     id,
-                    entry::target);
+                    entry::target,
+                    sysfs::hwmonio::retries,
+                    sysfs::hwmonio::delay);
+
         }
         catch (const std::system_error& e)
         {
@@ -60,7 +63,9 @@ void FanSpeed::enable()
                     enable::rpmMode,
                     type::pwm,
                     id,
-                    entry::enable);
+                    entry::enable,
+                    sysfs::hwmonio::retries,
+                    sysfs::hwmonio::delay);
         }
         catch (const std::system_error& e)
         {
