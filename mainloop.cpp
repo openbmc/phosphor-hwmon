@@ -40,6 +40,11 @@
 
 using namespace phosphor::logging;
 
+#include "gpio.hpp"
+
+// To avoid padding it into addValue
+std::unique_ptr<gpio::GpioManager> pGpio = nullptr;
+
 // Initialization for Warning Objects
 decltype(Thresholds<WarningObject>::setLo) Thresholds<WarningObject>::setLo =
     &WarningObject::warningLow;
@@ -306,6 +311,9 @@ void MainLoop::init()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
+    // Initialize the GPIO handler.
+    pGpio = std::make_unique<gpio::GpioManager>(env::getEnv("GPIO_BASE"));
+
     for (auto& i : *sensors)
     {
         auto object = getObject(i);
@@ -388,8 +396,11 @@ void MainLoop::read()
                 // Retry for up to a second if device is busy
                 // or has a transient error.
 
+                pGpio->unlockGpio(i.first);
                 value = ioAccess.read(i.first.first, i.first.second, input,
                                       hwmonio::retries, hwmonio::delay);
+
+                pGpio->lockGpio(i.first);
 
                 value = sensorObjects[i.first]->adjustValue(value);
 

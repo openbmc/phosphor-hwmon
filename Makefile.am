@@ -27,6 +27,7 @@ libhwmon_la_SOURCES = \
 	timer.cpp \
 	hwmon.cpp \
 	hwmonio.cpp \
-	sensor.cpp
+	sensor.cpp \
+	gpio.cpp
 
 SUBDIRS = . msl test tools
