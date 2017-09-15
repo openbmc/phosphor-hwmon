@@ -9,6 +9,7 @@
 #include "sensorset.hpp"
 #include "hwmon.hpp"
 #include "env.hpp"
+#include "gpio.hpp"
 #include "sysfs.hpp"
 
 namespace sensor
@@ -23,6 +24,12 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     ioAccess(ioAccess),
     devPath(devPath)
 {
+    auto access = env::getEnv("GPIO", sensor);
+    if (!access.empty())
+    {
+        pGpio->setupGpio(stoi(access), sensor);
+    }
+
     auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
     {
@@ -113,6 +120,8 @@ std::shared_ptr<ValueObject> Sensor::addValue(
     // its status is functional, read the input value.
     if (!statusIface || (statusIface && statusIface->functional()))
     {
+        pGpio->unlockGpio(sensor);
+
         // Retry for up to a second if device is busy
         // or has a transient error.
         val = ioAccess.read(
@@ -122,6 +131,8 @@ std::shared_ptr<ValueObject> Sensor::addValue(
                 std::get<size_t>(retryIO),
                 std::get<std::chrono::milliseconds>(retryIO));
         val = adjustValue(val);
+
+        pGpio->lockGpio(sensor);
     }
 
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
