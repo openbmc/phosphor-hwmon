@@ -54,6 +54,14 @@ static constexpr auto retryableErrors = {
      * eventually get ENOENT.
      */
     ENXIO,
+
+    /*
+     * We can see this from some drivers, such as the
+     * OCC driver, when we try to do a read in the middle
+     * of it being unbound.  The unbinding should complete
+     * before the retries are up and kill this process.
+     */
+    ECANCELED,
 };
 
 static const auto emptyString = ""s;
