@@ -199,6 +199,15 @@ auto addValue(const SensorSet::key_type& sensor,
             xyz::openbmc_project::Sensor::Device::
                 ReadFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
+        auto file = sysfs::make_sysfs_path(
+                ioAccess.path(),
+                sensor.first,
+                sensor.second,
+                hwmon::entry::cinput);
+
+        log<level::INFO>("Logging failing sysfs file",
+                entry("FILE=%s", file.c_str()));
+
         return static_cast<std::shared_ptr<ValueObject>>(nullptr);
     }
 
@@ -442,6 +451,16 @@ void MainLoop::run()
                             xyz::openbmc_project::Sensor::Device::
                                 ReadFailure::CALLOUT_DEVICE_PATH(
                                     _devPath.c_str()));
+
+                    auto file = sysfs::make_sysfs_path(
+                            ioAccess.path(),
+                            i.first.first,
+                            i.first.second,
+                            hwmon::entry::cinput);
+
+                    log<level::INFO>("Logging failing sysfs file",
+                            entry("FILE=%s", file.c_str()));
+
 #ifdef REMOVE_ON_FAIL
                     destroy.push_back(i.first);
 #else

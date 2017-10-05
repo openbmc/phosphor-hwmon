@@ -37,6 +37,16 @@ uint64_t FanSpeed::target(uint64_t value)
                         WriteFailure::CALLOUT_ERRNO(e.code().value()),
                     xyz::openbmc_project::Control::Device::
                         WriteFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
+
+            auto file = sysfs::make_sysfs_path(
+                    ioAccess.path(),
+                    type,
+                    id,
+                    entry::target);
+
+            log<level::INFO>("Logging failing sysfs file",
+                    phosphor::logging::entry("FILE=%s", file.c_str()));
+
             exit(EXIT_FAILURE);
         }
     }
@@ -76,6 +86,10 @@ void FanSpeed::enable()
                         WriteFailure::CALLOUT_ERRNO(e.code().value()),
                     xyz::openbmc_project::Control::Device::
                         WriteFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
+
+            log<level::INFO>("Logging failing sysfs file",
+                    phosphor::logging::entry("FILE=%s", fullPath.c_str()));
+
             exit(EXIT_FAILURE);
         }
     }
