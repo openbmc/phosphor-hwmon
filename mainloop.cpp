@@ -340,8 +340,7 @@ void MainLoop::run()
         auto sensorValue = valueInterface->value();
         addThreshold<WarningObject>(i.first, sensorValue, info);
         addThreshold<CriticalObject>(i.first, sensorValue, info);
-        //TODO openbmc/openbmc#1347
-        //     Handle application restarts to set/refresh fan speed values
+
         auto target = addTarget<hwmon::FanSpeed>(
                 i.first, ioAccess.path(), _devPath, info);
 
