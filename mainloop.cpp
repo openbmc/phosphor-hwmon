@@ -342,8 +342,8 @@ void MainLoop::run()
 #endif
         }
         auto sensorValue = valueInterface->value();
-        addThreshold<WarningObject>(i.first, sensorValue, info);
-        addThreshold<CriticalObject>(i.first, sensorValue, info);
+        addThreshold<WarningObject>(i.first.first, id, sensorValue, info);
+        addThreshold<CriticalObject>(i.first.first, id, sensorValue, info);
 
         auto target = addTarget<hwmon::FanSpeed>(
                 i.first, ioAccess.path(), _devPath, info);
