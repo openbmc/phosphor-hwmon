@@ -48,6 +48,39 @@ std::string getEnv(
     return getEnv(prefix, sensor);
 }
 
+std::string getIndirectID(
+        std::string path,
+        const SensorSet::key_type& sensor)
+{
+    std::string key;
+    std::string value;
+
+    path.append(sensor.first);
+    path.append(sensor.second);
+    path.append(1, '_');
+    path.append(hwmon::entry::label);
+
+    std::ifstream handle(path.c_str());
+    if (handle.fail())
+    {
+        return value;
+    }
+
+    std::string content(
+        (std::istreambuf_iterator<char>(handle)),
+        (std::istreambuf_iterator<char>()));
+
+    if (content.empty())
+    {
+        return value;
+    }
+
+    //remove the newline
+    content.pop_back();
+
+    return content;
+}
+
 std::string getIndirectLabelEnv(
     const char* prefix, std::string path, const SensorSet::key_type& sensor)
 {
