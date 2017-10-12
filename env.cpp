@@ -39,6 +39,15 @@ std::string getEnv(
     return value;
 }
 
+std::string getEnv(
+    const char* prefix,
+    const std::string& type,
+    const std::string& id)
+{
+    SensorSet::key_type sensor{type, id};
+    return getEnv(prefix, sensor);
+}
+
 std::string getIndirectLabelEnv(
     const char* prefix, std::string path, const SensorSet::key_type& sensor)
 {
