@@ -27,6 +27,18 @@ std::string getEnv(
     const std::string& type,
     const std::string& id);
 
+/** @brief Gets the ID for the sensor with a level of indirection
+ *
+ *  Read the sensor number/ID from the <path>/<item><X>_label file.
+ *  <item> & <X> are populated from the sensor key.
+ *
+ *  @param[in] path - Directory path of the label file
+ *  @param[in] sensor - Sensor details
+ */
+std::string getIndirectID(
+    std::string path,
+    const SensorSet::key_type& sensor);
+
 /** @brief Get the label for the sensor with a level of indirection.
  *
  *  Read the sensor number from the <path>/<item><X>_label file.<item> & <X> is
