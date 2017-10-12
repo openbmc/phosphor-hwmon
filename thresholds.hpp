@@ -91,8 +91,8 @@ auto addThreshold(const SensorSet::key_type& sensor,
     if (!tLo.empty() && !tHi.empty())
     {
         iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
-        auto lo = stoi(tLo);
-        auto hi = stoi(tHi);
+        auto lo = stoll(tLo);
+        auto hi = stoll(tHi);
         (*iface.*Thresholds<T>::setLo)(lo);
         (*iface.*Thresholds<T>::setHi)(hi);
         (*iface.*Thresholds<T>::alarmLo)(value < lo);
