@@ -81,45 +81,4 @@ std::string getIndirectID(
     return content;
 }
 
-std::string getIndirectLabelEnv(
-    const char* prefix, std::string path, const SensorSet::key_type& sensor)
-{
-    std::string key;
-    std::string value;
-
-    path.append(sensor.first);
-    path.append(sensor.second);
-    path.append(1, '_');
-    path.append(hwmon::entry::label);
-
-    std::ifstream handle(path.c_str());
-    if (handle.fail())
-    {
-        return value;
-    }
-
-    std::string content(
-        (std::istreambuf_iterator<char>(handle)),
-        (std::istreambuf_iterator<char>()));
-
-    if (content.empty())
-    {
-        return value;
-    }
-
-    content.pop_back();
-
-    key.assign(prefix);
-    key.append(1, '_');
-    key.append(sensor.first);
-    key.append(content);
-    auto env = getenv(key.c_str());
-    if (env)
-    {
-        value.assign(env);
-    }
-
-    return value;
-}
-
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
