@@ -72,13 +72,16 @@ void checkThresholds(std::experimental::any& iface, int64_t value)
  *
  *  @tparam T - The threshold type.
  *
- *  @param[in] sensor - A sensor type and name.
+ *  @param[in] sensorType - sensor type, like 'temp'
+ *  @param[in] sensorID - sensor ID, like '5'
  *  @param[in] value - The sensor reading.
  *  @param[in] info - The sdbusplus server connection and interfaces.
  */
 template <typename T>
-auto addThreshold(const SensorSet::key_type& sensor,
-                  int64_t value, ObjectInfo& info)
+auto addThreshold(const std::string& sensorType,
+                  const std::string& sensorID,
+                  int64_t value,
+                  ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
 
@@ -86,8 +89,9 @@ auto addThreshold(const SensorSet::key_type& sensor,
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<Object>(info);
     std::shared_ptr<T> iface;
-    auto tLo = getEnv(Thresholds<T>::envLo, sensor);
-    auto tHi = getEnv(Thresholds<T>::envHi, sensor);
+
+    auto tLo = getEnv(Thresholds<T>::envLo, sensorType, sensorID);
+    auto tHi = getEnv(Thresholds<T>::envHi, sensorType, sensorID);
     if (!tLo.empty() && !tHi.empty())
     {
         iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
