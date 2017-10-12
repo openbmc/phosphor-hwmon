@@ -286,33 +286,37 @@ void MainLoop::run()
     for (auto& i : *sensors)
     {
         std::string label;
+        std::string id;
 
         /*
          * Check if the value of the MODE_<item><X> env variable for the sensor
          * is "label", then read the sensor number from the <item><X>_label
          * file. The name of the DBUS object would be the value of the env
          * variable LABEL_<item><sensorNum>. If the MODE_<item><X> env variable
-         * does'nt exist, then the name of DBUS object is the value of the env
+         * doesn't exist, then the name of DBUS object is the value of the env
          * variable LABEL_<item><X>.
          */
         auto mode = getEnv("MODE", i.first);
         if (!mode.compare(hwmon::entry::label))
         {
-            label = getIndirectLabelEnv(
-                "LABEL", _hwmonRoot + '/' + _instance + '/', i.first);
-            if (label.empty())
+            id = getIndirectID(
+                    _hwmonRoot + '/' + _instance + '/', i.first);
+
+            if (id.empty())
             {
                 continue;
             }
         }
-        else
+
+        //In this loop, use the ID we looked up above if
+        //there was one, otherwise use the standard one.
+        id = (id.empty()) ? i.first.second : id;
+
+        // Ignore inputs without a label.
+        label = getEnv("LABEL", i.first.first, id);
+        if (label.empty())
         {
-            // Ignore inputs without a label.
-            label = getEnv("LABEL", i.first);
-            if (label.empty())
-            {
-                continue;
-            }
+            continue;
         }
 
         Attributes attrs;
