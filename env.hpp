@@ -2,8 +2,30 @@
 
 class SensorSet;
 
+/** @brief Reads an environment variable
+ *
+ *  Reads <prefix>_<sensor.first><sensor.second>
+ *
+ *  @param[in] prefix - the variable prefix
+ *  @param[in] sensor - Sensor details
+ *
+ *  @return string - the env var value
+ */
 std::string getEnv(
     const char* prefix, const SensorSet::key_type& sensor);
+
+/** @brief Same as above, but takes type and id separately
+ *
+ *  @param[in] prefix - the variable prefix
+ *  @param[in] type - sensor type, like 'temp'
+ *  @param[in] id - sensor ID, like '5'
+ *
+ *  @return string - the env var value
+ */
+std::string getEnv(
+    const char* prefix,
+    const std::string& type,
+    const std::string& id);
 
 /** @brief Get the label for the sensor with a level of indirection.
  *
