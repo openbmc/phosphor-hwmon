@@ -33,15 +33,12 @@ struct Targets<hwmon::FanSpeed>
  *  @param[in] sensor - A sensor type and name
  *  @param[in] instance - The target instance path
  *  @param[in] info - The sdbusplus server connection and interfaces
- *
- *  @return A shared pointer to the target interface object
- *          Will be empty if no interface was created
  */
 template <typename T>
-std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
-                             const std::string& instancePath,
-                             const std::string& devPath,
-                             ObjectInfo& info)
+void addTarget(const SensorSet::key_type& sensor,
+        const std::string& instancePath,
+        const std::string& devPath,
+        ObjectInfo& info)
 {
     std::shared_ptr<T> target;
     namespace fs = std::experimental::filesystem;
@@ -67,6 +64,4 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
         auto type = Targets<T>::type;
         obj[type] = target;
     }
-
-    return target;
 }
