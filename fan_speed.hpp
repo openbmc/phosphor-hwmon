@@ -48,7 +48,8 @@ class FanSpeed : public FanSpeedObject
         uint64_t target(uint64_t value) override;
 
         /**
-         * @brief Writes the pwm_enable sysfs entry.
+         * @brief Writes the pwm_enable sysfs entry if the
+         *        env var with the value to write is present
          */
         void enable();
 

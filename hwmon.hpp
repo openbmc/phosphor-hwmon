@@ -17,11 +17,6 @@ static const std::string target = ctarget;
 static const std::string enable = cenable;
 }
 
-namespace enable
-{
-static const auto rpmMode = 2;
-}
-
 namespace type
 {
 static constexpr auto cfan = "fan";
