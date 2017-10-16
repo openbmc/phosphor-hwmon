@@ -47,11 +47,6 @@ class FanSpeed : public FanSpeedObject
          */
         uint64_t target(uint64_t value) override;
 
-        /**
-         * @brief Writes the pwm_enable sysfs entry.
-         */
-        void enable();
-
     private:
         /** @brief hwmon type */
         static constexpr auto type = "fan";

@@ -348,11 +348,6 @@ void MainLoop::run()
         auto target = addTarget<hwmon::FanSpeed>(
                 i.first, ioAccess.path(), _devPath, info);
 
-        if (target)
-        {
-            target->enable();
-        }
-
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.
         valueInterface->emit_object_added();
