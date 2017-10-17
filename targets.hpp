@@ -1,6 +1,9 @@
 #pragma once
 
 #include <experimental/filesystem>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 #include "fan_speed.hpp"
 
 /** @class Targets
@@ -31,7 +34,8 @@ struct Targets<hwmon::FanSpeed>
  *  @tparam T - The target type
  *
  *  @param[in] sensor - A sensor type and name
- *  @param[in] instance - The target instance path
+ *  @param[in] ioAccess - hwmon sysfs access object
+ *  @param[in] devPath - The /sys/devices sysfs path
  *  @param[in] info - The sdbusplus server connection and interfaces
  *
  *  @return A shared pointer to the target interface object
@@ -39,7 +43,7 @@ struct Targets<hwmon::FanSpeed>
  */
 template <typename T>
 std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
-                             const std::string& instancePath,
+                             const sysfs::hwmonio::HwmonIO& ioAccess,
                              const std::string& devPath,
                              ObjectInfo& info)
 {
@@ -52,18 +56,48 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
     auto& objPath = std::get<std::string>(info);
 
     // Check if target sysfs file exists
-    auto sysfsFullPath = sysfs::make_sysfs_path(instancePath,
+    auto sysfsFullPath = sysfs::make_sysfs_path(ioAccess.path(),
                                                 sensor.first,
                                                 sensor.second,
                                                 hwmon::entry::target);
     if (fs::exists(sysfsFullPath))
     {
-        target = std::make_shared<T>(instancePath,
+        uint32_t targetSpeed = 0;
+
+        try
+        {
+            targetSpeed = ioAccess.read(
+                    sensor.first,
+                    sensor.second,
+                    hwmon::entry::target,
+                    sysfs::hwmonio::retries,
+                    sysfs::hwmonio::delay);
+
+        }
+        catch (const std::system_error& e)
+        {
+            using namespace phosphor::logging;
+            using namespace sdbusplus::xyz::openbmc_project::
+                Sensor::Device::Error;
+            using metadata = xyz::openbmc_project::Sensor::
+                Device::ReadFailure;
+
+            report<ReadFailure>(
+                    metadata::CALLOUT_ERRNO(e.code().value()),
+                    metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
+
+            log<level::INFO>("Logging failing sysfs file",
+                    phosphor::logging::entry(
+                            "FILE=%s", sysfsFullPath.c_str()));
+        }
+
+        target = std::make_shared<T>(ioAccess.path(),
                                      devPath,
                                      sensor.second,
                                      bus,
                                      objPath.c_str(),
-                                     deferSignals);
+                                     deferSignals,
+                                     targetSpeed);
         auto type = Targets<T>::type;
         obj[type] = target;
     }
