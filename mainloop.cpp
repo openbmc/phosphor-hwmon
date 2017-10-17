@@ -346,7 +346,7 @@ void MainLoop::run()
         addThreshold<CriticalObject>(i.first.first, id, sensorValue, info);
 
         addTarget<hwmon::FanSpeed>(
-                i.first, ioAccess.path(), _devPath, info);
+                i.first, ioAccess, _devPath, info);
 
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.
