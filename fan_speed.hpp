@@ -26,18 +26,20 @@ class FanSpeed : public FanSpeedObject
          * @param[in] bus - Dbus bus object
          * @param[in] objPath - Dbus object path
          * @param[in] defer - Dbus object registration defer
+         * @param[in] target - initial target speed value
          */
         FanSpeed(const std::string& instancePath,
                  const std::string& devPath,
                  const std::string& id,
                  sdbusplus::bus::bus& bus,
                  const char* objPath,
-                 bool defer) : FanSpeedObject(bus, objPath, defer),
+                 bool defer,
+                 uint64_t target) : FanSpeedObject(bus, objPath, defer),
                     id(id),
                     ioAccess(instancePath),
                     devPath(devPath)
         {
-            // Nothing to do here
+            FanSpeedObject::target(target);
         }
 
         /**

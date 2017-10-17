@@ -346,7 +346,7 @@ void MainLoop::run()
         addThreshold<CriticalObject>(i.first.first, id, sensorValue, info);
 
         auto target = addTarget<hwmon::FanSpeed>(
-                i.first, ioAccess.path(), _devPath, info);
+                i.first, ioAccess, _devPath, info);
 
         if (target)
         {
