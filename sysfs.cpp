@@ -20,6 +20,7 @@
 #include <fstream>
 #include <memory>
 #include <thread>
+#include "config.h"
 #include "sysfs.hpp"
 
 using namespace std::string_literals;
@@ -302,6 +303,9 @@ uint32_t HwmonIO::read(
                     !retries)
             {
                 // Not a retryable error or out of retries.
+#ifdef NEGATIVE_ERRNO_ON_FAIL
+                return -errno;
+#endif
 
                 // Work around GCC bugs 53984 and 66145 for callers by
                 // explicitly raising system_error here.

@@ -156,6 +156,16 @@ auto getAttributes(const std::string& type, Attributes& attributes)
 
 int adjustValue(const SensorSet::key_type& sensor, int value)
 {
+// Because read doesn't have an out pointer to store errors.
+// let's assume negative values are errors if they have this
+// set.
+#ifdef NEGATIVE_ERRNO_ON_FAIL
+    if (value < 0)
+    {
+        return value;
+    }
+#endif
+
     const auto& it = sensorAdjusts.find(sensor);
     if (it != sensorAdjusts.end())
     {
