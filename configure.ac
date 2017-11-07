@@ -50,6 +50,7 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
     AC_SUBST([OESDK_TESTCASE_FLAGS], [$testcase_flags])
 )
 
+# When a sensor access fails, just remove the sensor from dbus instead of exiting the daemon.
 AC_ARG_ENABLE([remove-from-dbus-on-fail],
     AS_HELP_STRING([--enable-remove-from-dbus-on-fail], [Remove properties from D-Bus on access failures])
 )
@@ -59,6 +60,19 @@ AC_ARG_VAR(REMOVE_ON_FAIL, [Remove properties from D-Bus on access failures])
 AS_IF([test "x$enable_remove_from_dbus_on_fail" == "xyes"],
       [REMOVE_ON_FAIL="yes"]
       AC_DEFINE_UNQUOTED([REMOVE_ON_FAIL], ["$REMOVE_ON_FAIL"], [Remove properties from D-Bus on access failures])
+)
+
+# When a sensor read fails, set the Value on dbus with -errno.
+# Incompatible with remove-from-dbus-on-fail.
+AC_ARG_ENABLE([negative-errno-on-fail],
+    AS_HELP_STRING([--enable-negative-errno-on-fail], [Set sensor value to -errno on read failures])
+)
+
+AC_ARG_VAR(NEGATIVE_ERRNO_ON_FAIL, [Set sensor value to -errno on read failures])
+
+AS_IF([test "x$enable_negative_errno_on_fail" == "xyes"],
+      [NEGATIVE_ERRNO_ON_FAIL="yes"]
+      AC_DEFINE_UNQUOTED([NEGATIVE_ERRNO_ON_FAIL], ["$NEGATIVE_ERRNO_ON_FAIL"], [Set sensor value to -errno on read failures])
 )
 
 AC_ARG_VAR(BUSNAME_PREFIX, [The DBus busname prefix.])
