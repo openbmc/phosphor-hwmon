@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <cstdlib>
@@ -373,8 +374,10 @@ void MainLoop::run()
 
     {
         std::string busname{_prefix};
-        busname.append(1, '.');
-        busname.append(_instance);
+        busname.append(1, '-');
+        busname.append(
+                std::to_string(std::hash<decltype(_devPath)>{}(_devPath)));
+        busname.append(".Hwmon1");
         _bus.request_name(busname.c_str());
     }
 
