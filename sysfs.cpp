@@ -62,6 +62,14 @@ static constexpr auto retryableErrors = {
      * and kill this process.
      */
     ENODEV,
+
+    /*
+     * Some devices return this when they are busy doing
+     * something else.  Even if being busy isn't the cause,
+     * a retry still gives this app a shot at getting data
+     * as opposed to failing out on the first try.
+     */
+    ENODATA,
 };
 
 static const auto emptyString = ""s;
