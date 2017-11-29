@@ -107,7 +107,7 @@ class HwmonIO
          *
          *  @return val - The read value.
          */
-        uint32_t read(
+        int64_t read(
                 const std::string& type,
                 const std::string& id,
                 const std::string& sensor,

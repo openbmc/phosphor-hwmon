@@ -154,7 +154,7 @@ auto getAttributes(const std::string& type, Attributes& attributes)
     return true;
 }
 
-int adjustValue(const SensorSet::key_type& sensor, int value)
+int64_t adjustValue(const SensorSet::key_type& sensor, int64_t value)
 {
     const auto& it = sensorAdjusts.find(sensor);
     if (it != sensorAdjusts.end())
@@ -179,7 +179,7 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    auto val = 0;
+    int64_t val = 0;
     try
     {
         // Retry for up to a second if device is busy
@@ -405,7 +405,7 @@ void MainLoop::run()
             if (attrs.find(hwmon::entry::input) != attrs.end())
             {
                 // Read value from sensor.
-                int value;
+                int64_t value;
                 try
                 {
                     // Retry for up to a second if device is busy

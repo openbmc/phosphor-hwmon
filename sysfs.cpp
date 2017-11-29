@@ -254,14 +254,14 @@ HwmonIO::HwmonIO(const std::string& path) : p(path)
 
 }
 
-uint32_t HwmonIO::read(
+int64_t HwmonIO::read(
         const std::string& type,
         const std::string& id,
         const std::string& sensor,
         size_t retries,
         std::chrono::milliseconds delay) const
 {
-    uint32_t val;
+    int64_t val;
     std::ifstream ifs;
     auto fullPath = sysfs::make_sysfs_path(
             p, type, id, sensor);
