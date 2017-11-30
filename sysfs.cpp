@@ -56,14 +56,6 @@ static constexpr auto retryableErrors = {
     ENXIO,
 
     /*
-     * We can see this from some drivers when we try to do
-     * a read in the middle of them being unbound.  The
-     * unbinding should complete before the retries are up
-     * and kill this process.
-     */
-    ENODEV,
-
-    /*
      * Some devices return this when they are busy doing
      * something else.  Even if being busy isn't the cause,
      * a retry still gives this app a shot at getting data
@@ -290,10 +282,10 @@ int64_t HwmonIO::read(
                 throw;
             }
 
-            if (rc == ENOENT)
+            if (rc == ENOENT || rc == ENODEV)
             {
-                // If the directory disappeared then this application should
-                // gracefully exit.  There are race conditions between the
+                // If the directory or device disappeared then this application
+                // should gracefully exit.  There are race conditions between the
                 // unloading of a hwmon driver and the stopping of this service
                 // by systemd.  To prevent this application from falsely failing
                 // in these scenarios, it will simply exit if the directory or
