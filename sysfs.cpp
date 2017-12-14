@@ -275,6 +275,7 @@ int64_t HwmonIO::read(
     {
         try
         {
+            errno = 0;
             if (!ifs.is_open())
                 ifs.open(fullPath);
             ifs.clear();
@@ -351,6 +352,7 @@ void HwmonIO::write(
     {
         try
         {
+            errno = 0;
             if (!ofs.is_open())
                 ofs.open(fullPath);
             ofs.clear();
