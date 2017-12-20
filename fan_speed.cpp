@@ -20,13 +20,24 @@ uint64_t FanSpeed::target(uint64_t value)
         //Write target out to sysfs
         try
         {
-            ioAccess.write(
-                    value,
-                    type,
-                    id,
-                    entry::target,
-                    sysfs::hwmonio::retries,
-                    sysfs::hwmonio::delay);
+            if (pwm.empty())
+            {
+                ioAccess.write(
+                        value,
+                        type,
+                        id,
+                        entry::target,
+                        sysfs::hwmonio::retries,
+                        sysfs::hwmonio::delay);
+            }
+            else
+            {
+                ioAccess.write(
+                        value,
+                        pwm,
+                        sysfs::hwmonio::retries,
+                        sysfs::hwmonio::delay);
+            }
 
         }
         catch (const std::system_error& e)

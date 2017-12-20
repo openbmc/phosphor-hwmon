@@ -27,6 +27,7 @@ class FanSpeed : public FanSpeedObject
          * @param[in] objPath - Dbus object path
          * @param[in] defer - Dbus object registration defer
          * @param[in] target - initial target speed value
+         * @param[in] targetFile - The sysfs target file set to pwm, optional
          */
         FanSpeed(const std::string& instancePath,
                  const std::string& devPath,
@@ -34,10 +35,13 @@ class FanSpeed : public FanSpeedObject
                  sdbusplus::bus::bus& bus,
                  const char* objPath,
                  bool defer,
-                 uint64_t target) : FanSpeedObject(bus, objPath, defer),
+                 uint64_t target,
+                 const std::string& targetFile)
+                  : FanSpeedObject(bus, objPath, defer),
                     id(id),
                     ioAccess(instancePath),
-                    devPath(devPath)
+                    devPath(devPath),
+                    pwm(targetFile)
         {
             FanSpeedObject::target(target);
         }
@@ -64,6 +68,8 @@ class FanSpeed : public FanSpeedObject
         sysfs::hwmonio::HwmonIO ioAccess;
         /** @brief Physical device path. */
         std::string devPath;
+        /** @brief pwm sysfs file, optional. */
+        std::string pwm;
 
 };
 

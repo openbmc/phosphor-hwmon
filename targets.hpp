@@ -60,44 +60,67 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                                                 sensor.first,
                                                 sensor.second,
                                                 hwmon::entry::target);
-    if (fs::exists(sysfsFullPath))
+    uint32_t targetSpeed = 0;
+    bool targetExist = false;
+    std::string targetSysfsFile;
+    try
     {
-        uint32_t targetSpeed = 0;
-
-        try
+        if (fs::exists(sysfsFullPath))
         {
+            // Target file exist, use it
             targetSpeed = ioAccess.read(
                     sensor.first,
                     sensor.second,
                     hwmon::entry::target,
                     sysfs::hwmonio::retries,
                     sysfs::hwmonio::delay);
-
+            targetExist = true;
         }
-        catch (const std::system_error& e)
+        else
         {
-            using namespace phosphor::logging;
-            using namespace sdbusplus::xyz::openbmc_project::
-                Sensor::Device::Error;
-            using metadata = xyz::openbmc_project::Sensor::
-                Device::ReadFailure;
-
-            report<ReadFailure>(
-                    metadata::CALLOUT_ERRNO(e.code().value()),
-                    metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
-
-            log<level::INFO>("Logging failing sysfs file",
-                    phosphor::logging::entry(
-                            "FILE=%s", sysfsFullPath.c_str()));
+            // No target file, check env config
+            auto targetStr = getEnv("TARGET", sensor);
+            if (!targetStr.empty())
+            {
+                // Use targetStr for target file
+                sysfsFullPath = ioAccess.path() + "/" + targetStr;
+                if (fs::exists(sysfsFullPath))
+                {
+                    targetSpeed = ioAccess.read(targetStr,
+                                                sysfs::hwmonio::retries,
+                                                sysfs::hwmonio::delay);
+                    targetExist = true;
+                    targetSysfsFile = targetStr;
+                }
+            }
         }
+    }
+    catch (const std::system_error& e)
+    {
+        using namespace phosphor::logging;
+        using namespace sdbusplus::xyz::openbmc_project::
+            Sensor::Device::Error;
+        using metadata = xyz::openbmc_project::Sensor::
+            Device::ReadFailure;
 
+        report<ReadFailure>(
+                metadata::CALLOUT_ERRNO(e.code().value()),
+                metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
+
+        log<level::INFO>("Logging failing sysfs file",
+                         entry("FILE=%s", sysfsFullPath.c_str()));
+    }
+
+    if (targetExist)
+    {
         target = std::make_shared<T>(ioAccess.path(),
                                      devPath,
                                      sensor.second,
                                      bus,
                                      objPath.c_str(),
                                      deferSignals,
-                                     targetSpeed);
+                                     targetSpeed,
+                                     targetSysfsFile);
         auto type = Targets<T>::type;
         obj[type] = target;
     }

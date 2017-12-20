@@ -7,14 +7,19 @@
 
 namespace sysfs {
 
+using namespace std::literals;
 inline std::string make_sysfs_path(const std::string& path,
                                    const std::string& type,
                                    const std::string& id,
                                    const std::string& entry)
 {
-    using namespace std::literals;
-
     return path + "/"s + type + id + "_"s + entry;
+}
+
+inline std::string make_sysfs_path(const std::string& path,
+                                   const std::string& file)
+{
+    return path + "/"s + file;
 }
 
 /** @brief Return the path to the phandle file matching value in io-channels.
@@ -114,6 +119,27 @@ class HwmonIO
                 size_t retries,
                 std::chrono::milliseconds delay) const;
 
+        /** @brief Perform formatted hwmon sysfs read.
+         *
+         *  Propagates any exceptions other than ENOENT.
+         *  ENOENT will result in a call to exit(0) in case
+         *  the underlying hwmon driver is unbound and
+         *  the program is inadvertently left running.
+         *
+         *  For possibly transient errors will retry up to
+         *  the specified number of times.
+         *
+         *  @param[in] file - The sysfs file to read.
+         *  @param[in] retries - The number of times to retry.
+         *  @param[in] delay - The time to sleep between retry attempts.
+         *
+         *  @return val - The read value.
+         */
+        int64_t read(
+                const std::string& file,
+                size_t retries,
+                std::chrono::milliseconds delay) const;
+
         /** @brief Perform formatted hwmon sysfs write.
          *
          *  Propagates any exceptions other than ENOENT.
@@ -138,6 +164,26 @@ class HwmonIO
                 size_t retries,
                 std::chrono::milliseconds delay) const;
 
+        /** @brief Perform formatted hwmon sysfs write.
+         *
+         *  Propagates any exceptions other than ENOENT.
+         *  ENOENT will result in a call to exit(0) in case
+         *  the underlying hwmon driver is unbound and
+         *  the program is inadvertently left running.
+         *
+         *  For possibly transient errors will retry up to
+         *  the specified number of times.
+         *
+         *  @param[in] val - The value to be written.
+         *  @param[in] file - The sysfs file to write.
+         *  @param[in] retries - The number of times to retry.
+         *  @param[in] delay - The time to sleep between retry attempts.
+         */
+        void write(
+                uint32_t val,
+                const std::string& file,
+                size_t retries,
+                std::chrono::milliseconds delay) const;
 
         /** @brief Hwmon instance path access.
          *
@@ -147,6 +193,29 @@ class HwmonIO
 
     private:
         std::string p;
+
+        /** @brief Implementation of read()
+         *
+         *  @parm[in] fullPath - The full path of the file to read
+         *  @param[in] retries - The number of times to retry.
+         *  @param[in] delay - The time to sleep between retry attempts.
+         *
+         *  @return val - The read value.
+         */
+        int64_t readInternal(const std::string& fullPath,
+                             size_t retries,
+                             std::chrono::milliseconds delay) const;
+
+        /** @brief Implementation of read()
+         *  @param[in] val - The value to be written.
+         *  @param[in] file - The full path of the file to write.
+         *  @param[in] retries - The number of times to retry.
+         *  @param[in] delay - The time to sleep between retry attempts.
+         */
+        void writeInternal(uint32_t val,
+                           const std::string& file,
+                           size_t retries,
+                           std::chrono::milliseconds delay) const;
 };
 } // namespace hwmonio
 }
