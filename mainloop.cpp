@@ -236,6 +236,17 @@ auto addValue(const SensorSet::key_type& sensor,
         iface->scale(getScale(attrs));
     }
 
+    auto maxValue = getEnv("MAXVALUE", sensor);
+    if(!maxValue.empty())
+    {
+        iface->maxValue(std::stoi(maxValue));
+    }
+    auto minValue = getEnv("MINVALUE", sensor);
+    if(!minValue.empty())
+    {
+        iface->minValue(std::stoi(minValue));
+    }
+
     obj[InterfaceType::VALUE] = iface;
     return iface;
 }
