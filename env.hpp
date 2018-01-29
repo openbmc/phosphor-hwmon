@@ -1,6 +1,8 @@
 #pragma once
 
-class SensorSet;
+#include <string>
+
+#include "sensorset.hpp"
 
 /** @brief Reads an environment variable
  *
