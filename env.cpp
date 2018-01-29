@@ -16,9 +16,9 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <string>
+
+#include "env.hpp"
 #include "hwmon.hpp"
-#include "sensorset.hpp"
 
 std::string getEnv(
     const char* prefix, const SensorSet::key_type& sensor)
