@@ -14,6 +14,10 @@ inline std::string make_sysfs_path(const std::string& path,
 {
     using namespace std::literals;
 
+    if (entry == ""s) {
+        return path + "/"s + type + id;
+    }
+
     return path + "/"s + type + id + "_"s + entry;
 }
 

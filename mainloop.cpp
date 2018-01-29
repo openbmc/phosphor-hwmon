@@ -29,6 +29,7 @@
 #include "thresholds.hpp"
 #include "targets.hpp"
 #include "fan_speed.hpp"
+#include "fan_pwm.hpp"
 
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
@@ -354,6 +355,8 @@ void MainLoop::run()
             target->enable();
         }
 
+        (void)addTarget<hwmon::FanPwm>(i.first, ioAccess, _devPath, info);
+
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.
         valueInterface->emit_object_added();
@@ -406,6 +409,11 @@ void MainLoop::run()
             {
                 // Read value from sensor.
                 int64_t value;
+                std::string input = hwmon::entry::cinput;
+                if (i.first.first == "pwm") {
+                    input = "";
+                }
+
                 try
                 {
                     // Retry for up to a second if device is busy
@@ -414,7 +422,7 @@ void MainLoop::run()
                     value = ioAccess.read(
                             i.first.first,
                             i.first.second,
-                            hwmon::entry::cinput,
+                            input,
                             sysfs::hwmonio::retries,
                             sysfs::hwmonio::delay);
 
