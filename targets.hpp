@@ -65,6 +65,9 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
 
     // Check if target sysfs file exists
     std::string sysfsFullPath;
+    std::string targetName;
+    std::string targetId;
+    std::string entry;
 
     using namespace std::literals;
     const std::string pwm = "pwm"s;
@@ -72,47 +75,38 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
 
     if (InterfaceType::FAN_PWM == type)
     {
-        /* We're leveraging that the sensor ID matches for PWM.
-         * TODO(venture): There's a CL from intel that allows
-         * this to be specified via an environment variable.
-         */
-        sysfsFullPath = sysfs::make_sysfs_path(ioAccess.path(),
-                                               pwm,
-                                               sensor.second,
-                                               empty);
+        targetName = pwm;
+        targetId = getEnv("PWM_TARGET", sensor);
+        if (targetId.empty())
+        {
+            // If no env, fall back to use the sensor id as target id
+            targetId = sensor.second;
+        }
+        entry = empty;
     }
     else
     {
-        sysfsFullPath = sysfs::make_sysfs_path(ioAccess.path(),
-                                               sensor.first,
-                                               sensor.second,
-                                               hwmon::entry::target);
+        targetName = sensor.first;
+        targetId = sensor.second;
+        entry = hwmon::entry::target;
     }
 
+    sysfsFullPath = sysfs::make_sysfs_path(ioAccess.path(),
+                                           targetName,
+                                           targetId,
+                                           entry);
     if (fs::exists(sysfsFullPath))
     {
         uint32_t targetSpeed = 0;
 
         try
         {
-            if (InterfaceType::FAN_PWM == type)
-            {
-                targetSpeed = ioAccess.read(
-                        pwm,
-                        sensor.second,
-                        empty,
-                        sysfs::hwmonio::retries,
-                        sysfs::hwmonio::delay);
-            }
-            else
-            {
-                targetSpeed = ioAccess.read(
-                        sensor.first,
-                        sensor.second,
-                        hwmon::entry::target,
-                        sysfs::hwmonio::retries,
-                        sysfs::hwmonio::delay);
-            }
+            targetSpeed = ioAccess.read(
+                targetName,
+                targetId,
+                entry,
+                sysfs::hwmonio::retries,
+                sysfs::hwmonio::delay);
         }
         catch (const std::system_error& e)
         {
@@ -133,12 +127,11 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
 
         target = std::make_shared<T>(ioAccess.path(),
                                      devPath,
-                                     sensor.second,
+                                     targetId,
                                      bus,
                                      objPath.c_str(),
                                      deferSignals,
                                      targetSpeed);
-        auto type = Targets<T>::type;
         obj[type] = target;
     }
 
