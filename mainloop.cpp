@@ -293,6 +293,31 @@ void MainLoop::shutdown() noexcept
 
 void MainLoop::run()
 {
+    //If this device supports target speeds,
+    //check which type to use.
+    targetType targetType = targetType::DEFAULT;
+    auto targetMode = getenv("TARGET_MODE");
+    if (targetMode)
+    {
+        std::string type{targetMode};
+
+        if (type == RPM_TARGET)
+        {
+            targetType = targetType::RPM;
+        }
+        else if (type == PWM_TARGET)
+        {
+            targetType = targetType::PWM;
+        }
+        else
+        {
+            log<level::ERR>(
+                    "Invalid TARGET_MODE env var found",
+                    entry("TARGET_MODE=%s", targetMode),
+                    entry("DEVPATH=%s", _devPath.c_str()));
+        }
+    }
+
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
@@ -358,15 +383,25 @@ void MainLoop::run()
         addThreshold<WarningObject>(i.first.first, id, sensorValue, info);
         addThreshold<CriticalObject>(i.first.first, id, sensorValue, info);
 
-        auto target = addTarget<hwmon::FanSpeed>(
-                i.first, ioAccess, _devPath, info);
-
-        if (target)
+        if ((targetType == targetType::RPM) ||
+            (targetType == targetType::DEFAULT))
         {
-            target->enable();
+            auto target = addTarget<hwmon::FanSpeed>(
+                    i.first, ioAccess, _devPath, info);
+
+            if (target)
+            {
+                target->enable();
+                //RPM mode for sure, so don't try for PWM below
+                targetType = targetType::RPM;
+            }
         }
 
-        addTarget<hwmon::FanPwm>(i.first, ioAccess, _devPath, info);
+        if ((targetType == targetType::PWM) ||
+            (targetType == targetType::DEFAULT))
+        {
+            addTarget<hwmon::FanPwm>(i.first, ioAccess, _devPath, info);
+        }
 
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.
