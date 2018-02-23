@@ -7,6 +7,16 @@
 #include "fan_speed.hpp"
 #include "fan_pwm.hpp"
 
+enum class targetType
+{
+    DEFAULT,
+    RPM,
+    PWM
+};
+
+static constexpr auto RPM_TARGET = "RPM";
+static constexpr auto PWM_TARGET = "PWM";
+
 /** @class Targets
  *  @brief Target type traits.
  *
