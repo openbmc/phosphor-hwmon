@@ -293,6 +293,31 @@ void MainLoop::shutdown() noexcept
 
 void MainLoop::run()
 {
+    //If this device supports target speeds,
+    //check which type to use.
+    targetType fanTargetType = targetType::DEFAULT;
+    auto targetMode = getenv("TARGET_MODE");
+    if (targetMode)
+    {
+        std::string type{targetMode};
+
+        if (type == RPM_TARGET)
+        {
+            fanTargetType = targetType::RPM;
+        }
+        else if (type == PWM_TARGET)
+        {
+            fanTargetType = targetType::PWM;
+        }
+        else
+        {
+            log<level::ERR>(
+                    "Invalid TARGET_MODE env var found",
+                    entry("TARGET_MODE=%s", targetMode),
+                    entry("DEVPATH=%s", _devPath.c_str()));
+        }
+    }
+
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
@@ -358,15 +383,23 @@ void MainLoop::run()
         addThreshold<WarningObject>(i.first.first, id, sensorValue, info);
         addThreshold<CriticalObject>(i.first.first, id, sensorValue, info);
 
-        auto target = addTarget<hwmon::FanSpeed>(
-                i.first, ioAccess, _devPath, info);
-
-        if (target)
+        if ((fanTargetType == targetType::RPM) ||
+            (fanTargetType == targetType::DEFAULT))
         {
-            target->enable();
+            auto target = addTarget<hwmon::FanSpeed>(
+                    i.first, ioAccess, _devPath, info);
+
+            if (target)
+            {
+                target->enable();
+            }
         }
 
-        addTarget<hwmon::FanPwm>(i.first, ioAccess, _devPath, info);
+        if ((fanTargetType == targetType::PWM) ||
+            (fanTargetType == targetType::DEFAULT))
+        {
+            addTarget<hwmon::FanPwm>(i.first, ioAccess, _devPath, info);
+        }
 
         // All the interfaces have been created.  Go ahead
         // and emit InterfacesAdded.
