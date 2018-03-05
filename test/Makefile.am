@@ -11,6 +11,8 @@ find_callout_path_LDFLAGS = \
 	-static
 find_callout_path_LDADD = \
 	-lstdc++fs \
+	$(SDBUSPLUS_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
 	${top_builddir}/sysfs.o
 
 find_callout_path_CXXFLAGS =
@@ -21,6 +23,8 @@ find_hwmon_LDFLAGS = \
 	-static
 find_hwmon_LDADD = \
 	-lstdc++fs \
+	$(SDBUSPLUS_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
 	${top_builddir}/sysfs.o
 
 find_hwmon_CXXFLAGS =
@@ -31,6 +35,8 @@ hwmonio_LDFLAGS = \
 	-static
 hwmonio_LDADD = \
 	-lstdc++fs \
+	$(SDBUSPLUS_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
 	${top_builddir}/sysfs.o
 
 hwmonio_CXXFLAGS =
