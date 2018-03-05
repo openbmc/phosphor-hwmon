@@ -238,6 +238,29 @@ std::string findHwmonFromOFPath(const std::string& ofNode)
     return emptyString;
 }
 
+std::string findHwmonFromDevPath(const std::string& devPath)
+{
+    fs::path path{"/sys"};
+    path /= devPath;
+    path /= "hwmon";
+
+    try
+    {
+        for (const auto& hwmonInst : fs::directory_iterator(path))
+        {
+            if ((hwmonInst.path().filename().string().find("hwmon") !=
+                   std::string::npos))
+            {
+                return hwmonInst.path();
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+    }
+    return emptyString;
+}
+
 namespace hwmonio
 {
 
