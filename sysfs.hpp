@@ -51,6 +51,19 @@ std::string findPhandleMatch(
  */
 std::string findHwmonFromOFPath(const std::string& ofNode);
 
+/** @brief Find hwmon instances from a device path
+ *
+ *  Look for a matching hwmon instance given a device path that
+ *  starts with /devices.  This path is the DEVPATH udev attribute
+ *  for the device except it has the '/hwmon/hwmonN' stripped off.
+ *
+ *  @param[in] devPath - The device path.
+ *
+ *  @return - The hwmon instance path or an empty
+ *            string if no match is found.
+ */
+std::string findHwmonFromDevPath(const std::string& devPath);
+
 /** @brief Return the path to use for a call out.
  *
  *  Return an empty string if a callout path cannot be
