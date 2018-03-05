@@ -197,7 +197,7 @@ std::string findCalloutPath(const std::string& instancePath)
     return emptyString;
 }
 
-std::string findHwmon(const std::string& ofNode)
+std::string findHwmonFromOFPath(const std::string& ofNode)
 {
     static constexpr auto hwmonRoot = "/sys/class/hwmon";
 

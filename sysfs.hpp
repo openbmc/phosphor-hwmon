@@ -39,7 +39,7 @@ std::string findPhandleMatch(
         const std::string& iochanneldir,
         const std::string& phandledir);
 
-/** @brief Find hwmon instances
+/** @brief Find hwmon instances from an open-firmware device tree path
  *
  *  Look for a matching hwmon instance given an
  *  open firmware device path.
@@ -49,7 +49,7 @@ std::string findPhandleMatch(
  *  @returns[in] - The hwmon instance path or an empty
  *                 string if no match is found.
  */
-std::string findHwmon(const std::string& ofNode);
+std::string findHwmonFromOFPath(const std::string& ofNode);
 
 /** @brief Return the path to use for a call out.
  *

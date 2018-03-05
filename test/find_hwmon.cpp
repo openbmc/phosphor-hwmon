@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        std::cout << sysfs::findHwmon(argv[1]) << '\n';
+        std::cout << sysfs::findHwmonFromOFPath(argv[1]) << '\n';
     }
     catch (const std::exception& e)
     {

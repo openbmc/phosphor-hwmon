@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     auto path = (*options)["of-name"];
     if (path != ArgumentParser::empty_string)
     {
-        path = sysfs::findHwmon(path);
+        path = sysfs::findHwmonFromOFPath(path);
     }
 
     if (path == ArgumentParser::empty_string)
