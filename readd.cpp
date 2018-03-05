@@ -34,10 +34,19 @@ int main(int argc, char** argv)
     auto options = std::make_unique<ArgumentParser>(argc, argv);
 
     // Parse out path argument.
-    auto path = (*options)["of-name"];
+    auto path = (*options)["dev-path"];
     if (path != ArgumentParser::empty_string)
     {
-        path = sysfs::findHwmonFromOFPath(path);
+        // This path may either be a device path (starts with
+        // /devices), or an open firmware device tree path.
+        if (path.substr(0, 8) == "/devices")
+        {
+            path = sysfs::findHwmonFromDevPath(path);
+        }
+        else
+        {
+            path = sysfs::findHwmonFromOFPath(path);
+        }
     }
 
     if (path == ArgumentParser::empty_string)
