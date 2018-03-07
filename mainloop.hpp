@@ -3,10 +3,12 @@
 #include <string>
 #include <vector>
 #include <experimental/any>
+#include <memory>
 #include <sdbusplus/server.hpp>
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 #include "interface.hpp"
+#include "timer.hpp"
 
 static constexpr auto default_interval = 1000000;
 
@@ -47,10 +49,12 @@ class MainLoop
             const char* prefix,
             const char* root);
 
-        /** @brief Start polling loop and process dbus traffic. */
+        /** @brief Setup polling timer in a sd event loop and attach to D-Bus
+         *         event loop.
+         */
         void run();
 
-        /** @brief Stop loop from another thread.
+        /** @brief Stop polling timer event loop from another thread.
          *
          *  Typically only used by testcases.
          */
@@ -60,12 +64,16 @@ class MainLoop
         using mapped_type = std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
         using SensorState = std::map<SensorSet::key_type, mapped_type>;
 
+        /** @brief Read hwmon sysfs entries */
+        void read();
+
+        /** @brief Set up D-Bus object state */
+        void init();
+
         /** @brief sdbusplus bus client connection. */
         sdbusplus::bus::bus _bus;
         /** @brief sdbusplus freedesktop.ObjectManager storage. */
         sdbusplus::server::manager::manager _manager;
-        /** @brief Shutdown requested. */
-        volatile bool _shutdown;
         /** @brief hwmon sysfs class path. */
         std::string _hwmonRoot;
         /** @brief hwmon sysfs instance. */
@@ -84,4 +92,8 @@ class MainLoop
         uint64_t _interval = default_interval;
         /** @brief Hwmon sysfs access. */
         sysfs::hwmonio::HwmonIO ioAccess;
+        /** @brief Timer */
+        std::unique_ptr<phosphor::hwmon::Timer> timer;
+        /** @brief the sd_event structure */
+        sd_event* loop = nullptr;
 };
