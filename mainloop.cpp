@@ -272,7 +272,6 @@ MainLoop::MainLoop(
     const char* root)
     : _bus(std::move(bus)),
       _manager(_bus, root),
-      _shutdown(false),
       _hwmonRoot(),
       _instance(),
       _devPath(devPath),
@@ -305,10 +304,43 @@ MainLoop::MainLoop(
 
 void MainLoop::shutdown() noexcept
 {
-    _shutdown = true;
+    timer->state(phosphor::hwmon::timer::OFF);
+    sd_event_exit(loop, 0);
+    loop = nullptr;
 }
 
 void MainLoop::run()
+{
+    init();
+
+    sd_event_default(&loop);
+
+    std::function<void()> callback(std::bind(
+            &MainLoop::read, this));
+    try
+    {
+        timer = std::make_unique<phosphor::hwmon::Timer>(
+                                 loop, callback,
+                                 std::chrono::microseconds(_interval),
+                                 phosphor::hwmon::timer::ON);
+
+        // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
+
+        // TODO: Issue#7 - Should probably periodically check the SensorSet
+        //       for new entries.
+
+        _bus.attach_event(loop, SD_EVENT_PRIORITY_IMPORTANT);
+        sd_event_loop(loop);
+    }
+    catch (const std::system_error& e)
+    {
+        log<level::ERR>("Error in sysfs polling loop",
+                        entry("ERROR=%s", e.what()));
+        throw;
+    }
+}
+
+void MainLoop::init()
 {
     //If this device supports target speeds,
     //check which type to use.
@@ -454,117 +486,106 @@ void MainLoop::run()
             _interval = strtoull(interval, NULL, 10);
         }
     }
+}
 
+void MainLoop::read()
+{
     // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
     //       ensure the objects all exist?
 
-    // Polling loop.
-    while (!_shutdown)
-    {
 #ifdef REMOVE_ON_FAIL
-        std::vector<SensorSet::key_type> destroy;
+    std::vector<SensorSet::key_type> destroy;
 #endif
-        // Iterate through all the sensors.
-        for (auto& i : state)
+    // Iterate through all the sensors.
+    for (auto& i : state)
+    {
+        auto& attrs = std::get<0>(i.second);
+        if (attrs.find(hwmon::entry::input) != attrs.end())
         {
-            auto& attrs = std::get<0>(i.second);
-            if (attrs.find(hwmon::entry::input) != attrs.end())
+            // Read value from sensor.
+            int64_t value;
+            std::string input = hwmon::entry::cinput;
+            if (i.first.first == "pwm") {
+                input = "";
+            }
+
+            try
             {
-                // Read value from sensor.
-                int64_t value;
-                std::string input = hwmon::entry::cinput;
-                if (i.first.first == "pwm") {
-                    input = "";
-                }
+                // Retry for up to a second if device is busy
+                // or has a transient error.
 
-                try
+                value = ioAccess.read(
+                        i.first.first,
+                        i.first.second,
+                        input,
+                        sysfs::hwmonio::retries,
+                        sysfs::hwmonio::delay,
+                        _isOCC);
+
+                value = adjustValue(i.first, value);
+
+                auto& objInfo = std::get<ObjectInfo>(i.second);
+                auto& obj = std::get<Object>(objInfo);
+
+                for (auto& iface : obj)
                 {
-                    // Retry for up to a second if device is busy
-                    // or has a transient error.
+                    auto valueIface = std::shared_ptr<ValueObject>();
+                    auto warnIface = std::shared_ptr<WarningObject>();
+                    auto critIface = std::shared_ptr<CriticalObject>();
 
-                    value = ioAccess.read(
-                            i.first.first,
-                            i.first.second,
-                            input,
-                            sysfs::hwmonio::retries,
-                            sysfs::hwmonio::delay,
-                            _isOCC);
-
-                    value = adjustValue(i.first, value);
-
-                    auto& objInfo = std::get<ObjectInfo>(i.second);
-                    auto& obj = std::get<Object>(objInfo);
-
-                    for (auto& iface : obj)
+                    switch (iface.first)
                     {
-                        auto valueIface = std::shared_ptr<ValueObject>();
-                        auto warnIface = std::shared_ptr<WarningObject>();
-                        auto critIface = std::shared_ptr<CriticalObject>();
-
-                        switch (iface.first)
-                        {
-                            case InterfaceType::VALUE:
-                                valueIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
-                                            (iface.second);
-                                valueIface->value(value);
-                                break;
-                            case InterfaceType::WARN:
-                                checkThresholds<WarningObject>(iface.second, value);
-                                break;
-                            case InterfaceType::CRIT:
-                                checkThresholds<CriticalObject>(iface.second, value);
-                                break;
-                            default:
-                                break;
-                        }
+                        case InterfaceType::VALUE:
+                            valueIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
+                                        (iface.second);
+                            valueIface->value(value);
+                            break;
+                        case InterfaceType::WARN:
+                            checkThresholds<WarningObject>(iface.second, value);
+                            break;
+                        case InterfaceType::CRIT:
+                            checkThresholds<CriticalObject>(iface.second, value);
+                            break;
+                        default:
+                            break;
                     }
                 }
-                catch (const std::system_error& e)
-                {
-                    using namespace sdbusplus::xyz::openbmc_project::
-                        Sensor::Device::Error;
-                    report<ReadFailure>(
-                            xyz::openbmc_project::Sensor::Device::
-                                ReadFailure::CALLOUT_ERRNO(e.code().value()),
-                            xyz::openbmc_project::Sensor::Device::
-                                ReadFailure::CALLOUT_DEVICE_PATH(
-                                    _devPath.c_str()));
+            }
+            catch (const std::system_error& e)
+            {
+                using namespace sdbusplus::xyz::openbmc_project::
+                    Sensor::Device::Error;
+                report<ReadFailure>(
+                        xyz::openbmc_project::Sensor::Device::
+                            ReadFailure::CALLOUT_ERRNO(e.code().value()),
+                        xyz::openbmc_project::Sensor::Device::
+                            ReadFailure::CALLOUT_DEVICE_PATH(
+                                _devPath.c_str()));
 
-                    auto file = sysfs::make_sysfs_path(
-                            ioAccess.path(),
-                            i.first.first,
-                            i.first.second,
-                            hwmon::entry::cinput);
+                auto file = sysfs::make_sysfs_path(
+                        ioAccess.path(),
+                        i.first.first,
+                        i.first.second,
+                        hwmon::entry::cinput);
 
-                    log<level::INFO>("Logging failing sysfs file",
-                            entry("FILE=%s", file.c_str()));
+                log<level::INFO>("Logging failing sysfs file",
+                        entry("FILE=%s", file.c_str()));
 
 #ifdef REMOVE_ON_FAIL
-                    destroy.push_back(i.first);
+                destroy.push_back(i.first);
 #else
-                    exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 #endif
-                }
             }
         }
+    }
 
 #ifdef REMOVE_ON_FAIL
-        for (auto& i : destroy)
-        {
-            state.erase(i);
-        }
-#endif
-
-        // Respond to DBus
-        _bus.process_discard();
-
-        // Sleep until next interval.
-        // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
-        _bus.wait(_interval);
-
-        // TODO: Issue#7 - Should probably periodically check the SensorSet
-        //       for new entries.
+    for (auto& i : destroy)
+    {
+        state.erase(i);
     }
+#endif
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
