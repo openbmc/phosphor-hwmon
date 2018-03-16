@@ -76,6 +76,8 @@ class MainLoop
         const char* _prefix;
         /** @brief DBus sensors namespace root. */
         const char* _root;
+        /** @brief hwmon instance is for an OCC. */
+        bool _isOCC = false;
         /** @brief DBus object state. */
         SensorState state;
         /** @brief Sleep interval in microseconds. */
