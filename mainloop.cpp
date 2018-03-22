@@ -18,6 +18,7 @@
 #include <memory>
 #include <cstdlib>
 #include <string>
+#include <unordered_set>
 
 #include <phosphor-logging/elog-errors.hpp>
 #include "config.h"
@@ -68,6 +69,7 @@ struct valueAdjust
 {
     double gain = 1.0;
     int offset = 0;
+    std::unordered_set<int> rmRCs;
 };
 
 // Store the valueAdjust for sensors
@@ -155,6 +157,32 @@ auto getAttributes(const std::string& type, Attributes& attributes)
     return true;
 }
 
+void addRemoveRCs(const SensorSet::key_type& sensor,
+                  const std::string& rcList)
+{
+    // Convert to a char* for strtok
+    std::vector<char> rmRCs(rcList.c_str(),
+                            rcList.c_str() + rcList.size() + 1);
+    auto rmRC = strtok(&rmRCs[0], ", ");
+    while (rmRC != nullptr)
+    {
+        try
+        {
+            sensorAdjusts[sensor].rmRCs.insert(std::stoi(rmRC));
+        }
+        catch (const std::logic_error& le)
+        {
+            // Unable to convert to int, continue to next token
+            std::string name = sensor.first + "_" + sensor.second;
+            log<level::INFO>("Unable to convert sensor removal return code",
+                             entry("SENSOR=%s", name.c_str()),
+                             entry("RC=%s", rmRC),
+                             entry("EXCEPTION=%s", le.what()));
+        }
+        rmRC = strtok(nullptr, ", ");
+    }
+}
+
 int64_t adjustValue(const SensorSet::key_type& sensor, int64_t value)
 {
     const auto& it = sensorAdjusts.find(sensor);
@@ -180,6 +208,13 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& bus = *std::get<sdbusplus::bus::bus*>(info);
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
+
+    auto senRmRCs = getEnv("REMOVERCS", sensor);
+    if (!senRmRCs.empty())
+    {
+        // Add sensor removal return codes defined per sensor
+        addRemoveRCs(sensor, senRmRCs);
+    }
 
     int64_t val = 0;
     try
@@ -326,6 +361,14 @@ void MainLoop::run()
         }
     }
 
+    // Get list of return codes for removing sensors on device
+    std::string deviceRmRCs;
+    auto devRmRCs = getenv("REMOVERCS");
+    if (devRmRCs)
+    {
+        deviceRmRCs.assign(devRmRCs);
+    }
+
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
@@ -369,6 +412,12 @@ void MainLoop::run()
         if (!getAttributes(i.first.first, attrs))
         {
             continue;
+        }
+
+        if (!deviceRmRCs.empty())
+        {
+            // Add sensor removal return codes defined at the device level
+            addRemoveRCs(i.first, deviceRmRCs);
         }
 
         std::string objectPath{_root};
