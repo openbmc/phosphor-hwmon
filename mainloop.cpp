@@ -204,39 +204,15 @@ auto addValue(const SensorSet::key_type& sensor,
         addRemoveRCs(sensor, senRmRCs);
     }
 
-    int64_t val = 0;
-    try
-    {
-        // Retry for up to a second if device is busy
-        // or has a transient error.
-        val = ioAccess.read(
-                sensor.first,
-                sensor.second,
-                hwmon::entry::cinput,
-                sysfs::hwmonio::retries,
-                sysfs::hwmonio::delay,
-                isOCC);
-    }
-    catch (const std::system_error& e)
-    {
-        using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
-        report<ReadFailure>(
-            xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_ERRNO(e.code().value()),
-            xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
-
-        auto file = sysfs::make_sysfs_path(
-                ioAccess.path(),
-                sensor.first,
-                sensor.second,
-                hwmon::entry::cinput);
-
-        log<level::INFO>("Logging failing sysfs file",
-                entry("FILE=%s", file.c_str()));
-
-        return static_cast<std::shared_ptr<ValueObject>>(nullptr);
-    }
+    // Retry for up to a second if device is busy
+    // or has a transient error.
+    int64_t val = ioAccess.read(
+            sensor.first,
+            sensor.second,
+            hwmon::entry::cinput,
+            sysfs::hwmonio::retries,
+            sysfs::hwmonio::delay,
+            isOCC);
 
     auto gain = getEnv("GAIN", sensor);
     if (!gain.empty())
@@ -415,10 +391,45 @@ void MainLoop::run()
         objectPath.append(label);
 
         ObjectInfo info(&_bus, std::move(objectPath), Object());
-        auto valueInterface = addValue(i.first, _devPath, ioAccess, info,
-                _isOCC);
-        if (!valueInterface)
+        auto valueInterface = static_cast<
+                std::shared_ptr<ValueObject>>(nullptr);
+        try
         {
+            valueInterface = addValue(i.first, _devPath, ioAccess, info,
+                    _isOCC);
+        }
+        catch (const std::system_error& e)
+        {
+#ifndef REMOVE_ON_FAIL
+            // Check sensorAdjusts for sensor removal RCs
+            const auto& it = sensorAdjusts.find(i.first);
+            if (it != sensorAdjusts.end())
+            {
+                auto rmRCit = it->second.rmRCs.find(e.code().value());
+                if (rmRCit != std::end(it->second.rmRCs))
+                {
+                    // Return code found in sensor removal list
+                    // Skip adding this sensor for now
+                    continue;
+                }
+            }
+#endif
+            using namespace sdbusplus::xyz::openbmc_project::
+                    Sensor::Device::Error;
+            report<ReadFailure>(
+                xyz::openbmc_project::Sensor::Device::
+                    ReadFailure::CALLOUT_ERRNO(e.code().value()),
+                xyz::openbmc_project::Sensor::Device::
+                    ReadFailure::CALLOUT_DEVICE_PATH(_devPath.c_str()));
+
+            auto file = sysfs::make_sysfs_path(
+                    ioAccess.path(),
+                    i.first.first,
+                    i.first.second,
+                    hwmon::entry::cinput);
+
+            log<level::INFO>("Logging failing sysfs file",
+                    entry("FILE=%s", file.c_str()));
 #ifdef REMOVE_ON_FAIL
             continue; /* skip adding this sensor for now. */
 #else
@@ -488,9 +499,8 @@ void MainLoop::run()
     // Polling loop.
     while (!_shutdown)
     {
-#ifdef REMOVE_ON_FAIL
+        // Used in marking a sensor for removal from dbus
         std::vector<SensorSet::key_type> destroy;
-#endif
         // Iterate through all the sensors.
         for (auto& i : state)
         {
@@ -548,6 +558,21 @@ void MainLoop::run()
                 }
                 catch (const std::system_error& e)
                 {
+#ifndef REMOVE_ON_FAIL
+                    // Check sensorAdjusts for sensor removal RCs
+                    const auto& it = sensorAdjusts.find(i.first);
+                    if (it != sensorAdjusts.end())
+                    {
+                        auto rmRCit = it->second.rmRCs.find(e.code().value());
+                        if (rmRCit != std::end(it->second.rmRCs))
+                        {
+                            // Return code found in sensor removal list
+                            // Mark this sensor to be removed from dbus
+                            destroy.push_back(i.first);
+                            continue;
+                        }
+                    }
+#endif
                     using namespace sdbusplus::xyz::openbmc_project::
                         Sensor::Device::Error;
                     report<ReadFailure>(
@@ -575,12 +600,11 @@ void MainLoop::run()
             }
         }
 
-#ifdef REMOVE_ON_FAIL
+        // Remove any sensors marked for removal
         for (auto& i : destroy)
         {
             state.erase(i);
         }
-#endif
 
         // Respond to DBus
         _bus.process_discard();
