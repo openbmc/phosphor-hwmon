@@ -567,9 +567,6 @@ void MainLoop::read()
     // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
     //       ensure the objects all exist?
 
-    // Used in marking a sensor for removal from dbus
-    std::vector<SensorSet::key_type> destroy;
-
     // Iterate through all the sensors.
     for (auto& i : state)
     {
@@ -637,7 +634,7 @@ void MainLoop::read()
                     {
                         // Return code found in sensor removal list
                         // Mark this sensor to be removed from dbus
-                        destroy.push_back(i.first);
+                        rmSensors[i.first] = std::get<0>(i.second);
                         continue;
                     }
                 }
@@ -661,7 +658,7 @@ void MainLoop::read()
                         entry("FILE=%s", file.c_str()));
 
 #ifdef REMOVE_ON_FAIL
-                destroy.push_back(i.first);
+                rmSensors[i.first] = std::get<0>(i.second);
 #else
                 exit(EXIT_FAILURE);
 #endif
@@ -670,9 +667,9 @@ void MainLoop::read()
     }
 
     // Remove any sensors marked for removal
-    for (auto& i : destroy)
+    for (auto& i : rmSensors)
     {
-        state.erase(i);
+        state.erase(i.first);
     }
 
 #ifndef REMOVE_ON_FAIL
