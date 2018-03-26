@@ -256,32 +256,6 @@ auto addValue(const SensorSet::key_type& sensor,
 void MainLoop::getObject(SensorSet::container_t::const_reference sensor,
                          const std::string& sID)
 {
-    //If this device supports target speeds,
-    //check which type to use.
-    targetType fanTargetType = targetType::DEFAULT;
-    auto targetMode = getenv("TARGET_MODE");
-    if (targetMode)
-    {
-        std::string type{targetMode};
-        std::transform(type.begin(), type.end(), type.begin(), toupper);
-
-        if (type == RPM_TARGET)
-        {
-            fanTargetType = targetType::RPM;
-        }
-        else if (type == PWM_TARGET)
-        {
-            fanTargetType = targetType::PWM;
-        }
-        else
-        {
-            log<level::ERR>(
-                    "Invalid TARGET_MODE env var found",
-                    entry("TARGET_MODE=%s", targetMode),
-                    entry("DEVPATH=%s", _devPath.c_str()));
-        }
-    }
-
     // Get list of return codes for removing sensors on device
     std::string deviceRmRCs;
     auto devRmRCs = getenv("REMOVERCS");
@@ -289,7 +263,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor,
     {
         deviceRmRCs.assign(devRmRCs);
     }
-
+    
     std::string label;
     std::string id = sID;
 
@@ -397,23 +371,13 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor,
     addThreshold<WarningObject>(sensor.first.first, id, sensorValue, info);
     addThreshold<CriticalObject>(sensor.first.first, id, sensorValue, info);
 
-    if ((fanTargetType == targetType::RPM) ||
-        (fanTargetType == targetType::DEFAULT))
+    auto target = addTarget<hwmon::FanSpeed>(
+            sensor.first, ioAccess, _devPath, info);
+    if (target)
     {
-        auto target = addTarget<hwmon::FanSpeed>(
-                sensor.first, ioAccess, _devPath, info);
-
-        if (target)
-        {
-            target->enable();
-        }
+        target->enable();
     }
-
-    if ((fanTargetType == targetType::PWM) ||
-        (fanTargetType == targetType::DEFAULT))
-    {
-        addTarget<hwmon::FanPwm>(sensor.first, ioAccess, _devPath, info);
-    }
+    addTarget<hwmon::FanPwm>(sensor.first, ioAccess, _devPath, info);
 
     // All the interfaces have been created.  Go ahead
     // and emit InterfacesAdded.
