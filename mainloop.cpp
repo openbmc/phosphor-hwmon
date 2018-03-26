@@ -275,6 +275,183 @@ auto addValue(const SensorSet::key_type& sensor,
     return iface;
 }
 
+/**
+ * Reads the environment parameters of a sensor and creates an object with
+ * atleast the `Value` interface, otherwise returns without creating the object.
+ * If the `Value` interface is successfully created, by reading the sensor's
+ * corresponding sysfs file's value, the additional interfaces for the sensor
+ * are created and the InterfacesAdded signal is emitted. The sensor is then
+ * moved to the list for sensor state monitoring within the main loop.
+ */
+void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
+{
+    //If this device supports target speeds,
+    //check which type to use.
+    targetType fanTargetType = targetType::DEFAULT;
+    auto targetMode = getenv("TARGET_MODE");
+    if (targetMode)
+    {
+        std::string type{targetMode};
+        std::transform(type.begin(), type.end(), type.begin(), toupper);
+
+        if (type == RPM_TARGET)
+        {
+            fanTargetType = targetType::RPM;
+        }
+        else if (type == PWM_TARGET)
+        {
+            fanTargetType = targetType::PWM;
+        }
+        else
+        {
+            log<level::ERR>(
+                    "Invalid TARGET_MODE env var found",
+                    entry("TARGET_MODE=%s", targetMode),
+                    entry("DEVPATH=%s", _devPath.c_str()));
+        }
+    }
+
+    // Get list of return codes for removing sensors on device
+    std::string deviceRmRCs;
+    auto devRmRCs = getenv("REMOVERCS");
+    if (devRmRCs)
+    {
+        deviceRmRCs.assign(devRmRCs);
+    }
+
+    std::string label;
+    std::string id;
+
+    /*
+     * Check if the value of the MODE_<item><X> env variable for the sensor
+     * is "label", then read the sensor number from the <item><X>_label
+     * file. The name of the DBUS object would be the value of the env
+     * variable LABEL_<item><sensorNum>. If the MODE_<item><X> env variable
+     * doesn't exist, then the name of DBUS object is the value of the env
+     * variable LABEL_<item><X>.
+     */
+    auto mode = getEnv("MODE", sensor.first);
+    if (!mode.compare(hwmon::entry::label))
+    {
+        id = getIndirectID(
+                _hwmonRoot + '/' + _instance + '/', sensor.first);
+
+        if (id.empty())
+        {
+            return;
+        }
+    }
+
+    // Use the ID we looked up above if there was one,
+    // otherwise use the standard one.
+    id = (id.empty()) ? sensor.first.second : id;
+
+    // Ignore inputs without a label.
+    label = getEnv("LABEL", sensor.first.first, id);
+    if (label.empty())
+    {
+        return;
+    }
+
+    Attributes attrs;
+    if (!getAttributes(sensor.first.first, attrs))
+    {
+        return;
+    }
+
+    if (!deviceRmRCs.empty())
+    {
+        // Add sensor removal return codes defined at the device level
+        addRemoveRCs(sensor.first, deviceRmRCs);
+    }
+
+    std::string objectPath{_root};
+    objectPath.append(1, '/');
+    objectPath.append(getNamespace(attrs));
+    objectPath.append(1, '/');
+    objectPath.append(label);
+
+    ObjectInfo info(&_bus, std::move(objectPath), Object());
+    auto valueInterface = static_cast<
+            std::shared_ptr<ValueObject>>(nullptr);
+    try
+    {
+        valueInterface = addValue(sensor.first, _devPath, ioAccess, info,
+                _isOCC);
+    }
+    catch (const std::system_error& e)
+    {
+#ifndef REMOVE_ON_FAIL
+        // Check sensorAdjusts for sensor removal RCs
+        const auto& it = sensorAdjusts.find(sensor.first);
+        if (it != sensorAdjusts.end())
+        {
+            auto rmRCit = it->second.rmRCs.find(e.code().value());
+            if (rmRCit != std::end(it->second.rmRCs))
+            {
+                // Return code found in sensor removal list
+                // Skip adding this sensor for now
+                rmSensors[std::move(sensor.first)] = std::move(sensor.second);
+                return;
+            }
+        }
+#endif
+        using namespace sdbusplus::xyz::openbmc_project::
+                Sensor::Device::Error;
+        report<ReadFailure>(
+            xyz::openbmc_project::Sensor::Device::
+                ReadFailure::CALLOUT_ERRNO(e.code().value()),
+            xyz::openbmc_project::Sensor::Device::
+                ReadFailure::CALLOUT_DEVICE_PATH(_devPath.c_str()));
+
+        auto file = sysfs::make_sysfs_path(
+                ioAccess.path(),
+                sensor.first.first,
+                sensor.first.second,
+                hwmon::entry::cinput);
+
+        log<level::INFO>("Logging failing sysfs file",
+                entry("FILE=%s", file.c_str()));
+#ifdef REMOVE_ON_FAIL
+        return; /* skip adding this sensor for now. */
+#else
+        exit(EXIT_FAILURE);
+#endif
+    }
+    auto sensorValue = valueInterface->value();
+    addThreshold<WarningObject>(sensor.first.first, id, sensorValue, info);
+    addThreshold<CriticalObject>(sensor.first.first, id, sensorValue, info);
+
+    if ((fanTargetType == targetType::RPM) ||
+        (fanTargetType == targetType::DEFAULT))
+    {
+        auto target = addTarget<hwmon::FanSpeed>(
+                sensor.first, ioAccess, _devPath, info);
+
+        if (target)
+        {
+            target->enable();
+        }
+    }
+
+    if ((fanTargetType == targetType::PWM) ||
+        (fanTargetType == targetType::DEFAULT))
+    {
+        addTarget<hwmon::FanPwm>(sensor.first, ioAccess, _devPath, info);
+    }
+
+    // All the interfaces have been created.  Go ahead
+    // and emit InterfacesAdded.
+    valueInterface->emit_object_added();
+
+    auto value = std::make_tuple(
+                     std::move(sensor.second),
+                     std::move(label),
+                     std::move(info));
+
+    state[std::move(sensor.first)] = std::move(value);
+}
+
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
     const std::string& path,
@@ -353,175 +530,12 @@ void MainLoop::run()
 
 void MainLoop::init()
 {
-    //If this device supports target speeds,
-    //check which type to use.
-    targetType fanTargetType = targetType::DEFAULT;
-    auto targetMode = getenv("TARGET_MODE");
-    if (targetMode)
-    {
-        std::string type{targetMode};
-        std::transform(type.begin(), type.end(), type.begin(), toupper);
-
-        if (type == RPM_TARGET)
-        {
-            fanTargetType = targetType::RPM;
-        }
-        else if (type == PWM_TARGET)
-        {
-            fanTargetType = targetType::PWM;
-        }
-        else
-        {
-            log<level::ERR>(
-                    "Invalid TARGET_MODE env var found",
-                    entry("TARGET_MODE=%s", targetMode),
-                    entry("DEVPATH=%s", _devPath.c_str()));
-        }
-    }
-
-    // Get list of return codes for removing sensors on device
-    std::string deviceRmRCs;
-    auto devRmRCs = getenv("REMOVERCS");
-    if (devRmRCs)
-    {
-        deviceRmRCs.assign(devRmRCs);
-    }
-
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
     for (auto& i : *sensors)
     {
-        std::string label;
-        std::string id;
-
-        /*
-         * Check if the value of the MODE_<item><X> env variable for the sensor
-         * is "label", then read the sensor number from the <item><X>_label
-         * file. The name of the DBUS object would be the value of the env
-         * variable LABEL_<item><sensorNum>. If the MODE_<item><X> env variable
-         * doesn't exist, then the name of DBUS object is the value of the env
-         * variable LABEL_<item><X>.
-         */
-        auto mode = getEnv("MODE", i.first);
-        if (!mode.compare(hwmon::entry::label))
-        {
-            id = getIndirectID(
-                    _hwmonRoot + '/' + _instance + '/', i.first);
-
-            if (id.empty())
-            {
-                continue;
-            }
-        }
-
-        //In this loop, use the ID we looked up above if
-        //there was one, otherwise use the standard one.
-        id = (id.empty()) ? i.first.second : id;
-
-        // Ignore inputs without a label.
-        label = getEnv("LABEL", i.first.first, id);
-        if (label.empty())
-        {
-            continue;
-        }
-
-        Attributes attrs;
-        if (!getAttributes(i.first.first, attrs))
-        {
-            continue;
-        }
-
-        if (!deviceRmRCs.empty())
-        {
-            // Add sensor removal return codes defined at the device level
-            addRemoveRCs(i.first, deviceRmRCs);
-        }
-
-        std::string objectPath{_root};
-        objectPath.append(1, '/');
-        objectPath.append(getNamespace(attrs));
-        objectPath.append(1, '/');
-        objectPath.append(label);
-
-        ObjectInfo info(&_bus, std::move(objectPath), Object());
-        auto valueInterface = static_cast<
-                std::shared_ptr<ValueObject>>(nullptr);
-        try
-        {
-            valueInterface = addValue(i.first, _devPath, ioAccess, info,
-                    _isOCC);
-        }
-        catch (const std::system_error& e)
-        {
-#ifndef REMOVE_ON_FAIL
-            // Check sensorAdjusts for sensor removal RCs
-            const auto& it = sensorAdjusts.find(i.first);
-            if (it != sensorAdjusts.end())
-            {
-                auto rmRCit = it->second.rmRCs.find(e.code().value());
-                if (rmRCit != std::end(it->second.rmRCs))
-                {
-                    // Return code found in sensor removal list
-                    // Skip adding this sensor for now
-                    continue;
-                }
-            }
-#endif
-            using namespace sdbusplus::xyz::openbmc_project::
-                    Sensor::Device::Error;
-            report<ReadFailure>(
-                xyz::openbmc_project::Sensor::Device::
-                    ReadFailure::CALLOUT_ERRNO(e.code().value()),
-                xyz::openbmc_project::Sensor::Device::
-                    ReadFailure::CALLOUT_DEVICE_PATH(_devPath.c_str()));
-
-            auto file = sysfs::make_sysfs_path(
-                    ioAccess.path(),
-                    i.first.first,
-                    i.first.second,
-                    hwmon::entry::cinput);
-
-            log<level::INFO>("Logging failing sysfs file",
-                    entry("FILE=%s", file.c_str()));
-#ifdef REMOVE_ON_FAIL
-            continue; /* skip adding this sensor for now. */
-#else
-            exit(EXIT_FAILURE);
-#endif
-        }
-        auto sensorValue = valueInterface->value();
-        addThreshold<WarningObject>(i.first.first, id, sensorValue, info);
-        addThreshold<CriticalObject>(i.first.first, id, sensorValue, info);
-
-        if ((fanTargetType == targetType::RPM) ||
-            (fanTargetType == targetType::DEFAULT))
-        {
-            auto target = addTarget<hwmon::FanSpeed>(
-                    i.first, ioAccess, _devPath, info);
-
-            if (target)
-            {
-                target->enable();
-            }
-        }
-
-        if ((fanTargetType == targetType::PWM) ||
-            (fanTargetType == targetType::DEFAULT))
-        {
-            addTarget<hwmon::FanPwm>(i.first, ioAccess, _devPath, info);
-        }
-
-        // All the interfaces have been created.  Go ahead
-        // and emit InterfacesAdded.
-        valueInterface->emit_object_added();
-
-        auto value = std::make_tuple(
-                         std::move(i.second),
-                         std::move(label),
-                         std::move(info));
-
-        state[std::move(i.first)] = std::move(value);
+        getObject(i);
     }
 
     /* If there are no sensors specified by labels, exit. */
@@ -660,6 +674,34 @@ void MainLoop::read()
     {
         state.erase(i);
     }
+
+#ifndef REMOVE_ON_FAIL
+    // Attempt to add any sensors that were removed
+    auto it = rmSensors.begin();
+    while (it != rmSensors.end())
+    {
+        if (state.find(it->first) == state.end())
+        {
+            SensorSet::container_t::value_type ssValueType =
+                    std::make_pair(it->first, it->second);
+            getObject(ssValueType);
+            if (state.find(it->first) != state.end())
+            {
+                // Sensor object added, erase entry from removal list
+                it = rmSensors.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+        else
+        {
+            // Sanity check to remove sensors that were re-added
+            it = rmSensors.erase(it);
+        }
+    }
+#endif
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
