@@ -84,4 +84,18 @@ class MainLoop
         uint64_t _interval = default_interval;
         /** @brief Hwmon sysfs access. */
         sysfs::hwmonio::HwmonIO ioAccess;
+
+        /**
+         * @brief Map of removed sensors
+         */
+        std::map<SensorSet::key_type, SensorSet::mapped_type> rmSensors;
+
+        /**
+         * @brief Used to create and add sensor objects
+         *
+         * @param[in] sensor - Sensor to create/add object for
+         * @param[in] sID - Known sensor id
+         */
+        void getObject(SensorSet::container_t::const_reference sensor,
+                       const std::string& sID = "");
 };
