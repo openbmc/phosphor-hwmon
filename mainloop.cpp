@@ -529,8 +529,6 @@ void MainLoop::run()
     // Polling loop.
     while (!_shutdown)
     {
-        // Used in marking a sensor for removal from dbus
-        std::vector<SensorSet::key_type> destroy;
         // Iterate through all the sensors.
         for (auto& i : state)
         {
@@ -598,7 +596,7 @@ void MainLoop::run()
                         {
                             // Return code found in sensor removal list
                             // Mark this sensor to be removed from dbus
-                            destroy.push_back(i.first);
+                            rmSensors[i.first] = std::get<0>(i.second);
                             continue;
                         }
                     }
@@ -622,7 +620,7 @@ void MainLoop::run()
                             entry("FILE=%s", file.c_str()));
 
 #ifdef REMOVE_ON_FAIL
-                    destroy.push_back(i.first);
+                    rmSensors[i.first] = std::get<0>(i.second);
 #else
                     exit(EXIT_FAILURE);
 #endif
@@ -631,9 +629,9 @@ void MainLoop::run()
         }
 
         // Remove any sensors marked for removal
-        for (auto& i : destroy)
+        for (auto& i : rmSensors)
         {
-            state.erase(i);
+            state.erase(i.first);
         }
 
         // Respond to DBus
