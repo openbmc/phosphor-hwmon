@@ -96,4 +96,16 @@ class MainLoop
         std::unique_ptr<phosphor::hwmon::Timer> timer;
         /** @brief the sd_event structure */
         sd_event* loop = nullptr;
+
+        /**
+         * @brief Map of removed sensors
+         */
+        std::map<SensorSet::key_type, SensorSet::mapped_type> rmSensors;
+
+        /**
+         * @brief Used to create and add sensor objects
+         *
+         * @param[in] sensor - Sensor to create/add object for
+         */
+        void getObject(SensorSet::container_t::const_reference sensor);
 };
