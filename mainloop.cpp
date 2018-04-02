@@ -355,6 +355,11 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     }
     catch (const std::system_error& e)
     {
+        auto file = sysfs::make_sysfs_path(
+                ioAccess.path(),
+                sensor.first.first,
+                sensor.first.second,
+                hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
         // Check sensorAdjusts for sensor removal RCs
         const auto& it = sensorAdjusts.find(sensor.first);
@@ -363,9 +368,16 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
             auto rmRCit = it->second.rmRCs.find(e.code().value());
             if (rmRCit != std::end(it->second.rmRCs))
             {
-                // Return code found in sensor removal list
-                // Skip adding this sensor for now
-                rmSensors[std::move(sensor.first)] = std::move(sensor.second);
+                // Return code found in sensor return code removal list
+                if (rmSensors.find(sensor.first) == rmSensors.end())
+                {
+                    // Trace for sensor not already removed from dbus
+                    log<level::INFO>("Sensor not added to dbus for read fail",
+                            entry("FILE=%s", file.c_str()),
+                            entry("RC=%d", e.code().value()));
+                    rmSensors[std::move(sensor.first)] =
+                            std::move(sensor.second);
+                }
                 return;
             }
         }
@@ -377,12 +389,6 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
                 ReadFailure::CALLOUT_ERRNO(e.code().value()),
             xyz::openbmc_project::Sensor::Device::
                 ReadFailure::CALLOUT_DEVICE_PATH(_devPath.c_str()));
-
-        auto file = sysfs::make_sysfs_path(
-                ioAccess.path(),
-                sensor.first.first,
-                sensor.first.second,
-                hwmon::entry::cinput);
 
         log<level::INFO>("Logging failing sysfs file",
                 entry("FILE=%s", file.c_str()));
@@ -588,6 +594,11 @@ void MainLoop::read()
             }
             catch (const std::system_error& e)
             {
+                auto file = sysfs::make_sysfs_path(
+                        ioAccess.path(),
+                        i.first.first,
+                        i.first.second,
+                        hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
                 // Check sensorAdjusts for sensor removal RCs
                 const auto& it = sensorAdjusts.find(i.first);
@@ -596,9 +607,17 @@ void MainLoop::read()
                     auto rmRCit = it->second.rmRCs.find(e.code().value());
                     if (rmRCit != std::end(it->second.rmRCs))
                     {
-                        // Return code found in sensor removal list
-                        // Mark this sensor to be removed from dbus
-                        rmSensors[i.first] = std::get<0>(i.second);
+                        // Return code found in sensor return code removal list
+                        if (rmSensors.find(i.first) == rmSensors.end())
+                        {
+                            // Trace for sensor not already removed from dbus
+                            log<level::INFO>(
+                                    "Remove sensor from dbus for read fail",
+                                    entry("FILE=%s", file.c_str()),
+                                    entry("RC=%d", e.code().value()));
+                            // Mark this sensor to be removed from dbus
+                            rmSensors[i.first] = std::get<0>(i.second);
+                        }
                         continue;
                     }
                 }
@@ -611,12 +630,6 @@ void MainLoop::read()
                         xyz::openbmc_project::Sensor::Device::
                             ReadFailure::CALLOUT_DEVICE_PATH(
                                 _devPath.c_str()));
-
-                auto file = sysfs::make_sysfs_path(
-                        ioAccess.path(),
-                        i.first.first,
-                        i.first.second,
-                        hwmon::entry::cinput);
 
                 log<level::INFO>("Logging failing sysfs file",
                         entry("FILE=%s", file.c_str()));
@@ -649,6 +662,14 @@ void MainLoop::read()
             if (state.find(it->first) != state.end())
             {
                 // Sensor object added, erase entry from removal list
+                auto file = sysfs::make_sysfs_path(
+                        ioAccess.path(),
+                        it->first.first,
+                        it->first.second,
+                        hwmon::entry::cinput);
+                log<level::INFO>(
+                        "Added sensor to dbus after successful read",
+                        entry("FILE=%s", file.c_str()));
                 it = rmSensors.erase(it);
             }
             else
