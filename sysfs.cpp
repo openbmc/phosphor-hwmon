@@ -337,14 +337,7 @@ int64_t HwmonIO::read(
 
             if (isOCC)
             {
-                if (rc == EAGAIN)
-                {
-                    // For the OCCs, when an EAGAIN is return, just set the
-                    // value to 0 (0x00 = sensor is unavailable)
-                    val = 0;
-                    break;
-                }
-                else if (rc == EREMOTEIO)
+                if (rc == EREMOTEIO)
                 {
                     // For the OCCs, when an EREMOTEIO is return, set the
                     // value to 255*1000
