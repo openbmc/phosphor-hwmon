@@ -357,9 +357,21 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor,
             auto rmRCit = it->second.rmRCs.find(e.code().value());
             if (rmRCit != std::end(it->second.rmRCs))
             {
-                // Return code found in sensor removal list
-                // Skip adding this sensor for now
-                rmSensors[std::move(sensor.first)] = std::move(sensor.second);
+                // Return code found in sensor return code removal list and
+                // sensor has not already been removed from dbus
+                if (rmSensors.find(sensor.first) != rmSensors.end())
+                {
+                    auto file = sysfs::make_sysfs_path(
+                            ioAccess.path(),
+                            sensor.first.first,
+                            sensor.first.second,
+                            hwmon::entry::cinput);
+                    log<level::INFO>("Removed sensor for sysfs file from dbus",
+                            entry("FILE=%s", file.c_str()),
+                            entry("RC=%d", e.code().value()));
+                    rmSensors[std::move(sensor.first)] =
+                            std::move(sensor.second);
+                }
                 return;
             }
         }
@@ -620,6 +632,14 @@ void MainLoop::run()
                 if (state.find(i.first) != state.end())
                 {
                     // Sensor object added, erase entry from removal list
+                    auto file = sysfs::make_sysfs_path(
+                            ioAccess.path(),
+                            i.first.first,
+                            i.first.second,
+                            hwmon::entry::cinput);
+                    log<level::INFO>(
+                            "Added sensor for sysfs file to dbus",
+                            entry("FILE=%s", file.c_str()));
                     rmSensors.erase(i.first);
                 }
             }
