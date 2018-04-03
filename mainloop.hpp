@@ -14,6 +14,7 @@ static constexpr auto default_interval = 1000000;
 
 using Object = std::map<InterfaceType, std::experimental::any>;
 using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, Object>;
+using RetryIO = std::tuple<size_t, std::chrono::milliseconds>;
 
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
