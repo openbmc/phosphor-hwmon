@@ -207,7 +207,7 @@ int64_t adjustValue(const SensorSet::key_type& sensor, int64_t value)
 }
 
 auto addValue(const SensorSet::key_type& sensor,
-              const std::string& devPath,
+              const RetryIO& retryIO,
               sysfs::hwmonio::HwmonIO& ioAccess,
               ObjectInfo& info,
               bool isOCC = false)
@@ -232,8 +232,8 @@ auto addValue(const SensorSet::key_type& sensor,
             sensor.first,
             sensor.second,
             hwmon::entry::cinput,
-            sysfs::hwmonio::retries,
-            sysfs::hwmonio::delay,
+            std::get<size_t>(retryIO),
+            std::get<std::chrono::milliseconds>(retryIO),
             isOCC);
 
     auto gain = getEnv("GAIN", sensor);
@@ -350,11 +350,18 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor,
     objectPath.append(label);
 
     ObjectInfo info(&_bus, std::move(objectPath), Object());
+    RetryIO retryIO(sysfs::hwmonio::retries, sysfs::hwmonio::delay);
+    if (rmSensors.find(sensor.first) != rmSensors.end())
+    {
+        // When adding a sensor that was purposely removed,
+        // don't retry on errors when reading its value
+        std::get<size_t>(retryIO) = 0;
+    }
     auto valueInterface = static_cast<
             std::shared_ptr<ValueObject>>(nullptr);
     try
     {
-        valueInterface = addValue(sensor.first, _devPath, ioAccess, info,
+        valueInterface = addValue(sensor.first, retryIO, ioAccess, info,
                 _isOCC);
     }
     catch (const std::system_error& e)
