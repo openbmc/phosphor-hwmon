@@ -329,22 +329,23 @@ SensorIdentifiers MainLoop::getIdentifiers(
  * atleast the `Value` interface, otherwise returns without creating the object.
  * If the `Value` interface is successfully created, by reading the sensor's
  * corresponding sysfs file's value, the additional interfaces for the sensor
- * are created and the InterfacesAdded signal is emitted. The sensor is then
- * moved to the list for sensor state monitoring within the main loop.
+ * are created and the InterfacesAdded signal is emitted. The object's state
+ * data is then returned for sensor state monitoring within the main loop.
  */
-void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
+optional_ns::optional<ObjectStateData> MainLoop::getObject(
+        SensorSet::container_t::const_reference sensor)
 {
     auto properties = getIdentifiers(sensor);
     if (std::get<sensorID>(properties).empty() ||
         std::get<sensorLabel>(properties).empty())
     {
-        return;
+        return {};
     }
 
     Attributes attrs;
     if (!getAttributes(sensor.first.first, attrs))
     {
-        return;
+        return {};
     }
 
     // Get list of return codes for removing sensors on device
@@ -403,7 +404,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
                     rmSensors[std::move(sensor.first)] =
                             std::move(sensor.second);
                 }
-                return;
+                return {};
             }
         }
 #endif
@@ -418,7 +419,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
         log<level::INFO>("Logging failing sysfs file",
                 entry("FILE=%s", file.c_str()));
 #ifdef REMOVE_ON_FAIL
-        return; /* skip adding this sensor for now. */
+        return {}; /* skip adding this sensor for now. */
 #else
         exit(EXIT_FAILURE);
 #endif
@@ -445,12 +446,8 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     // and emit InterfacesAdded.
     valueInterface->emit_object_added();
 
-    auto value = std::make_tuple(
-                     std::move(sensor.second),
-                     std::move(std::get<sensorLabel>(properties)),
-                     std::move(info));
-
-    state[std::move(sensor.first)] = std::move(value);
+    return std::make_pair(std::move(std::get<sensorLabel>(properties)),
+                          std::move(info));
 }
 
 MainLoop::MainLoop(
@@ -536,7 +533,15 @@ void MainLoop::init()
 
     for (auto& i : *sensors)
     {
-        getObject(i);
+        auto object = getObject(i);
+        if (object)
+        {
+            auto value = std::make_tuple(std::move(i.second),
+                                         std::move((*object).first),
+                                         std::move((*object).second));
+
+            state[std::move(i.first)] = std::move(value);
+        }
     }
 
     /* If there are no sensors specified by labels, exit. */
@@ -689,9 +694,15 @@ void MainLoop::read()
         {
             SensorSet::container_t::value_type ssValueType =
                     std::make_pair(it->first, it->second);
-            getObject(ssValueType);
-            if (state.find(it->first) != state.end())
+            auto object = getObject(ssValueType);
+            if (object)
             {
+                auto value = std::make_tuple(std::move(ssValueType.second),
+                                             std::move((*object).first),
+                                             std::move((*object).second));
+
+                state[std::move(ssValueType.first)] = std::move(value);
+
                 // Sensor object added, erase entry from removal list
                 auto file = sysfs::make_sysfs_path(
                         ioAccess.path(),
