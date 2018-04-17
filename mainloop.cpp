@@ -78,6 +78,11 @@ std::map<SensorSet::key_type, valueAdjust> sensorAdjusts;
 void addRemoveRCs(const SensorSet::key_type& sensor,
                   const std::string& rcList)
 {
+    if (rcList.empty())
+    {
+        return;
+    }
+
     // Convert to a char* for strtok
     std::vector<char> rmRCs(rcList.c_str(),
                             rcList.c_str() + rcList.size() + 1);
@@ -138,11 +143,8 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& objPath = std::get<std::string>(info);
 
     auto senRmRCs = env::getEnv("REMOVERCS", sensor);
-    if (!senRmRCs.empty())
-    {
-        // Add sensor removal return codes defined per sensor
-        addRemoveRCs(sensor, senRmRCs);
-    }
+    // Add sensor removal return codes defined per sensor
+    addRemoveRCs(sensor, senRmRCs);
 
     // Retry for up to a second if device is busy
     // or has a transient error.
@@ -203,14 +205,6 @@ auto addValue(const SensorSet::key_type& sensor,
  */
 void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 {
-    // Get list of return codes for removing sensors on device
-    std::string deviceRmRCs;
-    auto devRmRCs = env::getEnv("REMOVERCS");
-    if (!devRmRCs.empty())
-    {
-        deviceRmRCs.assign(devRmRCs);
-    }
-
     std::string label;
     std::string id;
 
@@ -251,11 +245,10 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
         return;
     }
 
-    if (!deviceRmRCs.empty())
-    {
-        // Add sensor removal return codes defined at the device level
-        addRemoveRCs(sensor.first, deviceRmRCs);
-    }
+    // Get list of return codes for removing sensors on device
+    auto devRmRCs = env::getEnv("REMOVERCS");
+    // Add sensor removal return codes defined at the device level
+    addRemoveRCs(sensor.first, devRmRCs);
 
     std::string objectPath{_root};
     objectPath.append(1, '/');
