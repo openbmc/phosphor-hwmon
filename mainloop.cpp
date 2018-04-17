@@ -195,17 +195,8 @@ auto addValue(const SensorSet::key_type& sensor,
     return iface;
 }
 
-/**
- * Reads the environment parameters of a sensor and creates an object with
- * atleast the `Value` interface, otherwise returns without creating the object.
- * If the `Value` interface is successfully created, by reading the sensor's
- * corresponding sysfs file's value, the additional interfaces for the sensor
- * are created and the InterfacesAdded signal is emitted. The sensor is then
- * moved to the list for sensor state monitoring within the main loop.
- */
-void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
+std::string MainLoop::getID(SensorSet::container_t::const_reference sensor)
 {
-    std::string label;
     std::string id;
 
     /*
@@ -224,7 +215,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 
         if (id.empty())
         {
-            return;
+            return id;
         }
     }
 
@@ -232,9 +223,38 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     // otherwise use the standard one.
     id = (id.empty()) ? sensor.first.second : id;
 
-    // Ignore inputs without a label.
-    label = env::getEnv("LABEL", sensor.first.first, id);
-    if (label.empty())
+    return id;
+}
+
+SensorIdentifiers MainLoop::getIdentifiers(
+        SensorSet::container_t::const_reference sensor)
+{
+    std::string id = getID(sensor);
+    std::string label;
+
+    if (!id.empty())
+    {
+        // Ignore inputs without a label.
+        label = getEnv("LABEL", sensor.first.first, id);
+    }
+
+    return std::make_tuple(std::move(id),
+                           std::move(label));
+}
+
+/**
+ * Reads the environment parameters of a sensor and creates an object with
+ * atleast the `Value` interface, otherwise returns without creating the object.
+ * If the `Value` interface is successfully created, by reading the sensor's
+ * corresponding sysfs file's value, the additional interfaces for the sensor
+ * are created and the InterfacesAdded signal is emitted. The sensor is then
+ * moved to the list for sensor state monitoring within the main loop.
+ */
+void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
+{
+    auto properties = getIdentifiers(sensor);
+    if (std::get<sensorID>(properties).empty() ||
+        std::get<sensorLabel>(properties).empty())
     {
         return;
     }
@@ -259,7 +279,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     objectPath.append(1, '/');
     objectPath.append(hwmon::getNamespace(attrs));
     objectPath.append(1, '/');
-    objectPath.append(label);
+    objectPath.append(std::get<sensorLabel>(properties));
 
     ObjectInfo info(&_bus, std::move(objectPath), Object());
     RetryIO retryIO(sysfs::hwmonio::retries, sysfs::hwmonio::delay);
@@ -322,8 +342,14 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 #endif
     }
     auto sensorValue = valueInterface->value();
-    addThreshold<WarningObject>(sensor.first.first, id, sensorValue, info);
-    addThreshold<CriticalObject>(sensor.first.first, id, sensorValue, info);
+    addThreshold<WarningObject>(sensor.first.first,
+                                std::get<sensorID>(properties),
+                                sensorValue,
+                                info);
+    addThreshold<CriticalObject>(sensor.first.first,
+                                 std::get<sensorID>(properties),
+                                 sensorValue,
+                                 info);
 
     auto target = addTarget<hwmon::FanSpeed>(
             sensor.first, ioAccess, _devPath, info);
@@ -339,7 +365,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 
     auto value = std::make_tuple(
                      std::move(sensor.second),
-                     std::move(label),
+                     std::move(std::get<sensorLabel>(properties)),
                      std::move(info));
 
     state[std::move(sensor.first)] = std::move(value);
