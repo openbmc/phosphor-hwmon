@@ -450,12 +450,15 @@ MainLoop::MainLoop(
         _isOCC = true;
     }
 
+    // Strip off any trailing slashes.
     std::string p = path;
     while (!p.empty() && p.back() == '/')
     {
         p.pop_back();
     }
 
+    // Given the furthest right /, set instance to
+    // the basename, and hwmonRoot to the leading path.
     auto n = p.rfind('/');
     if (n != std::string::npos)
     {
