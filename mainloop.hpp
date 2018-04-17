@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <experimental/any>
+#include <experimental/optional>
 #include <memory>
 #include <sdbusplus/server.hpp>
 #include "hwmonio.hpp"
@@ -16,10 +17,13 @@ static constexpr auto default_interval = 1000000;
 using Object = std::map<InterfaceType, std::experimental::any>;
 using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, Object>;
 using RetryIO = std::tuple<size_t, std::chrono::milliseconds>;
+using ObjectStateData = std::pair<std::string, ObjectInfo>;
 
 static constexpr auto sensorID = 0;
 static constexpr auto sensorLabel = 1;
 using SensorIdentifiers = std::tuple<std::string, std::string>;
+
+namespace optional_ns = std::experimental;
 
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
@@ -127,6 +131,10 @@ class MainLoop
          * @brief Used to create and add sensor objects
          *
          * @param[in] sensor - Sensor to create/add object for
+         *
+         * @return - Optional
+         *     Object state data on success, nothing on failure
          */
-        void getObject(SensorSet::container_t::const_reference sensor);
+        optional_ns::optional<ObjectStateData> getObject(
+                SensorSet::container_t::const_reference sensor);
 };
