@@ -160,26 +160,29 @@ auto getAttributes(const std::string& type, Attributes& attributes)
 void addRemoveRCs(const SensorSet::key_type& sensor,
                   const std::string& rcList)
 {
-    // Convert to a char* for strtok
-    std::vector<char> rmRCs(rcList.c_str(),
-                            rcList.c_str() + rcList.size() + 1);
-    auto rmRC = strtok(&rmRCs[0], ", ");
-    while (rmRC != nullptr)
+    if (!rcList.empty())
     {
-        try
+        // Convert to a char* for strtok
+        std::vector<char> rmRCs(rcList.c_str(),
+                                rcList.c_str() + rcList.size() + 1);
+        auto rmRC = strtok(&rmRCs[0], ", ");
+        while (rmRC != nullptr)
         {
-            sensorAdjusts[sensor].rmRCs.insert(std::stoi(rmRC));
+            try
+            {
+                sensorAdjusts[sensor].rmRCs.insert(std::stoi(rmRC));
+            }
+            catch (const std::logic_error& le)
+            {
+                // Unable to convert to int, continue to next token
+                std::string name = sensor.first + "_" + sensor.second;
+                log<level::INFO>("Unable to convert sensor removal return code",
+                                 entry("SENSOR=%s", name.c_str()),
+                                 entry("RC=%s", rmRC),
+                                 entry("EXCEPTION=%s", le.what()));
+            }
+            rmRC = strtok(nullptr, ", ");
         }
-        catch (const std::logic_error& le)
-        {
-            // Unable to convert to int, continue to next token
-            std::string name = sensor.first + "_" + sensor.second;
-            log<level::INFO>("Unable to convert sensor removal return code",
-                             entry("SENSOR=%s", name.c_str()),
-                             entry("RC=%s", rmRC),
-                             entry("EXCEPTION=%s", le.what()));
-        }
-        rmRC = strtok(nullptr, ", ");
     }
 }
 
@@ -220,11 +223,8 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& objPath = std::get<std::string>(info);
 
     auto senRmRCs = getEnv("REMOVERCS", sensor);
-    if (!senRmRCs.empty())
-    {
-        // Add sensor removal return codes defined per sensor
-        addRemoveRCs(sensor, senRmRCs);
-    }
+    // Add sensor removal return codes defined per sensor
+    addRemoveRCs(sensor, senRmRCs);
 
     // Retry for up to a second if device is busy
     // or has a transient error.
@@ -285,14 +285,6 @@ auto addValue(const SensorSet::key_type& sensor,
  */
 void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 {
-    // Get list of return codes for removing sensors on device
-    std::string deviceRmRCs;
-    auto devRmRCs = getenv("REMOVERCS");
-    if (devRmRCs)
-    {
-        deviceRmRCs.assign(devRmRCs);
-    }
-
     std::string label;
     std::string id;
 
@@ -333,8 +325,12 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
         return;
     }
 
-    if (!deviceRmRCs.empty())
+    // Get list of return codes for removing sensors on device
+    std::string deviceRmRCs;
+    auto devRmRCs = getenv("REMOVERCS");
+    if (devRmRCs)
     {
+        deviceRmRCs.assign(devRmRCs);
         // Add sensor removal return codes defined at the device level
         addRemoveRCs(sensor.first, deviceRmRCs);
     }
