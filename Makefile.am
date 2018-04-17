@@ -27,4 +27,4 @@ libhwmon_la_SOURCES = \
 	timer.cpp \
 	hwmon.cpp
 
-SUBDIRS = . test msl
+SUBDIRS = . test msl tools
