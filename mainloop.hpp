@@ -16,6 +16,10 @@ using Object = std::map<InterfaceType, std::experimental::any>;
 using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, Object>;
 using RetryIO = std::tuple<size_t, std::chrono::milliseconds>;
 
+static constexpr auto sensorID = 0;
+static constexpr auto sensorLabel = 1;
+using SensorIdentifiers = std::tuple<std::string, std::string>;
+
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
  */
@@ -102,6 +106,21 @@ class MainLoop
          * @brief Map of removed sensors
          */
         std::map<SensorSet::key_type, SensorSet::mapped_type> rmSensors;
+
+        /**
+         * @brief Get the ID of the sensor
+         *
+         * @param[in] sensor - Sensor to get the ID of
+         */
+        std::string getID(SensorSet::container_t::const_reference sensor);
+
+        /**
+         * @brief Get the sensor identifiers
+         *
+         * @param[in] sensor - Sensor to get the identifiers of
+         */
+        SensorIdentifiers getIdentifiers(
+                SensorSet::container_t::const_reference sensor);
 
         /**
          * @brief Used to create and add sensor objects
