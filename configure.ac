@@ -90,5 +90,5 @@ AC_DEFINE_UNQUOTED([BUSNAME_PREFIX], ["$BUSNAME_PREFIX"], [The DBus busname pref
 AC_DEFINE_UNQUOTED([SENSOR_ROOT], ["$SENSOR_ROOT"], [The DBus sensors namespace root.])
 
 # Create configured output
-AC_CONFIG_FILES([Makefile tools/Makefile msl/Makefile])
+AC_CONFIG_FILES([Makefile test/Makefile tools/Makefile msl/Makefile])
 AC_OUTPUT
