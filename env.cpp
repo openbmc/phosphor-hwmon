@@ -22,6 +22,11 @@
 
 namespace env {
 
+std::string getEnv(const char* key)
+{
+    return std::getenv(key);
+}
+
 std::string getEnv(
     const char* prefix, const SensorSet::key_type& sensor)
 {
@@ -32,8 +37,8 @@ std::string getEnv(
     key.append(1, '_');
     key.append(sensor.first);
     key.append(sensor.second);
-    auto env = getenv(key.c_str());
-    if (env)
+    auto env = getEnv(key.c_str());
+    if (!env.empty())
     {
         value.assign(env);
     }

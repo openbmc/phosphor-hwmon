@@ -206,8 +206,8 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 {
     // Get list of return codes for removing sensors on device
     std::string deviceRmRCs;
-    auto devRmRCs = getenv("REMOVERCS");
-    if (devRmRCs)
+    auto devRmRCs = env::getEnv("REMOVERCS");
+    if (!devRmRCs.empty())
     {
         deviceRmRCs.assign(devRmRCs);
     }
@@ -453,10 +453,10 @@ void MainLoop::init()
     }
 
     {
-        auto interval = getenv("INTERVAL");
-        if (interval)
+        auto interval = env::getEnv("INTERVAL");
+        if (!interval.empty())
         {
-            _interval = strtoull(interval, NULL, 10);
+            _interval = strtoull(interval.c_str(), NULL, 10);
         }
     }
 }
