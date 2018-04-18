@@ -58,7 +58,7 @@ uint64_t FanSpeed::target(uint64_t value)
 
 void FanSpeed::enable()
 {
-    auto enable = getEnv("ENABLE", type, id);
+    auto enable = env::getEnv("ENABLE", type, id);
     if (!enable.empty())
     {
         auto val = std::stoul(enable);
