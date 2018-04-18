@@ -2,7 +2,7 @@
 
 namespace sensor {
 
-auto getAttributes(const std::string& type, Attributes& attributes)
+bool getAttributes(const std::string& type, Attributes& attributes)
 {
     // *INDENT-OFF*
     auto a = std::find_if(

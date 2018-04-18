@@ -46,22 +46,22 @@ static constexpr auto typeAttrMap =
         "power"),
 };
 
-auto getHwmonType(decltype(typeAttrMap)::const_reference attrs)
+inline auto getHwmonType(decltype(typeAttrMap)::const_reference attrs)
 {
     return std::get<0>(attrs);
 }
 
-auto getUnit(decltype(typeAttrMap)::const_reference attrs)
+inline auto getUnit(decltype(typeAttrMap)::const_reference attrs)
 {
     return std::get<1>(attrs);
 }
 
-auto getScale(decltype(typeAttrMap)::const_reference attrs)
+inline auto getScale(decltype(typeAttrMap)::const_reference attrs)
 {
     return std::get<2>(attrs);
 }
 
-auto getNamespace(decltype(typeAttrMap)::const_reference attrs)
+inline auto getNamespace(decltype(typeAttrMap)::const_reference attrs)
 {
     return std::get<3>(attrs);
 }
@@ -77,7 +77,7 @@ using Attributes
  *  @param[in] type the sensor type
  *  @param[in,out] A pointer to the Attribute tuple
  */
-auto getAttributes(const std::string& type, Attributes& attributes);
+bool getAttributes(const std::string& type, Attributes& attributes);
 
 }  // sensor
 
