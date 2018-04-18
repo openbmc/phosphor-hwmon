@@ -17,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <unordered_set>
 
@@ -86,7 +87,7 @@ void addRemoveRCs(const SensorSet::key_type& sensor,
     // Convert to a char* for strtok
     std::vector<char> rmRCs(rcList.c_str(),
                             rcList.c_str() + rcList.size() + 1);
-    auto rmRC = strtok(&rmRCs[0], ", ");
+    auto rmRC = std::strtok(&rmRCs[0], ", ");
     while (rmRC != nullptr)
     {
         try
@@ -102,7 +103,7 @@ void addRemoveRCs(const SensorSet::key_type& sensor,
                              entry("RC=%s", rmRC),
                              entry("EXCEPTION=%s", le.what()));
         }
-        rmRC = strtok(nullptr, ", ");
+        rmRC = std::strtok(nullptr, ", ");
     }
 }
 
@@ -474,7 +475,7 @@ void MainLoop::init()
         auto interval = env::getEnv("INTERVAL");
         if (!interval.empty())
         {
-            _interval = strtoull(interval.c_str(), NULL, 10);
+            _interval = std::strtoull(interval.c_str(), NULL, 10);
         }
     }
 }
