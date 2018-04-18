@@ -31,6 +31,7 @@
 #include "mainloop.hpp"
 #include "targets.hpp"
 #include "thresholds.hpp"
+#include "sensor.hpp"
 
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
@@ -327,6 +328,9 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
         target->enable();
     }
     addTarget<hwmon::FanPwm>(sensor.first, ioAccess, _devPath, info);
+
+    // Add status interface based on _fault file being present
+    sensor::addStatus(sensor.first, ioAccess, _devPath, info);
 
     // All the interfaces have been created.  Go ahead
     // and emit InterfacesAdded.
