@@ -3,5 +3,12 @@ AM_CXXFLAGS = $(PTHREAD_CFLAGS) $(GTEST_CFLAGS) $(SDBUSPLUS_CFLAGS) $(PHOSPHOR_D
 AM_LDFLAGS = $(GTEST_LIBS) $(PTHREAD_LIBS) -lgtest -lgmock $(OESDK_TESTCASE_FLAGS) $(SDBUSPLUS_LIBS) $(PHOSPHOR_DBUS_INTERFACES_LIBS)
 
 # Run all 'check' test programs
-check_PROGRAMS = 
+check_PROGRAMS = addsensor_unittest
 TESTS = $(check_PROGRAMS)
+
+#mainloop_unittest_SOURCES = mainloop_unittest.cpp
+#mainloop_unittest_LDADD = $(top_builddir)/mainloop.o
+
+addsensor_unittest_SOURCES = addsensor_unittest.cpp
+addsensor_unittest_LDADD = $(top_builddir)/sensor.o
+
