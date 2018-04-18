@@ -12,5 +12,9 @@ AM_LDFLAGS = $(GTEST_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS)
 
 # Run all 'check' test programs
-check_PROGRAMS = 
+check_PROGRAMS = hwmon_unittest
 TESTS = $(check_PROGRAMS)
+
+hwmon_unittest_SOURCES = hwmon_unittest.cpp
+hwmon_unittest_LDADD = $(top_builddir)/hwmon.o
+
