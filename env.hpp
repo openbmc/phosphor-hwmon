@@ -8,6 +8,16 @@ namespace env {
 
 /** @brief Reads an environment variable
  *
+ *  Reads the environment for that key
+ *
+ *  @param[in] key - the key
+ *
+ *  @return string - the env var value
+ */
+std::string getEnv(const char* key);
+
+/** @brief Reads an environment variable
+ *
  *  Reads <prefix>_<sensor.first><sensor.second>
  *
  *  @param[in] prefix - the variable prefix
