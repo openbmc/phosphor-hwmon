@@ -20,6 +20,8 @@
 #include "env.hpp"
 #include "hwmon.hpp"
 
+namespace env {
+
 std::string getEnv(
     const char* prefix, const SensorSet::key_type& sensor)
 {
@@ -75,5 +77,7 @@ std::string getIndirectID(
 
     return content;
 }
+
+}  // namespace env
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

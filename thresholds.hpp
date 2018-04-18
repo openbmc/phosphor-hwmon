@@ -1,5 +1,7 @@
 #pragma once
 
+#include "env.hpp"
+
 /** @class Thresholds
  *  @brief Threshold type traits.
  *
@@ -90,8 +92,8 @@ auto addThreshold(const std::string& sensorType,
     auto& obj = std::get<Object>(info);
     std::shared_ptr<T> iface;
 
-    auto tLo = getEnv(Thresholds<T>::envLo, sensorType, sensorID);
-    auto tHi = getEnv(Thresholds<T>::envHi, sensorType, sensorID);
+    auto tLo = env::getEnv(Thresholds<T>::envLo, sensorType, sensorID);
+    auto tHi = env::getEnv(Thresholds<T>::envHi, sensorType, sensorID);
     if (!tLo.empty() && !tHi.empty())
     {
         iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
