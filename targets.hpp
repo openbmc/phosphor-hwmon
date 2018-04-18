@@ -4,6 +4,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
+#include "env.hpp"
 #include "fan_speed.hpp"
 #include "fan_pwm.hpp"
 
@@ -87,7 +88,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
     {
         targetName = pwm;
         // If PWM_TARGET is set, use the specified pwm id
-        auto id = getEnv("PWM_TARGET", sensor);
+        auto id = env::getEnv("PWM_TARGET", sensor);
         if (!id.empty())
         {
             targetId = id;
