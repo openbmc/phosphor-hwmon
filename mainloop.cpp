@@ -22,15 +22,15 @@
 
 #include <phosphor-logging/elog-errors.hpp>
 #include "config.h"
-#include "sensorset.hpp"
+#include "env.hpp"
+#include "fan_pwm.hpp"
+#include "fan_speed.hpp"
 #include "hwmon.hpp"
+#include "sensorset.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
-#include "env.hpp"
-#include "thresholds.hpp"
 #include "targets.hpp"
-#include "fan_speed.hpp"
-#include "fan_pwm.hpp"
+#include "thresholds.hpp"
 
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
@@ -74,88 +74,6 @@ struct valueAdjust
 
 // Store the valueAdjust for sensors
 std::map<SensorSet::key_type, valueAdjust> sensorAdjusts;
-
-static constexpr auto typeAttrMap =
-{
-    // 1 - hwmon class
-    // 2 - unit
-    // 3 - sysfs scaling factor
-    std::make_tuple(
-        hwmon::type::ctemp,
-        ValueInterface::Unit::DegreesC,
-        -3,
-        "temperature"),
-    std::make_tuple(
-        hwmon::type::cfan,
-        ValueInterface::Unit::RPMS,
-        0,
-        "fan_tach"),
-    std::make_tuple(
-        hwmon::type::cvolt,
-        ValueInterface::Unit::Volts,
-        -3,
-        "voltage"),
-    std::make_tuple(
-        hwmon::type::ccurr,
-        ValueInterface::Unit::Amperes,
-        -3,
-        "current"),
-    std::make_tuple(
-        hwmon::type::cenergy,
-        ValueInterface::Unit::Joules,
-        -6,
-        "energy"),
-    std::make_tuple(
-        hwmon::type::cpower,
-        ValueInterface::Unit::Watts,
-        -6,
-        "power"),
-};
-
-auto getHwmonType(decltype(typeAttrMap)::const_reference attrs)
-{
-    return std::get<0>(attrs);
-}
-
-auto getUnit(decltype(typeAttrMap)::const_reference attrs)
-{
-    return std::get<1>(attrs);
-}
-
-auto getScale(decltype(typeAttrMap)::const_reference attrs)
-{
-    return std::get<2>(attrs);
-}
-
-auto getNamespace(decltype(typeAttrMap)::const_reference attrs)
-{
-    return std::get<3>(attrs);
-}
-
-using AttributeIterator = decltype(*typeAttrMap.begin());
-using Attributes
-    = std::remove_cv<std::remove_reference<AttributeIterator>::type>::type;
-
-auto getAttributes(const std::string& type, Attributes& attributes)
-{
-    // *INDENT-OFF*
-    auto a = std::find_if(
-                typeAttrMap.begin(),
-                typeAttrMap.end(),
-                [&](const auto & e)
-                {
-                   return type == getHwmonType(e);
-                });
-    // *INDENT-ON*
-
-    if (a == typeAttrMap.end())
-    {
-        return false;
-    }
-
-    attributes = *a;
-    return true;
-}
 
 void addRemoveRCs(const SensorSet::key_type& sensor,
                   const std::string& rcList)
@@ -253,11 +171,11 @@ auto addValue(const SensorSet::key_type& sensor,
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
-    Attributes attrs;
-    if (getAttributes(sensor.first, attrs))
+    hwmon::Attributes attrs;
+    if (hwmon::getAttributes(sensor.first, attrs))
     {
-        iface->unit(getUnit(attrs));
-        iface->scale(getScale(attrs));
+        iface->unit(hwmon::getUnit(attrs));
+        iface->scale(hwmon::getScale(attrs));
     }
 
     auto maxValue = env::getEnv("MAXVALUE", sensor);
@@ -327,8 +245,8 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
         return;
     }
 
-    Attributes attrs;
-    if (!getAttributes(sensor.first.first, attrs))
+    hwmon::Attributes attrs;
+    if (!hwmon::getAttributes(sensor.first.first, attrs))
     {
         return;
     }
@@ -341,7 +259,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 
     std::string objectPath{_root};
     objectPath.append(1, '/');
-    objectPath.append(getNamespace(attrs));
+    objectPath.append(hwmon::getNamespace(attrs));
     objectPath.append(1, '/');
     objectPath.append(label);
 
