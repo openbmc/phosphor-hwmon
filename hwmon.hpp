@@ -13,11 +13,13 @@ static constexpr auto cinput = "input";
 static constexpr auto clabel = "label";
 static constexpr auto ctarget = "target";
 static constexpr auto cenable = "enable";
+static constexpr auto cfault = "fault";
 
 static const std::string input = cinput;
 static const std::string label = clabel;
 static const std::string target = ctarget;
 static const std::string enable = cenable;
+static const std::string fault = cfault;
 }
 
 namespace type
