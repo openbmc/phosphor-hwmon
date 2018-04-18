@@ -4,6 +4,8 @@
 
 #include "sensorset.hpp"
 
+namespace env {
+
 /** @brief Reads an environment variable
  *
  *  Reads <prefix>_<sensor.first><sensor.second>
@@ -40,3 +42,5 @@ std::string getEnv(
 std::string getIndirectID(
     std::string path,
     const SensorSet::key_type& sensor);
+
+}  // namespace env
