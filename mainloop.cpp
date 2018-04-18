@@ -138,7 +138,7 @@ auto addValue(const SensorSet::key_type& sensor,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    auto senRmRCs = getEnv("REMOVERCS", sensor);
+    auto senRmRCs = env::getEnv("REMOVERCS", sensor);
     if (!senRmRCs.empty())
     {
         // Add sensor removal return codes defined per sensor
@@ -155,13 +155,13 @@ auto addValue(const SensorSet::key_type& sensor,
             std::get<std::chrono::milliseconds>(retryIO),
             isOCC);
 
-    auto gain = getEnv("GAIN", sensor);
+    auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
     {
         sensorAdjusts[sensor].gain = std::stod(gain);
     }
 
-    auto offset = getEnv("OFFSET", sensor);
+    auto offset = env::getEnv("OFFSET", sensor);
     if (!offset.empty())
     {
         sensorAdjusts[sensor].offset = std::stoi(offset);
@@ -179,12 +179,12 @@ auto addValue(const SensorSet::key_type& sensor,
         iface->scale(sensor::getScale(attrs));
     }
 
-    auto maxValue = getEnv("MAXVALUE", sensor);
+    auto maxValue = env::getEnv("MAXVALUE", sensor);
     if(!maxValue.empty())
     {
         iface->maxValue(std::stoll(maxValue));
     }
-    auto minValue = getEnv("MINVALUE", sensor);
+    auto minValue = env::getEnv("MINVALUE", sensor);
     if(!minValue.empty())
     {
         iface->minValue(std::stoll(minValue));
@@ -223,7 +223,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
      * doesn't exist, then the name of DBUS object is the value of the env
      * variable LABEL_<item><X>.
      */
-    auto mode = getEnv("MODE", sensor.first);
+    auto mode = env::getEnv("MODE", sensor.first);
     if (!mode.compare(hwmon::entry::label))
     {
         id = getIndirectID(
@@ -240,7 +240,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     id = (id.empty()) ? sensor.first.second : id;
 
     // Ignore inputs without a label.
-    label = getEnv("LABEL", sensor.first.first, id);
+    label = env::getEnv("LABEL", sensor.first.first, id);
     if (label.empty())
     {
         return;
