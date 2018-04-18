@@ -5,6 +5,7 @@
 #include "xyz/openbmc_project/Sensor/Threshold/Critical/server.hpp"
 #include "xyz/openbmc_project/Control/FanSpeed/server.hpp"
 #include "xyz/openbmc_project/Control/FanPwm/server.hpp"
+#include "xyz/openbmc_project/State/Decorator/OperationalStatus/server.hpp"
 #include <sdbusplus/server.hpp>
 
 template <typename... T>
@@ -24,6 +25,9 @@ using FanSpeedObject = ServerObject<FanSpeedInterface>;
 using FanPwmInterface =
     sdbusplus::xyz::openbmc_project::Control::server::FanPwm;
 using FanPwmObject = ServerObject<FanPwmInterface>;
+using StatusInterface =
+    sdbusplus::xyz::openbmc_project::State::Decorator::server::OperationalStatus;
+using StatusObject = ServerObject<StatusInterface>;
 
 enum class InterfaceType
 {
@@ -32,6 +36,7 @@ enum class InterfaceType
     CRIT,
     FAN_SPEED,
     FAN_PWM,
+    STATUS,
 };
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
