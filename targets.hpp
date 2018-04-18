@@ -103,8 +103,8 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
     if (fs::exists(sysfsFullPath))
     {
         auto useTarget = true;
-        auto tmEnv = getenv("TARGET_MODE");
-        if (tmEnv)
+        auto tmEnv = env::getEnv("TARGET_MODE");
+        if (!tmEnv.empty())
         {
             std::string mode{tmEnv};
             std::transform(mode.begin(), mode.end(), mode.begin(), toupper);
