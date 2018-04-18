@@ -24,6 +24,7 @@ libhwmon_la_SOURCES = \
 	env.cpp \
 	fan_speed.cpp \
 	fan_pwm.cpp \
-	timer.cpp
+	timer.cpp \
+	sensor.cpp
 
 SUBDIRS = . test msl
