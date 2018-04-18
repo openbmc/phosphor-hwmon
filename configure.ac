@@ -29,14 +29,21 @@ AC_CHECK_HEADER(experimental/filesystem, ,[AC_MSG_ERROR([Could not find experime
 LT_INIT
 
 # Check/set gtest specific functions.
-AX_PTHREAD([GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=1"],[GTEST_CPPFLAGS="-DGTEST_HAS_PTHREAD=0"])
-AC_SUBST(GTEST_CPPFLAGS)
+PKG_CHECK_MODULES([GTEST], [gtest], [], [AC_MSG_NOTICE([gtest not found, tests will not build])])
+PKG_CHECK_MODULES([GMOCK], [gmock], [], [AC_MSG_NOTICE([gmock not found, tests will not build])])
+AX_PTHREAD([GTEST_CFLAGS+=" -DGTEST_HAS_PTHREAD=1 "],[GTEST_CFLAGS+=" -DGTEST_HAS_PTHREAD=0 "])
 
+# Add --enable-oe-sdk flag to configure script
 AC_ARG_ENABLE([oe-sdk],
     AS_HELP_STRING([--enable-oe-sdk], [Link testcases absolutely against OE SDK so they can be ran within it.])
 )
+
+# Check for OECORE_TARGET_SYSROOT in the environment.
 AC_ARG_VAR(OECORE_TARGET_SYSROOT,
     [Path to the OE SDK SYSROOT])
+
+# Configure OESDK_TESTCASE_FLAGS environment variable, which will be later
+# used in test/Makefile.am
 AS_IF([test "x$enable_oe_sdk" == "xyes"],
     AS_IF([test "x$OECORE_TARGET_SYSROOT" == "x"],
           AC_MSG_ERROR([OECORE_TARGET_SYSROOT must be set with --enable-oe-sdk])
