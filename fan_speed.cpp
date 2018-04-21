@@ -4,6 +4,7 @@
 #include "env.hpp"
 #include "fan_speed.hpp"
 #include "hwmon.hpp"
+#include "hwmonio.hpp"
 #include "sysfs.hpp"
 
 using namespace phosphor::logging;
@@ -25,8 +26,8 @@ uint64_t FanSpeed::target(uint64_t value)
                     type,
                     id,
                     entry::target,
-                    sysfs::hwmonio::retries,
-                    sysfs::hwmonio::delay);
+                    hwmonio::retries,
+                    hwmonio::delay);
 
         }
         catch (const std::system_error& e)
@@ -70,8 +71,8 @@ void FanSpeed::enable()
                     type::pwm,
                     id,
                     entry::enable,
-                    sysfs::hwmonio::retries,
-                    sysfs::hwmonio::delay);
+                    hwmonio::retries,
+                    hwmonio::delay);
         }
         catch (const std::system_error& e)
         {

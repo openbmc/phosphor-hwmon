@@ -5,6 +5,7 @@
 #include <experimental/any>
 #include <memory>
 #include <sdbusplus/server.hpp>
+#include "hwmonio.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 #include "interface.hpp"
@@ -96,7 +97,7 @@ class MainLoop
         /** @brief Sleep interval in microseconds. */
         uint64_t _interval = default_interval;
         /** @brief Hwmon sysfs access. */
-        sysfs::hwmonio::HwmonIO ioAccess;
+        hwmonio::HwmonIO ioAccess;
         /** @brief Timer */
         std::unique_ptr<phosphor::hwmon::Timer> timer;
         /** @brief the sd_event structure */

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hwmonio.hpp"
 #include "interface.hpp"
 #include "sysfs.hpp"
 
@@ -54,7 +55,7 @@ class FanPwm : public FanPwmObject
         /** @brief hwmon id */
         std::string id;
         /** @brief Hwmon sysfs access. */
-        sysfs::hwmonio::HwmonIO ioAccess;
+        hwmonio::HwmonIO ioAccess;
         /** @brief Physical device path. */
         std::string devPath;
 };
