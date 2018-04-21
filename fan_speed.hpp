@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <sdbusplus/bus.hpp>
+#include <string>
+
 #include "hwmonio.hpp"
 #include "interface.hpp"
 #include "sysfs.hpp"
@@ -20,8 +24,8 @@ class FanSpeed : public FanSpeedObject
         /**
          * @brief Constructs FanSpeed Object
          *
-         * @param[in] instancePath - The hwmon instance path
-         *     (ex. /sys/class/hwmon/hwmon1)
+         * @param[in] HwmonIoInterface ptr to instancePath - The hwmon instance
+         *     path (ex. /sys/class/hwmon/hwmon1)
          * @param[in] devPath - The /sys/devices sysfs path
          * @param[in] id - The hwmon id
          * @param[in] bus - Dbus bus object
@@ -29,7 +33,7 @@ class FanSpeed : public FanSpeedObject
          * @param[in] defer - Dbus object registration defer
          * @param[in] target - initial target speed value
          */
-        FanSpeed(const std::string& instancePath,
+        FanSpeed(std::unique_ptr<hwmonio::HwmonIoInterface> io,
                  const std::string& devPath,
                  const std::string& id,
                  sdbusplus::bus::bus& bus,
@@ -37,7 +41,7 @@ class FanSpeed : public FanSpeedObject
                  bool defer,
                  uint64_t target) : FanSpeedObject(bus, objPath, defer),
                     id(id),
-                    ioAccess(instancePath),
+                    ioAccess(std::move(io)),
                     devPath(devPath)
         {
             FanSpeedObject::target(target);
@@ -62,7 +66,7 @@ class FanSpeed : public FanSpeedObject
         /** @brief hwmon id */
         std::string id;
         /** @brief Hwmon sysfs access. */
-        hwmonio::HwmonIO ioAccess;
+        std::unique_ptr<hwmonio::HwmonIoInterface> ioAccess;
         /** @brief Physical device path. */
         std::string devPath;
 
