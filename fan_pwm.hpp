@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <sdbusplus/bus.hpp>
+#include <string>
+
 #include "hwmonio.hpp"
 #include "interface.hpp"
 #include "sysfs.hpp"
@@ -20,15 +24,15 @@ class FanPwm : public FanPwmObject
         /**
          * @brief Constructs FanPwm Object
          *
-         * @param[in] instancePath - The hwmon instance path
-         *     (ex. /sys/class/hwmon/hwmon1)
+         * @param[in] HwmonIoInterface ptr to instancePath - The hwmon instance
+         *     path (ex. /sys/class/hwmon/hwmon1)
          * @param[in] devPath - The /sys/devices sysfs path
          * @param[in] id - The hwmon id
          * @param[in] bus - Dbus bus object
          * @param[in] objPath - Dbus object path
          * @param[in] defer - Dbus object registration defer
          */
-    FanPwm(const std::string& instancePath,
+    FanPwm(std::unique_ptr<hwmonio::HwmonIoInterface> io,
            const std::string& devPath,
            const std::string& id,
            sdbusplus::bus::bus& bus,
@@ -36,7 +40,7 @@ class FanPwm : public FanPwmObject
            bool defer,
            uint64_t target) : FanPwmObject(bus, objPath, defer),
                 id(id),
-                ioAccess(instancePath),
+                ioAccess(std::move(io)),
                 devPath(devPath)
         {
             FanPwmObject::target(target);
@@ -55,7 +59,7 @@ class FanPwm : public FanPwmObject
         /** @brief hwmon id */
         std::string id;
         /** @brief Hwmon sysfs access. */
-        hwmonio::HwmonIO ioAccess;
+        std::unique_ptr<hwmonio::HwmonIoInterface> ioAccess;
         /** @brief Physical device path. */
         std::string devPath;
 };
