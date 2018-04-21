@@ -27,7 +27,8 @@
 using namespace std::string_literals;
 namespace fs = std::experimental::filesystem;
 
-namespace sysfs {
+namespace sysfs
+{
 
 static constexpr auto retryableErrors = {
     /*
@@ -69,9 +70,8 @@ static constexpr auto retryableErrors = {
 static const auto emptyString = ""s;
 static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
 
-std::string findPhandleMatch(
-        const std::string& iochanneldir,
-        const std::string& phandledir)
+std::string findPhandleMatch(const std::string& iochanneldir,
+                             const std::string& phandledir)
 {
     // TODO: At the moment this method only supports device trees
     // with iio-hwmon nodes with a single sensor.  Typically
@@ -93,9 +93,8 @@ std::string findPhandleMatch(
     uint32_t ioChannelsValue;
     std::ifstream ioChannelsFile(ioChannelsPath);
 
-    ioChannelsFile.read(
-            reinterpret_cast<char*>(&ioChannelsValue),
-            sizeof(ioChannelsValue));
+    ioChannelsFile.read(reinterpret_cast<char*>(&ioChannelsValue),
+                        sizeof(ioChannelsValue));
 
     for (const auto& ofInst : fs::recursive_directory_iterator(phandledir))
     {
@@ -107,9 +106,8 @@ std::string findPhandleMatch(
         std::ifstream pHandleFile(path);
         uint32_t pHandleValue;
 
-        pHandleFile.read(
-                reinterpret_cast<char*>(&pHandleValue),
-                sizeof(pHandleValue));
+        pHandleFile.read(reinterpret_cast<char*>(&pHandleValue),
+                         sizeof(pHandleValue));
 
         if (ioChannelsValue == pHandleValue)
         {
@@ -165,7 +163,7 @@ std::string findCalloutPath(const std::string& instancePath)
     // If a match is found, use the corresponding /sys/devices
     // iio device as the callout device.
     static constexpr auto iioDevices = "/sys/bus/iio/devices";
-    for (const auto& iioDev: fs::recursive_directory_iterator(iioDevices))
+    for (const auto& iioDev : fs::recursive_directory_iterator(iioDevices))
     {
         p = iioDev.path();
         p /= "of_node";
@@ -248,9 +246,9 @@ std::string findHwmonFromDevPath(const std::string& devPath)
 
     try
     {
-        //This path is also used as a filesystem path to an environment
-        //file, and that has issues with ':'s in the path so they've
-        //been converted to '--'s.  Convert them back now.
+        // This path is also used as a filesystem path to an environment
+        // file, and that has issues with ':'s in the path so they've
+        // been converted to '--'s.  Convert them back now.
         size_t pos = 0;
         std::string path = p;
         while ((pos = path.find("--")) != std::string::npos)
@@ -261,7 +259,7 @@ std::string findHwmonFromDevPath(const std::string& devPath)
         for (const auto& hwmonInst : fs::directory_iterator(path))
         {
             if ((hwmonInst.path().filename().string().find("hwmon") !=
-                   std::string::npos))
+                 std::string::npos))
             {
                 return hwmonInst.path();
             }
@@ -270,9 +268,8 @@ std::string findHwmonFromDevPath(const std::string& devPath)
     catch (const std::exception& e)
     {
         using namespace phosphor::logging;
-        log<level::ERR>(
-                "Unable to find hwmon directory from the dev path",
-                entry("PATH=%s", devPath.c_str()));
+        log<level::ERR>("Unable to find hwmon directory from the dev path",
+                        entry("PATH=%s", devPath.c_str()));
     }
     return emptyString;
 }
@@ -282,26 +279,18 @@ namespace hwmonio
 
 HwmonIO::HwmonIO(const std::string& path) : p(path)
 {
-
 }
 
-int64_t HwmonIO::read(
-        const std::string& type,
-        const std::string& id,
-        const std::string& sensor,
-        size_t retries,
-        std::chrono::milliseconds delay,
-        bool isOCC) const
+int64_t HwmonIO::read(const std::string& type, const std::string& id,
+                      const std::string& sensor, size_t retries,
+                      std::chrono::milliseconds delay, bool isOCC) const
 {
     int64_t val;
     std::ifstream ifs;
-    auto fullPath = sysfs::make_sysfs_path(
-            p, type, id, sensor);
+    auto fullPath = sysfs::make_sysfs_path(p, type, id, sensor);
 
-    ifs.exceptions(
-            std::ifstream::failbit |
-                std::ifstream::badbit |
-                std::ifstream::eofbit);
+    ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit |
+                   std::ifstream::eofbit);
 
     while (true)
     {
@@ -326,13 +315,13 @@ int64_t HwmonIO::read(
             if (rc == ENOENT || rc == ENODEV)
             {
                 // If the directory or device disappeared then this application
-                // should gracefully exit.  There are race conditions between the
-                // unloading of a hwmon driver and the stopping of this service
-                // by systemd.  To prevent this application from falsely failing
-                // in these scenarios, it will simply exit if the directory or
-                // file can not be found.  It is up to the user(s) of this
-                // provided hwmon object to log the appropriate errors if the
-                // object disappears when it should not.
+                // should gracefully exit.  There are race conditions between
+                // the unloading of a hwmon driver and the stopping of this
+                // service by systemd.  To prevent this application from falsely
+                // failing in these scenarios, it will simply exit if the
+                // directory or file can not be found.  It is up to the user(s)
+                // of this provided hwmon object to log the appropriate errors
+                // if the object disappears when it should not.
                 exit(0);
             }
 
@@ -348,13 +337,11 @@ int64_t HwmonIO::read(
                 }
             }
 
-            if (0 == std::count(
-                        retryableErrors.begin(),
-                        retryableErrors.end(),
-                        rc) ||
-                    !retries)
+            if (0 == std::count(retryableErrors.begin(), retryableErrors.end(),
+                                rc) ||
+                !retries)
             {
-                // Not a retryable error or out of retries.
+            // Not a retryable error or out of retries.
 #ifdef NEGATIVE_ERRNO_ON_FAIL
                 return -rc;
 #endif
@@ -374,23 +361,16 @@ int64_t HwmonIO::read(
     return val;
 }
 
-void HwmonIO::write(
-        uint32_t val,
-        const std::string& type,
-        const std::string& id,
-        const std::string& sensor,
-        size_t retries,
-        std::chrono::milliseconds delay) const
+void HwmonIO::write(uint32_t val, const std::string& type,
+                    const std::string& id, const std::string& sensor,
+                    size_t retries, std::chrono::milliseconds delay) const
 
 {
     std::ofstream ofs;
-    auto fullPath = sysfs::make_sysfs_path(
-            p, type, id, sensor);
+    auto fullPath = sysfs::make_sysfs_path(p, type, id, sensor);
 
-    ofs.exceptions(
-            std::ofstream::failbit |
-                std::ofstream::badbit |
-                std::ofstream::eofbit);
+    ofs.exceptions(std::ofstream::failbit | std::ofstream::badbit |
+                   std::ofstream::eofbit);
 
     // See comments in the read method for an explanation of the odd exception
     // handling behavior here.
@@ -421,11 +401,9 @@ void HwmonIO::write(
                 exit(0);
             }
 
-            if (0 == std::count(
-                        retryableErrors.begin(),
-                        retryableErrors.end(),
-                        rc) ||
-                    !retries)
+            if (0 == std::count(retryableErrors.begin(), retryableErrors.end(),
+                                rc) ||
+                !retries)
             {
                 // Not a retryable error or out of retries.
 

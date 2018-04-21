@@ -66,12 +66,11 @@ void ArgumentParser::usage(char** argv)
     std::cerr << std::flush;
 }
 
-const option ArgumentParser::options[] =
-{
-    { "path",   required_argument,  NULL,   'p' },
-    { "dev-path", required_argument,  NULL, 'o' },
-    { "help",   no_argument,        NULL,   'h' },
-    { 0, 0, 0, 0},
+const option ArgumentParser::options[] = {
+    {"path", required_argument, NULL, 'p'},
+    {"dev-path", required_argument, NULL, 'o'},
+    {"help", no_argument, NULL, 'h'},
+    {0, 0, 0, 0},
 };
 
 const char* ArgumentParser::optionstr = "o:p:?h";

@@ -20,8 +20,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 2)
     {
-        std::cerr << "Usage: " << argv[0]
-            << " HWMON_INST_PATH" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " HWMON_INST_PATH" << std::endl;
         return 1;
     }
 

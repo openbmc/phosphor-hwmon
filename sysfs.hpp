@@ -5,7 +5,8 @@
 #include <fstream>
 #include <string>
 
-namespace sysfs {
+namespace sysfs
+{
 
 inline std::string make_sysfs_path(const std::string& path,
                                    const std::string& type,
@@ -14,7 +15,8 @@ inline std::string make_sysfs_path(const std::string& path,
 {
     using namespace std::literals;
 
-    if (entry.empty()) {
+    if (entry.empty())
+    {
         return path + "/"s + type + id;
     }
 
@@ -35,9 +37,8 @@ inline std::string make_sysfs_path(const std::string& path,
  *
  *  @return Path to phandle file with value matching that in io-channels
  */
-std::string findPhandleMatch(
-        const std::string& iochanneldir,
-        const std::string& phandledir);
+std::string findPhandleMatch(const std::string& iochanneldir,
+                             const std::string& phandledir);
 
 /** @brief Find hwmon instances from an open-firmware device tree path
  *
@@ -91,80 +92,71 @@ static constexpr auto delay = std::chrono::milliseconds{100};
  */
 class HwmonIO
 {
-    public:
-        HwmonIO() = delete;
-        HwmonIO(const HwmonIO&) = default;
-        HwmonIO(HwmonIO&&) = default;
-        HwmonIO& operator=(const HwmonIO&) = default;
-        HwmonIO& operator=(HwmonIO&&) = default;
-        ~HwmonIO() = default;
+  public:
+    HwmonIO() = delete;
+    HwmonIO(const HwmonIO&) = default;
+    HwmonIO(HwmonIO&&) = default;
+    HwmonIO& operator=(const HwmonIO&) = default;
+    HwmonIO& operator=(HwmonIO&&) = default;
+    ~HwmonIO() = default;
 
-        /** @brief Constructor
-         *
-         *  @param[in] path - hwmon instance root - eg:
-         *      /sys/class/hwmon/hwmon<N>
-         */
-        explicit HwmonIO(const std::string& path);
+    /** @brief Constructor
+     *
+     *  @param[in] path - hwmon instance root - eg:
+     *      /sys/class/hwmon/hwmon<N>
+     */
+    explicit HwmonIO(const std::string& path);
 
-        /** @brief Perform formatted hwmon sysfs read.
-         *
-         *  Propagates any exceptions other than ENOENT.
-         *  ENOENT will result in a call to exit(0) in case
-         *  the underlying hwmon driver is unbound and
-         *  the program is inadvertently left running.
-         *
-         *  For possibly transient errors will retry up to
-         *  the specified number of times.
-         *
-         *  @param[in] type - The hwmon type (ex. temp).
-         *  @param[in] id - The hwmon id (ex. 1).
-         *  @param[in] sensor - The hwmon sensor (ex. input).
-         *  @param[in] retries - The number of times to retry.
-         *  @param[in] delay - The time to sleep between retry attempts.
-         *
-         *  @return val - The read value.
-         */
-        int64_t read(
-                const std::string& type,
-                const std::string& id,
-                const std::string& sensor,
-                size_t retries,
-                std::chrono::milliseconds delay,
-                bool isOCC = false) const;
+    /** @brief Perform formatted hwmon sysfs read.
+     *
+     *  Propagates any exceptions other than ENOENT.
+     *  ENOENT will result in a call to exit(0) in case
+     *  the underlying hwmon driver is unbound and
+     *  the program is inadvertently left running.
+     *
+     *  For possibly transient errors will retry up to
+     *  the specified number of times.
+     *
+     *  @param[in] type - The hwmon type (ex. temp).
+     *  @param[in] id - The hwmon id (ex. 1).
+     *  @param[in] sensor - The hwmon sensor (ex. input).
+     *  @param[in] retries - The number of times to retry.
+     *  @param[in] delay - The time to sleep between retry attempts.
+     *
+     *  @return val - The read value.
+     */
+    int64_t read(const std::string& type, const std::string& id,
+                 const std::string& sensor, size_t retries,
+                 std::chrono::milliseconds delay, bool isOCC = false) const;
 
-        /** @brief Perform formatted hwmon sysfs write.
-         *
-         *  Propagates any exceptions other than ENOENT.
-         *  ENOENT will result in a call to exit(0) in case
-         *  the underlying hwmon driver is unbound and
-         *  the program is inadvertently left running.
-         *
-         *  For possibly transient errors will retry up to
-         *  the specified number of times.
-         *
-         *  @param[in] val - The value to be written.
-         *  @param[in] type - The hwmon type (ex. fan).
-         *  @param[in] id - The hwmon id (ex. 1).
-         *  @param[in] retries - The number of times to retry.
-         *  @param[in] delay - The time to sleep between retry attempts.
-         */
-        void write(
-                uint32_t val,
-                const std::string& type,
-                const std::string& id,
-                const std::string& sensor,
-                size_t retries,
-                std::chrono::milliseconds delay) const;
+    /** @brief Perform formatted hwmon sysfs write.
+     *
+     *  Propagates any exceptions other than ENOENT.
+     *  ENOENT will result in a call to exit(0) in case
+     *  the underlying hwmon driver is unbound and
+     *  the program is inadvertently left running.
+     *
+     *  For possibly transient errors will retry up to
+     *  the specified number of times.
+     *
+     *  @param[in] val - The value to be written.
+     *  @param[in] type - The hwmon type (ex. fan).
+     *  @param[in] id - The hwmon id (ex. 1).
+     *  @param[in] retries - The number of times to retry.
+     *  @param[in] delay - The time to sleep between retry attempts.
+     */
+    void write(uint32_t val, const std::string& type, const std::string& id,
+               const std::string& sensor, size_t retries,
+               std::chrono::milliseconds delay) const;
 
+    /** @brief Hwmon instance path access.
+     *
+     *  @return path - The hwmon instance path.
+     */
+    std::string path() const;
 
-        /** @brief Hwmon instance path access.
-         *
-         *  @return path - The hwmon instance path.
-         */
-        std::string path() const;
-
-    private:
-        std::string p;
+  private:
+    std::string p;
 };
 } // namespace hwmonio
 }

@@ -23,8 +23,7 @@ static constexpr auto PWM_TARGET = "PWM";
  *
  *  @tparam T - The target type.
  */
-template <typename T>
-struct Targets
+template <typename T> struct Targets
 {
     static void fail()
     {
@@ -33,14 +32,12 @@ struct Targets
 };
 
 /**@brief Targets specialization for fan speed. */
-template <>
-struct Targets<hwmon::FanSpeed>
+template <> struct Targets<hwmon::FanSpeed>
 {
     static constexpr InterfaceType type = InterfaceType::FAN_SPEED;
 };
 
-template <>
-struct Targets<hwmon::FanPwm>
+template <> struct Targets<hwmon::FanPwm>
 {
     static constexpr InterfaceType type = InterfaceType::FAN_PWM;
 };
@@ -62,8 +59,7 @@ struct Targets<hwmon::FanPwm>
 template <typename T>
 std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                              const sysfs::hwmonio::HwmonIO& ioAccess,
-                             const std::string& devPath,
-                             ObjectInfo& info)
+                             const std::string& devPath, ObjectInfo& info)
 {
     std::shared_ptr<T> target;
     namespace fs = std::experimental::filesystem;
@@ -96,10 +92,8 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
         entry = empty;
     }
 
-    sysfsFullPath = sysfs::make_sysfs_path(ioAccess.path(),
-                                           targetName,
-                                           targetId,
-                                           entry);
+    sysfsFullPath =
+        sysfs::make_sysfs_path(ioAccess.path(), targetName, targetId, entry);
     if (fs::exists(sysfsFullPath))
     {
         auto useTarget = true;
@@ -126,11 +120,10 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
             else
             {
                 using namespace phosphor::logging;
-                log<level::ERR>("Invalid TARGET_MODE env var found",
-                        phosphor::logging::entry(
-                                "TARGET_MODE=%s", tmEnv),
-                        phosphor::logging::entry(
-                                "DEVPATH=%s", devPath.c_str()));
+                log<level::ERR>(
+                    "Invalid TARGET_MODE env var found",
+                    phosphor::logging::entry("TARGET_MODE=%s", tmEnv),
+                    phosphor::logging::entry("DEVPATH=%s", devPath.c_str()));
             }
         }
 
@@ -140,37 +133,30 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
 
             try
             {
-                targetSpeed = ioAccess.read(
-                    targetName,
-                    targetId,
-                    entry,
-                    sysfs::hwmonio::retries,
-                    sysfs::hwmonio::delay);
+                targetSpeed = ioAccess.read(targetName, targetId, entry,
+                                            sysfs::hwmonio::retries,
+                                            sysfs::hwmonio::delay);
             }
             catch (const std::system_error& e)
             {
                 using namespace phosphor::logging;
-                using namespace sdbusplus::xyz::openbmc_project::
-                    Sensor::Device::Error;
-                using metadata = xyz::openbmc_project::Sensor::
-                    Device::ReadFailure;
+                using namespace sdbusplus::xyz::openbmc_project::Sensor::
+                    Device::Error;
+                using metadata =
+                    xyz::openbmc_project::Sensor::Device::ReadFailure;
 
                 report<ReadFailure>(
-                        metadata::CALLOUT_ERRNO(e.code().value()),
-                        metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
+                    metadata::CALLOUT_ERRNO(e.code().value()),
+                    metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
-                log<level::INFO>("Logging failing sysfs file",
-                        phosphor::logging::entry(
-                                "FILE=%s", sysfsFullPath.c_str()));
+                log<level::INFO>(
+                    "Logging failing sysfs file",
+                    phosphor::logging::entry("FILE=%s", sysfsFullPath.c_str()));
             }
 
-            target = std::make_shared<T>(ioAccess.path(),
-                                         devPath,
-                                         targetId,
-                                         bus,
-                                         objPath.c_str(),
-                                         deferSignals,
-                                         targetSpeed);
+            target =
+                std::make_shared<T>(ioAccess.path(), devPath, targetId, bus,
+                                    objPath.c_str(), deferSignals, targetSpeed);
             obj[type] = target;
         }
     }

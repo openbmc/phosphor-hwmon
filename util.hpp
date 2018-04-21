@@ -9,8 +9,7 @@ namespace utility
 /** @struct Free
  *  @brief A malloc cleanup type for use with smart pointers.
  */
-template <typename T>
-struct Free
+template <typename T> struct Free
 {
     void operator()(T* ptr) const
     {

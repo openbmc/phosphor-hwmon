@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     if (argc < 6)
     {
         std::cerr << "Usage: " << argv[0]
-            << " [read|write] PATH TYPE N ATTR [VALUE]" << std::endl;
+                  << " [read|write] PATH TYPE N ATTR [VALUE]" << std::endl;
         return 1;
     }
 
@@ -32,16 +32,14 @@ int main(int argc, char* argv[])
 
     if ("read"s == argv[1])
     {
-        std::cout << io.read(argv[3], argv[4], argv[5],
-                sysfs::hwmonio::retries, sysfs::hwmonio::delay) <<
-            std::endl;
+        std::cout << io.read(argv[3], argv[4], argv[5], sysfs::hwmonio::retries,
+                             sysfs::hwmonio::delay)
+                  << std::endl;
     }
     else
     {
-        io.write(
-                strtol(argv[6], nullptr, 0),
-                argv[3], argv[4], argv[5], sysfs::hwmonio::retries,
-                sysfs::hwmonio::delay);
+        io.write(strtol(argv[6], nullptr, 0), argv[3], argv[4], argv[5],
+                 sysfs::hwmonio::retries, sysfs::hwmonio::delay);
     }
 
     return 0;

@@ -45,9 +45,11 @@ decltype(Thresholds<WarningObject>::getLo) Thresholds<WarningObject>::getLo =
     &WarningObject::warningLow;
 decltype(Thresholds<WarningObject>::getHi) Thresholds<WarningObject>::getHi =
     &WarningObject::warningHigh;
-decltype(Thresholds<WarningObject>::alarmLo) Thresholds<WarningObject>::alarmLo =
+decltype(
+    Thresholds<WarningObject>::alarmLo) Thresholds<WarningObject>::alarmLo =
     &WarningObject::warningAlarmLow;
-decltype(Thresholds<WarningObject>::alarmHi) Thresholds<WarningObject>::alarmHi =
+decltype(
+    Thresholds<WarningObject>::alarmHi) Thresholds<WarningObject>::alarmHi =
     &WarningObject::warningAlarmHigh;
 
 // Initialization for Critical Objects
@@ -59,9 +61,11 @@ decltype(Thresholds<CriticalObject>::getLo) Thresholds<CriticalObject>::getLo =
     &CriticalObject::criticalLow;
 decltype(Thresholds<CriticalObject>::getHi) Thresholds<CriticalObject>::getHi =
     &CriticalObject::criticalHigh;
-decltype(Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmLo =
+decltype(
+    Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmLo =
     &CriticalObject::criticalAlarmLow;
-decltype(Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
+decltype(
+    Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
 
 // The gain and offset to adjust a value
@@ -75,12 +79,10 @@ struct valueAdjust
 // Store the valueAdjust for sensors
 std::map<SensorSet::key_type, valueAdjust> sensorAdjusts;
 
-void addRemoveRCs(const SensorSet::key_type& sensor,
-                  const std::string& rcList)
+void addRemoveRCs(const SensorSet::key_type& sensor, const std::string& rcList)
 {
     // Convert to a char* for strtok
-    std::vector<char> rmRCs(rcList.c_str(),
-                            rcList.c_str() + rcList.size() + 1);
+    std::vector<char> rmRCs(rcList.c_str(), rcList.c_str() + rcList.size() + 1);
     auto rmRC = strtok(&rmRCs[0], ", ");
     while (rmRC != nullptr)
     {
@@ -118,16 +120,13 @@ int64_t adjustValue(const SensorSet::key_type& sensor, int64_t value)
     {
         // Adjust based on gain and offset
         value = static_cast<decltype(value)>(
-                    static_cast<double>(value) * it->second.gain
-                        + it->second.offset);
+            static_cast<double>(value) * it->second.gain + it->second.offset);
     }
     return value;
 }
 
-auto addValue(const SensorSet::key_type& sensor,
-              const RetryIO& retryIO,
-              sysfs::hwmonio::HwmonIO& ioAccess,
-              ObjectInfo& info,
+auto addValue(const SensorSet::key_type& sensor, const RetryIO& retryIO,
+              sysfs::hwmonio::HwmonIO& ioAccess, ObjectInfo& info,
               bool isOCC = false)
 {
     static constexpr bool deferSignals = true;
@@ -146,13 +145,10 @@ auto addValue(const SensorSet::key_type& sensor,
 
     // Retry for up to a second if device is busy
     // or has a transient error.
-    int64_t val = ioAccess.read(
-            sensor.first,
-            sensor.second,
-            hwmon::entry::cinput,
-            std::get<size_t>(retryIO),
-            std::get<std::chrono::milliseconds>(retryIO),
-            isOCC);
+    int64_t val =
+        ioAccess.read(sensor.first, sensor.second, hwmon::entry::cinput,
+                      std::get<size_t>(retryIO),
+                      std::get<std::chrono::milliseconds>(retryIO), isOCC);
 
     auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
@@ -168,7 +164,8 @@ auto addValue(const SensorSet::key_type& sensor,
 
     val = adjustValue(sensor, val);
 
-    auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
+    auto iface =
+        std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
     hwmon::Attributes attrs;
@@ -179,12 +176,12 @@ auto addValue(const SensorSet::key_type& sensor,
     }
 
     auto maxValue = env::getEnv("MAXVALUE", sensor);
-    if(!maxValue.empty())
+    if (!maxValue.empty())
     {
         iface->maxValue(std::stoll(maxValue));
     }
     auto minValue = env::getEnv("MINVALUE", sensor);
-    if(!minValue.empty())
+    if (!minValue.empty())
     {
         iface->minValue(std::stoll(minValue));
     }
@@ -225,8 +222,8 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     auto mode = env::getEnv("MODE", sensor.first);
     if (!mode.compare(hwmon::entry::label))
     {
-        id = env::getIndirectID(
-                _hwmonRoot + '/' + _instance + '/', sensor.first);
+        id = env::getIndirectID(_hwmonRoot + '/' + _instance + '/',
+                                sensor.first);
 
         if (id.empty())
         {
@@ -271,20 +268,17 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
         // don't retry on errors when reading its value
         std::get<size_t>(retryIO) = 0;
     }
-    auto valueInterface = static_cast<
-            std::shared_ptr<ValueObject>>(nullptr);
+    auto valueInterface = static_cast<std::shared_ptr<ValueObject>>(nullptr);
     try
     {
-        valueInterface = addValue(sensor.first, retryIO, ioAccess, info,
-                _isOCC);
+        valueInterface =
+            addValue(sensor.first, retryIO, ioAccess, info, _isOCC);
     }
     catch (const std::system_error& e)
     {
-        auto file = sysfs::make_sysfs_path(
-                ioAccess.path(),
-                sensor.first.first,
-                sensor.first.second,
-                hwmon::entry::cinput);
+        auto file =
+            sysfs::make_sysfs_path(ioAccess.path(), sensor.first.first,
+                                   sensor.first.second, hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
         // Check sensorAdjusts for sensor removal RCs
         const auto& it = sensorAdjusts.find(sensor.first);
@@ -298,25 +292,24 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
                 {
                     // Trace for sensor not already removed from dbus
                     log<level::INFO>("Sensor not added to dbus for read fail",
-                            entry("FILE=%s", file.c_str()),
-                            entry("RC=%d", e.code().value()));
+                                     entry("FILE=%s", file.c_str()),
+                                     entry("RC=%d", e.code().value()));
                     rmSensors[std::move(sensor.first)] =
-                            std::move(sensor.second);
+                        std::move(sensor.second);
                 }
                 return;
             }
         }
 #endif
-        using namespace sdbusplus::xyz::openbmc_project::
-                Sensor::Device::Error;
+        using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
-            xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_ERRNO(e.code().value()),
-            xyz::openbmc_project::Sensor::Device::
-                ReadFailure::CALLOUT_DEVICE_PATH(_devPath.c_str()));
+            xyz::openbmc_project::Sensor::Device::ReadFailure::CALLOUT_ERRNO(
+                e.code().value()),
+            xyz::openbmc_project::Sensor::Device::ReadFailure::
+                CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
         log<level::INFO>("Logging failing sysfs file",
-                entry("FILE=%s", file.c_str()));
+                         entry("FILE=%s", file.c_str()));
 #ifdef REMOVE_ON_FAIL
         return; /* skip adding this sensor for now. */
 #else
@@ -327,8 +320,8 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     addThreshold<WarningObject>(sensor.first.first, id, sensorValue, info);
     addThreshold<CriticalObject>(sensor.first.first, id, sensorValue, info);
 
-    auto target = addTarget<hwmon::FanSpeed>(
-            sensor.first, ioAccess, _devPath, info);
+    auto target =
+        addTarget<hwmon::FanSpeed>(sensor.first, ioAccess, _devPath, info);
     if (target)
     {
         target->enable();
@@ -339,29 +332,18 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     // and emit InterfacesAdded.
     valueInterface->emit_object_added();
 
-    auto value = std::make_tuple(
-                     std::move(sensor.second),
-                     std::move(label),
-                     std::move(info));
+    auto value = std::make_tuple(std::move(sensor.second), std::move(label),
+                                 std::move(info));
 
     state[std::move(sensor.first)] = std::move(value);
 }
 
-MainLoop::MainLoop(
-    sdbusplus::bus::bus&& bus,
-    const std::string& path,
-    const std::string& devPath,
-    const char* prefix,
-    const char* root)
-    : _bus(std::move(bus)),
-      _manager(_bus, root),
-      _hwmonRoot(),
-      _instance(),
-      _devPath(devPath),
-      _prefix(prefix),
-      _root(root),
-      state(),
-      ioAccess(path)
+MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& path,
+                   const std::string& devPath, const char* prefix,
+                   const char* root) :
+    _bus(std::move(bus)),
+    _manager(_bus, root), _hwmonRoot(), _instance(), _devPath(devPath),
+    _prefix(prefix), _root(root), state(), ioAccess(path)
 {
     if (path.find("occ") != std::string::npos)
     {
@@ -401,14 +383,12 @@ void MainLoop::run()
 
     sd_event_default(&loop);
 
-    std::function<void()> callback(std::bind(
-            &MainLoop::read, this));
+    std::function<void()> callback(std::bind(&MainLoop::read, this));
     try
     {
         timer = std::make_unique<phosphor::hwmon::Timer>(
-                                 loop, callback,
-                                 std::chrono::microseconds(_interval),
-                                 phosphor::hwmon::timer::ON);
+            loop, callback, std::chrono::microseconds(_interval),
+            phosphor::hwmon::timer::ON);
 
         // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
 
@@ -446,7 +426,7 @@ void MainLoop::init()
         std::string busname{_prefix};
         busname.append(1, '-');
         busname.append(
-                std::to_string(std::hash<decltype(_devPath)>{}(_devPath)));
+            std::to_string(std::hash<decltype(_devPath)>{}(_devPath)));
         busname.append(".Hwmon1");
         _bus.request_name(busname.c_str());
     }
@@ -474,7 +454,8 @@ void MainLoop::read()
             // Read value from sensor.
             int64_t value;
             std::string input = hwmon::entry::cinput;
-            if (i.first.first == "pwm") {
+            if (i.first.first == "pwm")
+            {
                 input = "";
             }
 
@@ -483,13 +464,9 @@ void MainLoop::read()
                 // Retry for up to a second if device is busy
                 // or has a transient error.
 
-                value = ioAccess.read(
-                        i.first.first,
-                        i.first.second,
-                        input,
-                        sysfs::hwmonio::retries,
-                        sysfs::hwmonio::delay,
-                        _isOCC);
+                value = ioAccess.read(i.first.first, i.first.second, input,
+                                      sysfs::hwmonio::retries,
+                                      sysfs::hwmonio::delay, _isOCC);
 
                 value = adjustValue(i.first, value);
 
@@ -505,15 +482,16 @@ void MainLoop::read()
                     switch (iface.first)
                     {
                         case InterfaceType::VALUE:
-                            valueIface = std::experimental::any_cast<std::shared_ptr<ValueObject>>
-                                        (iface.second);
+                            valueIface = std::experimental::any_cast<
+                                std::shared_ptr<ValueObject>>(iface.second);
                             valueIface->value(value);
                             break;
                         case InterfaceType::WARN:
                             checkThresholds<WarningObject>(iface.second, value);
                             break;
                         case InterfaceType::CRIT:
-                            checkThresholds<CriticalObject>(iface.second, value);
+                            checkThresholds<CriticalObject>(iface.second,
+                                                            value);
                             break;
                         default:
                             break;
@@ -523,10 +501,8 @@ void MainLoop::read()
             catch (const std::system_error& e)
             {
                 auto file = sysfs::make_sysfs_path(
-                        ioAccess.path(),
-                        i.first.first,
-                        i.first.second,
-                        hwmon::entry::cinput);
+                    ioAccess.path(), i.first.first, i.first.second,
+                    hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
                 // Check sensorAdjusts for sensor removal RCs
                 const auto& it = sensorAdjusts.find(i.first);
@@ -540,9 +516,9 @@ void MainLoop::read()
                         {
                             // Trace for sensor not already removed from dbus
                             log<level::INFO>(
-                                    "Remove sensor from dbus for read fail",
-                                    entry("FILE=%s", file.c_str()),
-                                    entry("RC=%d", e.code().value()));
+                                "Remove sensor from dbus for read fail",
+                                entry("FILE=%s", file.c_str()),
+                                entry("RC=%d", e.code().value()));
                             // Mark this sensor to be removed from dbus
                             rmSensors[i.first] = std::get<0>(i.second);
                         }
@@ -550,17 +526,16 @@ void MainLoop::read()
                     }
                 }
 #endif
-                using namespace sdbusplus::xyz::openbmc_project::
-                    Sensor::Device::Error;
+                using namespace sdbusplus::xyz::openbmc_project::Sensor::
+                    Device::Error;
                 report<ReadFailure>(
-                        xyz::openbmc_project::Sensor::Device::
-                            ReadFailure::CALLOUT_ERRNO(e.code().value()),
-                        xyz::openbmc_project::Sensor::Device::
-                            ReadFailure::CALLOUT_DEVICE_PATH(
-                                _devPath.c_str()));
+                    xyz::openbmc_project::Sensor::Device::ReadFailure::
+                        CALLOUT_ERRNO(e.code().value()),
+                    xyz::openbmc_project::Sensor::Device::ReadFailure::
+                        CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
                 log<level::INFO>("Logging failing sysfs file",
-                        entry("FILE=%s", file.c_str()));
+                                 entry("FILE=%s", file.c_str()));
 
 #ifdef REMOVE_ON_FAIL
                 rmSensors[i.first] = std::get<0>(i.second);
@@ -585,19 +560,16 @@ void MainLoop::read()
         if (state.find(it->first) == state.end())
         {
             SensorSet::container_t::value_type ssValueType =
-                    std::make_pair(it->first, it->second);
+                std::make_pair(it->first, it->second);
             getObject(ssValueType);
             if (state.find(it->first) != state.end())
             {
                 // Sensor object added, erase entry from removal list
                 auto file = sysfs::make_sysfs_path(
-                        ioAccess.path(),
-                        it->first.first,
-                        it->first.second,
-                        hwmon::entry::cinput);
-                log<level::INFO>(
-                        "Added sensor to dbus after successful read",
-                        entry("FILE=%s", file.c_str()));
+                    ioAccess.path(), it->first.first, it->first.second,
+                    hwmon::entry::cinput);
+                log<level::INFO>("Added sensor to dbus after successful read",
+                                 entry("FILE=%s", file.c_str()));
                 it = rmSensors.erase(it);
             }
             else

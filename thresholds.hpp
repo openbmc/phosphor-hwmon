@@ -7,8 +7,7 @@
  *
  *  @tparam T - The threshold type.
  */
-template <typename T>
-struct Thresholds
+template <typename T> struct Thresholds
 {
     static void fail()
     {
@@ -17,8 +16,7 @@ struct Thresholds
 };
 
 /**@brief Thresholds specialization for warning thresholds. */
-template <>
-struct Thresholds<WarningObject>
+template <> struct Thresholds<WarningObject>
 {
     static constexpr InterfaceType type = InterfaceType::WARN;
     static constexpr const char* envLo = "WARNLO";
@@ -32,8 +30,7 @@ struct Thresholds<WarningObject>
 };
 
 /**@brief Thresholds specialization for critical thresholds. */
-template <>
-struct Thresholds<CriticalObject>
+template <> struct Thresholds<CriticalObject>
 {
     static constexpr InterfaceType type = InterfaceType::CRIT;
     static constexpr const char* envLo = "CRITLO";
@@ -59,8 +56,7 @@ struct Thresholds<CriticalObject>
 template <typename T>
 void checkThresholds(std::experimental::any& iface, int64_t value)
 {
-    auto realIface = std::experimental::any_cast<std::shared_ptr<T>>
-                     (iface);
+    auto realIface = std::experimental::any_cast<std::shared_ptr<T>>(iface);
     auto lo = (*realIface.*Thresholds<T>::getLo)();
     auto hi = (*realIface.*Thresholds<T>::getHi)();
     (*realIface.*Thresholds<T>::alarmLo)(value <= lo);
@@ -80,10 +76,8 @@ void checkThresholds(std::experimental::any& iface, int64_t value)
  *  @param[in] info - The sdbusplus server connection and interfaces.
  */
 template <typename T>
-auto addThreshold(const std::string& sensorType,
-                  const std::string& sensorID,
-                  int64_t value,
-                  ObjectInfo& info)
+auto addThreshold(const std::string& sensorType, const std::string& sensorID,
+                  int64_t value, ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
 

@@ -69,12 +69,8 @@ int main(int argc, char** argv)
         exit_with_error("Unable to determine callout path.", argv);
     }
 
-    MainLoop loop(
-        sdbusplus::bus::new_default(),
-        path,
-        calloutPath,
-        BUSNAME_PREFIX,
-        SENSOR_ROOT);
+    MainLoop loop(sdbusplus::bus::new_default(), path, calloutPath,
+                  BUSNAME_PREFIX, SENSOR_ROOT);
     loop.run();
 
     return 0;
