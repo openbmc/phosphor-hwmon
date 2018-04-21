@@ -1,6 +1,7 @@
 #include "env.hpp"
 #include "fan_pwm.hpp"
 #include "hwmon.hpp"
+#include "hwmonio.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 
@@ -30,8 +31,8 @@ uint64_t FanPwm::target(uint64_t value)
                 type,
                 id,
                 empty,
-                sysfs::hwmonio::retries,
-                sysfs::hwmonio::delay);
+                hwmonio::retries,
+                hwmonio::delay);
         }
         catch (const std::system_error& e)
         {

@@ -27,6 +27,7 @@
 #include "fan_pwm.hpp"
 #include "fan_speed.hpp"
 #include "hwmon.hpp"
+#include "hwmonio.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 #include "mainloop.hpp"
@@ -127,7 +128,7 @@ int64_t adjustValue(const SensorSet::key_type& sensor, int64_t value)
 
 auto addValue(const SensorSet::key_type& sensor,
               const RetryIO& retryIO,
-              sysfs::hwmonio::HwmonIO& ioAccess,
+              hwmonio::HwmonIO& ioAccess,
               ObjectInfo& info,
               bool isOCC = false)
 {
@@ -265,7 +266,7 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
     objectPath.append(label);
 
     ObjectInfo info(&_bus, std::move(objectPath), Object());
-    RetryIO retryIO(sysfs::hwmonio::retries, sysfs::hwmonio::delay);
+    RetryIO retryIO(hwmonio::retries, hwmonio::delay);
     if (rmSensors.find(sensor.first) != rmSensors.end())
     {
         // When adding a sensor that was purposely removed,
@@ -488,8 +489,8 @@ void MainLoop::read()
                         i.first.first,
                         i.first.second,
                         input,
-                        sysfs::hwmonio::retries,
-                        sysfs::hwmonio::delay,
+                        hwmonio::retries,
+                        hwmonio::delay,
                         _isOCC);
 
                 value = adjustValue(i.first, value);

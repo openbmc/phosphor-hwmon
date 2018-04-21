@@ -7,6 +7,7 @@
 #include "env.hpp"
 #include "fan_speed.hpp"
 #include "fan_pwm.hpp"
+#include "hwmonio.hpp"
 
 enum class targetType
 {
@@ -61,7 +62,7 @@ struct Targets<hwmon::FanPwm>
  */
 template <typename T>
 std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
-                             const sysfs::hwmonio::HwmonIO& ioAccess,
+                             const hwmonio::HwmonIO& ioAccess,
                              const std::string& devPath,
                              ObjectInfo& info)
 {
@@ -144,8 +145,8 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                     targetName,
                     targetId,
                     entry,
-                    sysfs::hwmonio::retries,
-                    sysfs::hwmonio::delay);
+                    hwmonio::retries,
+                    hwmonio::delay);
             }
             catch (const std::system_error& e)
             {
