@@ -8,6 +8,33 @@ namespace hwmonio {
 static constexpr auto retries = 10;
 static constexpr auto delay = std::chrono::milliseconds{100};
 
+/** @class HwmonIoInterface
+ *  @brief Interface for IO.
+ */
+class HwmonIoInterface
+{
+    public:
+        virtual ~HwmonIoInterface() {}
+
+        virtual int64_t read(
+                const std::string& type,
+                const std::string& id,
+                const std::string& sensor,
+                size_t retries,
+                std::chrono::milliseconds delay,
+                bool isOCC = false) const = 0;
+
+        virtual void write(
+                uint32_t val,
+                const std::string& type,
+                const std::string& id,
+                const std::string& sensor,
+                size_t retries,
+                std::chrono::milliseconds delay) const = 0;
+
+        virtual std::string path() const = 0;
+};
+
 /** @class HwmonIO
  *  @brief Convenience wrappers for HWMON sysfs attribute IO.
  *
@@ -17,7 +44,7 @@ static constexpr auto delay = std::chrono::milliseconds{100};
  *  cannot always be terminated externally before we try to
  *  do an io.
  */
-class HwmonIO
+class HwmonIO : public HwmonIoInterface
 {
     public:
         HwmonIO() = delete;
@@ -58,7 +85,7 @@ class HwmonIO
                 const std::string& sensor,
                 size_t retries,
                 std::chrono::milliseconds delay,
-                bool isOCC = false) const;
+                bool isOCC = false) const override;
 
         /** @brief Perform formatted hwmon sysfs write.
          *
@@ -82,14 +109,14 @@ class HwmonIO
                 const std::string& id,
                 const std::string& sensor,
                 size_t retries,
-                std::chrono::milliseconds delay) const;
+                std::chrono::milliseconds delay) const override;
 
 
         /** @brief Hwmon instance path access.
          *
          *  @return path - The hwmon instance path.
          */
-        std::string path() const;
+        std::string path() const override;
 
     private:
         std::string p;
