@@ -19,6 +19,9 @@
 #include <cstdlib>
 #include <string>
 #include <unordered_set>
+#include <sstream>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <phosphor-logging/elog-errors.hpp>
 #include "config.h"
@@ -342,12 +345,14 @@ void MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 
 MainLoop::MainLoop(
     sdbusplus::bus::bus&& bus,
+    const std::string& param,
     const std::string& path,
     const std::string& devPath,
     const char* prefix,
     const char* root)
     : _bus(std::move(bus)),
       _manager(_bus, root),
+      _param(param),
       _hwmonRoot(),
       _instance(),
       _devPath(devPath),
@@ -436,12 +441,15 @@ void MainLoop::init()
     }
 
     {
-        std::string busname{_prefix};
-        busname.append(1, '-');
-        busname.append(
-                std::to_string(std::hash<decltype(_devPath)>{}(_devPath)));
-        busname.append(".Hwmon1");
-        _bus.request_name(busname.c_str());
+        std::stringstream ss;
+        ss << _prefix
+           << "-"
+           << std::to_string(std::hash<decltype(_devPath)>{}(_devPath))
+           << "-"
+           << std::to_string(std::hash<decltype(_param)>{}(_param))
+           << ".Hwmon1";
+
+        _bus.request_name(ss.str().c_str());
     }
 
     {
