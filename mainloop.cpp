@@ -19,6 +19,9 @@
 #include <cstdlib>
 #include <string>
 #include <unordered_set>
+#include <sstream>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <phosphor-logging/elog-errors.hpp>
 #include "config.h"
@@ -436,12 +439,15 @@ void MainLoop::init()
     }
 
     {
-        std::string busname{_prefix};
-        busname.append(1, '-');
-        busname.append(
-                std::to_string(std::hash<decltype(_devPath)>{}(_devPath)));
-        busname.append(".Hwmon1");
-        _bus.request_name(busname.c_str());
+        std::stringstream ss;
+        ss << _prefix
+           << "-"
+           << std::to_string(std::hash<decltype(_devPath)>{}(_devPath))
+           << "-"
+           << getpid()
+           << ".Hwmon1";
+
+        _bus.request_name(ss.str().c_str());
     }
 
     {
