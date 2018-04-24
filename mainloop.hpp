@@ -36,6 +36,7 @@ class MainLoop
         /** @brief Constructor
          *
          *  @param[in] bus - sdbusplus bus client connection.
+         *  @param[in] param - the path parameter provided
          *  @param[in] path - hwmon sysfs instance to manage
          *  @param[in] devPath - physical device sysfs path.
          *  @param[in] prefix - DBus busname prefix.
@@ -49,6 +50,7 @@ class MainLoop
          */
         MainLoop(
             sdbusplus::bus::bus&& bus,
+            const std::string& param,
             const std::string& path,
             const std::string& devPath,
             const char* prefix,
@@ -79,6 +81,8 @@ class MainLoop
         sdbusplus::bus::bus _bus;
         /** @brief sdbusplus freedesktop.ObjectManager storage. */
         sdbusplus::server::manager::manager _manager;
+        /** @brief the parameter path used. */
+        std::string _param;
         /** @brief hwmon sysfs class path. */
         std::string _hwmonRoot;
         /** @brief hwmon sysfs instance. */
