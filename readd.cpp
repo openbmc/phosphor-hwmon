@@ -35,6 +35,7 @@ int main(int argc, char** argv)
 
     // Parse out path argument.
     auto path = (*options)["dev-path"];
+    auto param = path;
     if (path != ArgumentParser::empty_string)
     {
         // This path may either be a device path (starts with
@@ -52,6 +53,7 @@ int main(int argc, char** argv)
     if (path == ArgumentParser::empty_string)
     {
         path = (*options)["path"];
+        param = path;
     }
 
     if (path == ArgumentParser::empty_string)
@@ -71,6 +73,7 @@ int main(int argc, char** argv)
 
     MainLoop loop(
         sdbusplus::bus::new_default(),
+        param,
         path,
         calloutPath,
         BUSNAME_PREFIX,
