@@ -149,16 +149,6 @@ auto addValue(const SensorSet::key_type& sensor,
     // Add sensor removal return codes defined per sensor
     addRemoveRCs(sensor, senRmRCs);
 
-    // Retry for up to a second if device is busy
-    // or has a transient error.
-    int64_t val = ioAccess.read(
-            sensor.first,
-            sensor.second,
-            hwmon::entry::cinput,
-            std::get<size_t>(retryIO),
-            std::get<std::chrono::milliseconds>(retryIO),
-            isOCC);
-
     auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
     {
@@ -171,7 +161,30 @@ auto addValue(const SensorSet::key_type& sensor,
         sensorAdjusts[sensor].offset = std::stoi(offset);
     }
 
-    val = adjustValue(sensor, val);
+    int64_t val = 0;
+    std::shared_ptr<StatusObject> statusIface = nullptr;
+    auto it = obj.find(InterfaceType::STATUS);
+    if (it != obj.end())
+    {
+        statusIface = std::experimental::any_cast<
+                std::shared_ptr<StatusObject>>(it->second);
+    }
+
+    // If there's no fault file or the sensor has a fault file and
+    // its status is functional, read the input value.
+    if (!statusIface || (statusIface && statusIface->functional()))
+    {
+        // Retry for up to a second if device is busy
+        // or has a transient error.
+        val = ioAccess.read(
+                sensor.first,
+                sensor.second,
+                hwmon::entry::cinput,
+                std::get<size_t>(retryIO),
+                std::get<std::chrono::milliseconds>(retryIO),
+                isOCC);
+        val = adjustValue(sensor, val);
+    }
 
     auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
@@ -292,6 +305,8 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
             std::shared_ptr<ValueObject>>(nullptr);
     try
     {
+        // Add status interface based on _fault file being present
+        sensor::addStatus(sensor.first, ioAccess, _devPath, info);
         valueInterface = addValue(sensor.first, retryIO, ioAccess, info,
                 _isOCC);
     }
@@ -357,9 +372,6 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
         target->enable();
     }
     addTarget<hwmon::FanPwm>(sensor.first, ioAccess, _devPath, info);
-
-    // Add status interface based on _fault file being present
-    sensor::addStatus(sensor.first, ioAccess, _devPath, info);
 
     // All the interfaces have been created.  Go ahead
     // and emit InterfacesAdded.
