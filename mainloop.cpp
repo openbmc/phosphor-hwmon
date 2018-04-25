@@ -526,6 +526,20 @@ void MainLoop::read()
 
             try
             {
+                auto& objInfo = std::get<ObjectInfo>(i.second);
+                auto& obj = std::get<Object>(objInfo);
+
+                auto it = obj.find(InterfaceType::STATUS);
+                if (it != obj.end())
+                {
+                    auto statusIface = std::experimental::any_cast<
+                            std::shared_ptr<StatusObject>>(it->second);
+                    if (!statusIface->functional())
+                    {
+                        continue;
+                    }
+                }
+
                 // Retry for up to a second if device is busy
                 // or has a transient error.
 
@@ -538,9 +552,6 @@ void MainLoop::read()
                         _isOCC);
 
                 value = adjustValue(i.first, value);
-
-                auto& objInfo = std::get<ObjectInfo>(i.second);
-                auto& obj = std::get<Object>(objInfo);
 
                 for (auto& iface : obj)
                 {
