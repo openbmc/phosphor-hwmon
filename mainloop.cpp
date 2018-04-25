@@ -523,9 +523,16 @@ void MainLoop::read()
                 auto it = obj.find(InterfaceType::STATUS);
                 if (it != obj.end())
                 {
+                    auto fault = ioAccess.read(
+                            i.first.first,
+                            i.first.second,
+                            hwmon::entry::fault,
+                            hwmonio::retries,
+                            hwmonio::delay);
                     auto statusIface = std::experimental::any_cast<
                             std::shared_ptr<StatusObject>>(it->second);
-                    if (!statusIface->functional())
+                    statusIface->functional((fault == 0) ? true : false);
+                    if (fault != 0)
                     {
                         continue;
                     }
