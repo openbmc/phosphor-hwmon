@@ -68,8 +68,7 @@ int64_t HwmonIO::read(
         const std::string& id,
         const std::string& sensor,
         size_t retries,
-        std::chrono::milliseconds delay,
-        bool isOCC) const
+        std::chrono::milliseconds delay) const
 {
     int64_t val;
     std::ifstream ifs;
@@ -112,18 +111,6 @@ int64_t HwmonIO::read(
                 // provided hwmon object to log the appropriate errors if the
                 // object disappears when it should not.
                 exit(0);
-            }
-
-            if (isOCC)
-            {
-                if (rc == EREMOTEIO)
-                {
-                    // For the OCCs, when an EREMOTEIO is return, set the
-                    // value to 255*1000
-                    // (0xFF = sensor is failed, 1000 = sensor factor)
-                    val = 255000;
-                    break;
-                }
             }
 
             if (0 == std::count(
