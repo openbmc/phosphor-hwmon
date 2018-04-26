@@ -135,8 +135,7 @@ int64_t adjustValue(const SensorSet::key_type& sensor, int64_t value)
 auto addValue(const SensorSet::key_type& sensor,
               const RetryIO& retryIO,
               hwmonio::HwmonIO& ioAccess,
-              ObjectInfo& info,
-              bool isOCC = false)
+              ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
 
@@ -181,8 +180,7 @@ auto addValue(const SensorSet::key_type& sensor,
                 sensor.second,
                 hwmon::entry::cinput,
                 std::get<size_t>(retryIO),
-                std::get<std::chrono::milliseconds>(retryIO),
-                isOCC);
+                std::get<std::chrono::milliseconds>(retryIO));
         val = adjustValue(sensor, val);
     }
 
@@ -307,8 +305,7 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
     {
         // Add status interface based on _fault file being present
         sensor::addStatus(sensor.first, ioAccess, _devPath, info);
-        valueInterface = addValue(sensor.first, retryIO, ioAccess, info,
-                _isOCC);
+        valueInterface = addValue(sensor.first, retryIO, ioAccess, info);
     }
     catch (const std::system_error& e)
     {
@@ -397,11 +394,6 @@ MainLoop::MainLoop(
       state(),
       ioAccess(path)
 {
-    if (path.find("occ") != std::string::npos)
-    {
-        _isOCC = true;
-    }
-
     // Strip off any trailing slashes.
     std::string p = path;
     while (!p.empty() && p.back() == '/')
@@ -554,8 +546,7 @@ void MainLoop::read()
                         i.first.second,
                         input,
                         hwmonio::retries,
-                        hwmonio::delay,
-                        _isOCC);
+                        hwmonio::delay);
 
                 value = adjustValue(i.first, value);
 
