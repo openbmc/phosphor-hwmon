@@ -14,6 +14,8 @@
 namespace sensor
 {
 
+using namespace phosphor::logging;
+
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIO& ioAccess,
                const std::string& devPath) :
@@ -21,6 +23,20 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     _ioAccess(ioAccess),
     _devPath(devPath)
 {
+    auto gain = env::getEnv("GAIN", sensor);
+    if (!gain.empty())
+    {
+        sensorAdjusts.gain = std::stod(gain);
+    }
+
+    auto offset = env::getEnv("OFFSET", sensor);
+    if (!offset.empty())
+    {
+        sensorAdjusts.offset = std::stoi(offset);
+    }
+    auto senRmRCs = env::getEnv("REMOVERCS", sensor);
+    // Add sensor removal return codes defined per sensor
+    addRemoveRCs(senRmRCs);
 }
 
 void Sensor::addRemoveRCs(const std::string& rcList)
@@ -170,7 +186,6 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
         }
         catch (const std::system_error& e)
         {
-            using namespace phosphor::logging;
             using namespace sdbusplus::xyz::openbmc_project::
                 Sensor::Device::Error;
             using metadata = xyz::openbmc_project::Sensor::
