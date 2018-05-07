@@ -3,9 +3,12 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
+#include "config.h"
 #include "sensor.hpp"
 #include "sensorset.hpp"
 #include "hwmon.hpp"
+#include "hwmonio.hpp"
+#include "env.hpp"
 #include "sysfs.hpp"
 
 namespace sensor
@@ -18,6 +21,116 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     ioAccess(ioAccess),
     devPath(devPath)
 {
+}
+
+void Sensor::addRemoveRCs(const std::string& rcList)
+{
+    if (rcList.empty())
+    {
+        return;
+    }
+
+    // Convert to a char* for strtok
+    std::vector<char> rmRCs(rcList.c_str(),
+                            rcList.c_str() + rcList.size() + 1);
+    auto rmRC = std::strtok(&rmRCs[0], ", ");
+    while (rmRC != nullptr)
+    {
+        try
+        {
+            sensorAdjusts.rmRCs.insert(std::stoi(rmRC));
+        }
+        catch (const std::logic_error& le)
+        {
+            // Unable to convert to int, continue to next token
+            std::string name = sensor.first + "_" + sensor.second;
+            log<level::INFO>("Unable to convert sensor removal return code",
+                             entry("SENSOR=%s", name.c_str()),
+                             entry("RC=%s", rmRC),
+                             entry("EXCEPTION=%s", le.what()));
+        }
+        rmRC = std::strtok(nullptr, ", ");
+    }
+}
+
+int64_t Sensor::adjustValue(int64_t value)
+{
+// Because read doesn't have an out pointer to store errors.
+// let's assume negative values are errors if they have this
+// set.
+#ifdef NEGATIVE_ERRNO_ON_FAIL
+    if (value < 0)
+    {
+        return value;
+    }
+#endif
+
+    // Adjust based on gain and offset
+    value = static_cast<decltype(value)>(
+                static_cast<double>(value) * sensorAdjusts.gain
+                    + sensorAdjusts.offset);
+
+    return value;
+}
+
+std::shared_ptr<ValueObject> Sensor::addValue(
+        const RetryIO& retryIO,
+        ObjectInfo& info)
+{
+    static constexpr bool deferSignals = true;
+
+    // Get the initial value for the value interface.
+    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
+    auto& obj = std::get<Object>(info);
+    auto& objPath = std::get<std::string>(info);
+
+    int64_t val = 0;
+    std::shared_ptr<StatusObject> statusIface = nullptr;
+    auto it = obj.find(InterfaceType::STATUS);
+    if (it != obj.end())
+    {
+        statusIface = std::experimental::any_cast<
+                std::shared_ptr<StatusObject>>(it->second);
+    }
+
+    // If there's no fault file or the sensor has a fault file and
+    // its status is functional, read the input value.
+    if (!statusIface || (statusIface && statusIface->functional()))
+    {
+        // Retry for up to a second if device is busy
+        // or has a transient error.
+        val = ioAccess.read(
+                sensor.first,
+                sensor.second,
+                hwmon::entry::cinput,
+                std::get<size_t>(retryIO),
+                std::get<std::chrono::milliseconds>(retryIO));
+        val = adjustValue(val);
+    }
+
+    auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
+    iface->value(val);
+
+    hwmon::Attributes attrs;
+    if (hwmon::getAttributes(sensor.first, attrs))
+    {
+        iface->unit(hwmon::getUnit(attrs));
+        iface->scale(hwmon::getScale(attrs));
+    }
+
+    auto maxValue = env::getEnv("MAXVALUE", sensor);
+    if(!maxValue.empty())
+    {
+        iface->maxValue(std::stoll(maxValue));
+    }
+    auto minValue = env::getEnv("MINVALUE", sensor);
+    if(!minValue.empty())
+    {
+        iface->minValue(std::stoll(minValue));
+    }
+
+    obj[InterfaceType::VALUE] = iface;
+    return iface;
 }
 
 std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
