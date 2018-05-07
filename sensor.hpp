@@ -1,11 +1,19 @@
 #pragma once
 
+#include <unordered_set>
 #include "types.hpp"
 #include "sensorset.hpp"
 #include "hwmonio.hpp"
 
 namespace sensor
 {
+
+struct valueAdjust
+{
+    double gain = 1.0;
+    int offset = 0;
+    std::unordered_set<int> rmRCs;
+};
 
 /** @class Sensor
  *  @brief Sensor object based on a SensorSet container's key type
@@ -35,6 +43,42 @@ class Sensor
                         const std::string& devPath);
 
         /**
+         * @brief Adds any sensor removal return codes for the sensor
+         * @details Add all return codes defined within a device's config file
+         * for the entire device or for the specific sensor.
+         *
+         * @param[in] rcList - List of return codes found for the sensor
+         */
+        void addRemoveRCs(const std::string& rcList);
+
+        /**
+         * @brief Adjusts a sensor value
+         * @details Adjusts the value given by any gain and/or offset defined
+         * for this sensor object and returns that adjusted value.
+         *
+         * @param[in] value - Value to be adjusted
+         *
+         * @return - Adjusted sensor value
+         */
+        int64_t adjustValue(int64_t value);
+
+        /**
+         * @brief Add value interface and value property for sensor
+         * @details When a sensor has an associated input file, the Sensor.Value
+         * interface is added along with setting the Value property to the
+         * corresponding value found in the input file.
+         *
+         * @param[in] retryIO - Hwmon sysfs file retry constraints
+         *                      (number of and delay between)
+         * @param[in] info - Sensor object information
+         *
+         * @return - Shared pointer to the value object
+         */
+        std::shared_ptr<ValueObject> addValue(
+                const RetryIO& retryIO,
+                ObjectInfo& info);
+
+        /**
          * @brief Add status interface and functional property for sensor
          * @details When a sensor has an associated fault file, the
          * OperationalStatus interface is added along with setting the
@@ -57,6 +101,9 @@ class Sensor
 
         /** @brief Physical device sysfs path. */
         const std::string& devPath;
+
+        /** @brief Structure for storing sensor adjustments */
+        valueAdjust sensorAdjusts;
 };
 
 } // namespace sensor
