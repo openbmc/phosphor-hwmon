@@ -11,16 +11,16 @@
 namespace sensor
 {
 
-Sensor::Sensor(const SensorSet::key_type& sensor) :
-    _sensor(sensor)
+Sensor::Sensor(const SensorSet::key_type& sensor,
+               const hwmonio::HwmonIO& ioAccess,
+               const std::string& devPath) :
+    _sensor(sensor),
+    _ioAccess(ioAccess),
+    _devPath(devPath)
 {
 }
 
-std::shared_ptr<StatusObject> addStatus(
-        const SensorSet::key_type& sensor,
-        const hwmonio::HwmonIO& ioAccess,
-        const std::string& devPath,
-        ObjectInfo& info)
+std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
 {
     namespace fs = std::experimental::filesystem;
 
@@ -31,11 +31,11 @@ std::shared_ptr<StatusObject> addStatus(
     auto& obj = std::get<Object>(info);
 
     // Check if fault sysfs file exists
-    std::string faultName = sensor.first;
-    std::string faultID = sensor.second;
+    std::string faultName = _sensor.first;
+    std::string faultID = _sensor.second;
     std::string entry = hwmon::entry::fault;
 
-    auto sysfsFullPath = sysfs::make_sysfs_path(ioAccess.path(),
+    auto sysfsFullPath = sysfs::make_sysfs_path(_ioAccess.path(),
                                                 faultName,
                                                 faultID,
                                                 entry);
@@ -45,11 +45,11 @@ std::shared_ptr<StatusObject> addStatus(
         uint32_t fault = 0;
         try
         {
-            fault = ioAccess.read(faultName,
-                                  faultID,
-                                  entry,
-                                  hwmonio::retries,
-                                  hwmonio::delay);
+            fault = _ioAccess.read(faultName,
+                                   faultID,
+                                   entry,
+                                   hwmonio::retries,
+                                   hwmonio::delay);
             if (fault != 0)
             {
                 functional = false;
@@ -65,7 +65,7 @@ std::shared_ptr<StatusObject> addStatus(
 
             report<ReadFailure>(
                     metadata::CALLOUT_ERRNO(e.code().value()),
-                    metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
+                    metadata::CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
             log<level::INFO>("Logging failing sysfs file",
                     phosphor::logging::entry(
