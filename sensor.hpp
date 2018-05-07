@@ -21,6 +21,14 @@ class Sensor
                         const hwmonio::HwmonIO& ioAccess,
                         const std::string& devPath);
 
+        void addRemoveRCs(const std::string& rcList);
+
+        int64_t adjustValue(int64_t value);
+
+        std::shared_ptr<ValueObject> addValue(
+                const RetryIO& retryIO,
+                ObjectInfo& info);
+
         /**
          * @brief Add status interface and functional property for sensor
          * @details When a sensor has an associated fault file, the OperationalStatus
