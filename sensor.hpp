@@ -1,11 +1,21 @@
 #pragma once
 
+#include <cstring>
+#include <unordered_set>
+
 #include "types.hpp"
 #include "sensorset.hpp"
 #include "hwmonio.hpp"
 
 namespace sensor
 {
+
+struct valueAdjust
+{
+    double gain = 1.0;
+    int offset = 0;
+    std::unordered_set<int> rmRCs;
+};
 
 /** @class Sensor
  *  @brief Sensor object based on a SensorSet container's key type
@@ -42,6 +52,16 @@ class Sensor
          * @param[in] rcList - List of return codes found for the sensor
          */
         void addRemoveRCs(const std::string& rcList);
+
+        /**
+         * @brief Get the adjustments struct for the sensor
+         *
+         * @return - Sensor adjustment struct
+         */
+        inline const valueAdjust& getAdjusts()
+        {
+            return sensorAdjusts;
+        }
 
         /**
          * @brief Adjusts a sensor value
@@ -92,6 +112,9 @@ class Sensor
 
         /** @brief Physical device sysfs path. */
         const std::string devPath;
+
+        /** @brief Structure for storing sensor adjustments */
+        valueAdjust sensorAdjusts;
 };
 
 } // namespace sensor
