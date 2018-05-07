@@ -11,16 +11,16 @@
 namespace sensor
 {
 
-Sensor::Sensor(const SensorSet::key_type& sensor) :
-    sensor(sensor)
+Sensor::Sensor(const SensorSet::key_type& sensor,
+               const hwmonio::HwmonIO& ioAccess,
+               const std::string& devPath) :
+    sensor(sensor),
+    ioAccess(ioAccess),
+    devPath(devPath)
 {
 }
 
-std::shared_ptr<StatusObject> addStatus(
-        const SensorSet::key_type& sensor,
-        const hwmonio::HwmonIO& ioAccess,
-        const std::string& devPath,
-        ObjectInfo& info)
+std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
 {
     namespace fs = std::experimental::filesystem;
 

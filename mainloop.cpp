@@ -288,7 +288,9 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
         return {};
     }
 
-    auto sensorObj = std::make_unique<sensor::Sensor>(sensor.first);
+    auto sensorObj = std::make_unique<sensor::Sensor>(sensor.first,
+                                                      ioAccess,
+                                                      _devPath);
 
     // Get list of return codes for removing sensors on device
     auto devRmRCs = env::getEnv("REMOVERCS");
@@ -314,7 +316,7 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
     try
     {
         // Add status interface based on _fault file being present
-        sensor::addStatus(sensor.first, ioAccess, _devPath, info);
+        sensorObj->addStatus(info);
         valueInterface = addValue(sensor.first, retryIO, ioAccess, info);
     }
     catch (const std::system_error& e)
