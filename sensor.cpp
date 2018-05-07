@@ -11,6 +11,11 @@
 namespace sensor
 {
 
+Sensor::Sensor(const SensorSet::key_type& sensor) :
+    sensor(sensor)
+{
+}
+
 std::shared_ptr<StatusObject> addStatus(
         const SensorSet::key_type& sensor,
         const hwmonio::HwmonIO& ioAccess,

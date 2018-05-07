@@ -6,18 +6,15 @@
 #include <experimental/optional>
 #include <memory>
 #include <sdbusplus/server.hpp>
+#include "types.hpp"
 #include "hwmonio.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 #include "interface.hpp"
 #include "timer.hpp"
+#include "sensor.hpp"
 
 static constexpr auto default_interval = 1000000;
-
-using Object = std::map<InterfaceType, std::experimental::any>;
-using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, Object>;
-using RetryIO = std::tuple<size_t, std::chrono::milliseconds>;
-using ObjectStateData = std::pair<std::string, ObjectInfo>;
 
 static constexpr auto sensorID = 0;
 static constexpr auto sensorLabel = 1;
@@ -108,6 +105,9 @@ class MainLoop
         std::unique_ptr<phosphor::hwmon::Timer> timer;
         /** @brief the sd_event structure */
         sd_event* loop = nullptr;
+        /** @brief Store the specifications of sensor objects */
+        std::map<SensorSet::key_type,
+                 std::unique_ptr<sensor::Sensor>> sensorObjects;
 
         /**
          * @brief Map of removed sensors
