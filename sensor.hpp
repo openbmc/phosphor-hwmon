@@ -1,10 +1,27 @@
 #pragma once
 
+#include "types.hpp"
 #include "sensorset.hpp"
-#include "mainloop.hpp"
+#include "hwmonio.hpp"
 
 namespace sensor
 {
+
+class Sensor
+{
+    public:
+        Sensor() = delete;
+        Sensor(const Sensor&) = delete;
+        Sensor(Sensor&&) = delete;
+        Sensor& operator=(const Sensor&) = delete;
+        Sensor& operator=(Sensor&&) = delete;
+        ~Sensor() = default;
+
+        explicit Sensor(const SensorSet::key_type& sensor);
+
+    private:
+        SensorSet::key_type _sensor;
+};
 
 /**
  * @brief Add status interface and functional property for sensor

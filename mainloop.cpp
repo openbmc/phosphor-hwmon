@@ -288,6 +288,8 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
         return {};
     }
 
+    auto sensorObj = std::make_unique<sensor::Sensor>(sensor.first);
+
     // Get list of return codes for removing sensors on device
     auto devRmRCs = env::getEnv("REMOVERCS");
     // Add sensor removal return codes defined at the device level
@@ -381,6 +383,9 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
     // All the interfaces have been created.  Go ahead
     // and emit InterfacesAdded.
     valueInterface->emit_object_added();
+
+    // Save sensor object specifications
+    sensorObjects[sensor.first] = std::move(sensorObj);
 
     return std::make_pair(std::move(std::get<sensorLabel>(properties)),
                           std::move(info));
