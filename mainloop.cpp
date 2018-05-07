@@ -67,17 +67,6 @@ decltype(Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmL
 decltype(Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
 
-// The gain and offset to adjust a value
-struct valueAdjust
-{
-    double gain = 1.0;
-    int offset = 0;
-    std::unordered_set<int> rmRCs;
-};
-
-// Store the valueAdjust for sensors
-std::map<SensorSet::key_type, valueAdjust> sensorAdjusts;
-
 std::string MainLoop::getID(SensorSet::container_t::const_reference sensor)
 {
     std::string id;
@@ -196,24 +185,20 @@ optional_ns::optional<ObjectStateData> MainLoop::getObject(
                 hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
         // Check sensorAdjusts for sensor removal RCs
-        const auto& it = sensorAdjusts.find(sensor.first);
-        if (it != sensorAdjusts.end())
+        auto& sAdjusts = sensorObj->getAdjusts();
+        if (sAdjusts.rmRCs.count(e.code().value()) > 0)
         {
-            auto rmRCit = it->second.rmRCs.find(e.code().value());
-            if (rmRCit != std::end(it->second.rmRCs))
+            // Return code found in sensor return code removal list
+            if (rmSensors.find(sensor.first) == rmSensors.end())
             {
-                // Return code found in sensor return code removal list
-                if (rmSensors.find(sensor.first) == rmSensors.end())
-                {
-                    // Trace for sensor not already removed from dbus
-                    log<level::INFO>("Sensor not added to dbus for read fail",
-                            entry("FILE=%s", file.c_str()),
-                            entry("RC=%d", e.code().value()));
-                    rmSensors[std::move(sensor.first)] =
-                            std::move(sensor.second);
-                }
-                return {};
+                // Trace for sensor not already removed from dbus
+                log<level::INFO>("Sensor not added to dbus for read fail",
+                        entry("FILE=%s", file.c_str()),
+                        entry("RC=%d", e.code().value()));
+                rmSensors[std::move(sensor.first)] =
+                        std::move(sensor.second);
             }
+            return {};
         }
 #endif
         using namespace sdbusplus::xyz::openbmc_project::
@@ -469,25 +454,21 @@ void MainLoop::read()
                         hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
                 // Check sensorAdjusts for sensor removal RCs
-                const auto& it = sensorAdjusts.find(i.first);
-                if (it != sensorAdjusts.end())
+                auto& sAdjusts = sensorObjects[i.first]->getAdjusts();
+                if (sAdjusts.rmRCs.count(e.code().value()) > 0)
                 {
-                    auto rmRCit = it->second.rmRCs.find(e.code().value());
-                    if (rmRCit != std::end(it->second.rmRCs))
+                    // Return code found in sensor return code removal list
+                    if (rmSensors.find(i.first) == rmSensors.end())
                     {
-                        // Return code found in sensor return code removal list
-                        if (rmSensors.find(i.first) == rmSensors.end())
-                        {
-                            // Trace for sensor not already removed from dbus
-                            log<level::INFO>(
-                                    "Remove sensor from dbus for read fail",
-                                    entry("FILE=%s", file.c_str()),
-                                    entry("RC=%d", e.code().value()));
-                            // Mark this sensor to be removed from dbus
-                            rmSensors[i.first] = std::get<0>(i.second);
-                        }
-                        continue;
+                        // Trace for sensor not already removed from dbus
+                        log<level::INFO>(
+                                "Remove sensor from dbus for read fail",
+                                entry("FILE=%s", file.c_str()),
+                                entry("RC=%d", e.code().value()));
+                        // Mark this sensor to be removed from dbus
+                        rmSensors[i.first] = std::get<0>(i.second);
                     }
+                    continue;
                 }
 #endif
                 using namespace sdbusplus::xyz::openbmc_project::
