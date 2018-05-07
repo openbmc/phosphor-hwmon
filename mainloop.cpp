@@ -378,17 +378,24 @@ void MainLoop::init()
 
         /*
          * Check if the value of the MODE_<item><X> env variable for the sensor
-         * is "label", then read the sensor number from the <item><X>_label
+         * is set. If it is, then read the from the <item><X>_<mode>
          * file. The name of the DBUS object would be the value of the env
-         * variable LABEL_<item><sensorNum>. If the MODE_<item><X> env variable
+         * variable LABEL_<item><mode value>. If the MODE_<item><X> env variable
          * doesn't exist, then the name of DBUS object is the value of the env
          * variable LABEL_<item><X>.
+         *
+         * For example, if MODE_temp1 = "label", then code reads the temp1_label
+         * file.  If it has a 5 in it, then it will use the following entry to
+         * name the object: LABEL_temp5 = "My DBus object name".
+         *
          */
         auto mode = getEnv("MODE", i.first);
-        if (!mode.compare(hwmon::entry::label))
+        if (!mode.empty())
         {
             id = getIndirectID(
-                    _hwmonRoot + '/' + _instance + '/', i.first);
+                    _hwmonRoot + '/' + _instance + '/',
+                    mode,
+                    i.first);
 
             if (id.empty())
             {

@@ -50,6 +50,7 @@ std::string getEnv(
 
 std::string getIndirectID(
         std::string path,
+        const std::string& fileSuffix,
         const SensorSet::key_type& sensor)
 {
     std::string content;
@@ -57,7 +58,7 @@ std::string getIndirectID(
     path.append(sensor.first);
     path.append(sensor.second);
     path.append(1, '_');
-    path.append(hwmon::entry::label);
+    path.append(fileSuffix);
 
     std::ifstream handle(path.c_str());
     if (!handle.fail())
