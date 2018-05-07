@@ -1,11 +1,21 @@
 #pragma once
 
+#include <cstring>
+#include <unordered_set>
+
 #include "types.hpp"
 #include "sensorset.hpp"
 #include "hwmonio.hpp"
 
 namespace sensor
 {
+
+struct valueAdjust
+{
+    double gain = 1.0;
+    int offset = 0;
+    std::unordered_set<int> rmRCs;
+};
 
 class Sensor
 {
@@ -22,6 +32,11 @@ class Sensor
                         const std::string& devPath);
 
         void addRemoveRCs(const std::string& rcList);
+
+        inline const valueAdjust& getAdjusts()
+        {
+            return sensorAdjusts;
+        }
 
         int64_t adjustValue(int64_t value);
 
@@ -48,6 +63,8 @@ class Sensor
         hwmonio::HwmonIO _ioAccess;
 
         const std::string _devPath;
+
+        valueAdjust sensorAdjusts;
 };
 
 } // namespace sensor
