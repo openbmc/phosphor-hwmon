@@ -52,6 +52,16 @@ class Sensor
         void addRemoveRCs(const std::string& rcList);
 
         /**
+         * @brief Get the adjustments struct for the sensor
+         *
+         * @return - Sensor adjustment struct
+         */
+        inline const valueAdjust& getAdjusts()
+        {
+            return sensorAdjusts;
+        }
+
+        /**
          * @brief Adjusts a sensor value
          * @details Adjusts the value given by any gain and/or offset defined
          * for this sensor object and returns that adjusted value.
