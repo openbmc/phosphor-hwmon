@@ -1,0 +1,9 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+2: Patrick Venture <venture@google.com>
+Code-Review+2: Matt Spinler <spinler@us.ibm.com>
+Submitted-by: Matt Spinler <spinler@us.ibm.com>
+Submitted-at: Tue, 08 May 2018 13:43:42 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/10490
+Project: openbmc/phosphor-hwmon
+Branch: refs/heads/master
