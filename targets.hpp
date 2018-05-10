@@ -129,7 +129,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                 using namespace phosphor::logging;
                 log<level::ERR>("Invalid TARGET_MODE env var found",
                         phosphor::logging::entry(
-                                "TARGET_MODE=%s", tmEnv),
+                                "TARGET_MODE=%s", tmEnv.c_str()),
                         phosphor::logging::entry(
                                 "DEVPATH=%s", devPath.c_str()));
             }
