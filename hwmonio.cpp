@@ -57,6 +57,15 @@ static constexpr auto retryableErrors = {
      * as opposed to failing out on the first try.
      */
     ENODATA,
+
+    /*
+     * Some devices return this if the hardware is being
+     * powered off in a normal manner, as incomplete data
+     * is received. Retrying allows time for the system to
+     * clean up driver devices, or in the event of a real
+     * failure, attempt to get the rest of the data.
+     */
+    EMSGSIZE,
 };
 
 HwmonIO::HwmonIO(const std::string& path) : p(path)
