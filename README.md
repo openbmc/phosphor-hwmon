@@ -1,4 +1,5 @@
 Exposes generic hwmon entries as DBus objects.
+More information can be found at [Sensor Architecture](https://github.com/openbmc/docs/blob/master/sensor-architecture.md)
 
 ## To Build
 ```
