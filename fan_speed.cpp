@@ -21,7 +21,7 @@ uint64_t FanSpeed::target(uint64_t value)
         //Write target out to sysfs
         try
         {
-            ioAccess.write(
+            ioAccess->write(
                     value,
                     type,
                     id,
@@ -41,7 +41,7 @@ uint64_t FanSpeed::target(uint64_t value)
                         WriteFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
             auto file = sysfs::make_sysfs_path(
-                    ioAccess.path(),
+                    ioAccess->path(),
                     type,
                     id,
                     entry::target);
@@ -66,7 +66,7 @@ void FanSpeed::enable()
 
         try
         {
-            ioAccess.write(
+            ioAccess->write(
                     val,
                     type::pwm,
                     id,
@@ -85,7 +85,7 @@ void FanSpeed::enable()
                         WriteFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
             auto fullPath = sysfs::make_sysfs_path(
-                    ioAccess.path(),
+                    ioAccess->path(),
                     type::pwm,
                     id,
                     entry::enable);
