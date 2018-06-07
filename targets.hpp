@@ -1,6 +1,7 @@
 #pragma once
 
 #include <experimental/filesystem>
+#include <memory>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
@@ -165,13 +166,15 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                                 "FILE=%s", sysfsFullPath.c_str()));
             }
 
-            target = std::make_shared<T>(ioAccess.path(),
-                                         devPath,
-                                         targetId,
-                                         bus,
-                                         objPath.c_str(),
-                                         deferSignals,
-                                         targetSpeed);
+            target = std::make_shared<T>(
+                    std::move(std::make_unique<hwmonio::HwmonIO>(
+                            ioAccess.path())),
+                    devPath,
+                    targetId,
+                    bus,
+                    objPath.c_str(),
+                    deferSignals,
+                    targetSpeed);
             obj[type] = target;
         }
     }
