@@ -26,7 +26,7 @@ uint64_t FanPwm::target(uint64_t value)
         std::string empty;
         //Write target out to sysfs
         try {
-            ioAccess.write(
+            ioAccess->write(
                 value,
                 type,
                 id,
@@ -45,7 +45,7 @@ uint64_t FanPwm::target(uint64_t value)
                         WriteFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
             auto file = sysfs::make_sysfs_path(
-                    ioAccess.path(),
+                    ioAccess->path(),
                     type,
                     id,
                     empty);
