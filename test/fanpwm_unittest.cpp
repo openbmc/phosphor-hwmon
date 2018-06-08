@@ -14,6 +14,34 @@ using ::testing::NotNull;
 using ::testing::Return;
 using ::testing::StrEq;
 
+// Handle basic expectations we'll need for all these tests, if it's found that
+// this is helpful for more tests, it can be promoted in scope.
+void SetupDbusObject(
+        sdbusplus::SdBusMock *sdbus_mock,
+        const std::string& path,
+        const std::string& intf)
+{
+    EXPECT_CALL(*sdbus_mock,
+                sd_bus_add_object_vtable(
+                    IsNull(),
+                    NotNull(),
+                    StrEq(path),
+                    StrEq(intf),
+                    NotNull(),
+                    NotNull()))
+    .WillOnce(Return(0));
+
+    EXPECT_CALL(*sdbus_mock,
+                sd_bus_emit_properties_changed_strv(
+                    IsNull(),
+                    StrEq(path),
+                    StrEq(intf),
+                    NotNull()))
+    .WillOnce(Return(0));
+
+    return;
+}
+
 TEST(FanPwmTest, BasicConstructorDeferredTest) {
     // Attempt to just instantiate one.
 
@@ -26,29 +54,14 @@ TEST(FanPwmTest, BasicConstructorDeferredTest) {
     std::string devPath = "";
     std::string id = "";
     std::string objPath = "asdf";
+    std::string interface = "xyz.openbmc_project.Control.FanPwm";
     bool defer = true;
     uint64_t target = 0x01;
 
     std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
         std::make_unique<hwmonio::HwmonIOMock>();
 
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_add_object_vtable(
-                    IsNull(),
-                    NotNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull(),
-                    NotNull()))
-    .WillOnce(Return(0));
-
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_emit_properties_changed_strv(
-                    IsNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull()))
-    .WillOnce(Return(0));
+    SetupDbusObject(&sdbus_mock, objPath, interface);
 
     hwmon::FanPwm f(std::move(hwmonio_mock),
                     devPath,
@@ -71,29 +84,14 @@ TEST(FanPwmTest, BasicConstructorNotDeferredTest) {
     std::string devPath = "";
     std::string id = "";
     std::string objPath = "asdf";
+    std::string interface = "xyz.openbmc_project.Control.FanPwm";
     bool defer = false;
     uint64_t target = 0x01;
 
     std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
         std::make_unique<hwmonio::HwmonIOMock>();
 
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_add_object_vtable(
-                    IsNull(),
-                    NotNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull(),
-                    NotNull()))
-    .WillOnce(Return(0));
-
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_emit_properties_changed_strv(
-                    IsNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull()))
-    .WillOnce(Return(0));
+    SetupDbusObject(&sdbus_mock, objPath, interface);
 
     EXPECT_CALL(sdbus_mock,
                 sd_bus_emit_object_added(IsNull(), StrEq("asdf")))
@@ -122,29 +120,14 @@ TEST(FanPwmTest, WriteTargetValue) {
     std::string devPath = "devp";
     std::string id = "the_id";
     std::string objPath = "asdf";
+    std::string interface = "xyz.openbmc_project.Control.FanPwm";
     bool defer = true;
     uint64_t target = 0x01;
 
     std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
         std::make_unique<hwmonio::HwmonIOMock>();
 
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_add_object_vtable(
-                    IsNull(),
-                    NotNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull(),
-                    NotNull()))
-    .WillOnce(Return(0));
-
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_emit_properties_changed_strv(
-                    IsNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull()))
-    .WillOnce(Return(0));
+    SetupDbusObject(&sdbus_mock, objPath, interface);
 
     hwmonio::HwmonIOMock *hwmonio =
         reinterpret_cast<hwmonio::HwmonIOMock *>(hwmonio_mock.get());
@@ -196,29 +179,14 @@ TEST(FanPwmTest, WriteTargetValueNoUpdate) {
     std::string devPath = "devp";
     std::string id = "the_id";
     std::string objPath = "asdf";
+    std::string interface = "xyz.openbmc_project.Control.FanPwm";
     bool defer = true;
     uint64_t target = 0x01;
 
     std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
         std::make_unique<hwmonio::HwmonIOMock>();
 
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_add_object_vtable(
-                    IsNull(),
-                    NotNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull(),
-                    NotNull()))
-    .WillOnce(Return(0));
-
-    EXPECT_CALL(sdbus_mock,
-                sd_bus_emit_properties_changed_strv(
-                    IsNull(),
-                    StrEq("asdf"),
-                    StrEq("xyz.openbmc_project.Control.FanPwm"),
-                    NotNull()))
-    .WillOnce(Return(0));
+    SetupDbusObject(&sdbus_mock, objPath, interface);
 
     hwmon::FanPwm f(std::move(hwmonio_mock),
                     devPath,
