@@ -1,0 +1,9 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Gunnar Mills <gmills@us.ibm.com>
+Code-Review+2: Patrick Venture <venture@google.com>
+Submitted-by: Patrick Venture <venture@google.com>
+Submitted-at: Fri, 08 Jun 2018 18:40:59 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/11014
+Project: openbmc/phosphor-hwmon
+Branch: refs/heads/master
