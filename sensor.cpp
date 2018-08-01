@@ -8,6 +8,7 @@
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 
+#include <cmath>
 #include <cstring>
 #include <experimental/filesystem>
 #include <phosphor-logging/elog-errors.hpp>
@@ -21,6 +22,19 @@ namespace sensor
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
+// todo: this can be deleted once we move to double
+// helper class to set the scale on the value iface only when it's available
+template <typename T>
+void setScale(T& iface, int64_t value, double)
+{
+}
+template <typename T>
+void setScale(T& iface, int64_t value, int64_t)
+{
+    iface->scale(value);
+}
+
+// todo: this can be simplified once we move to the double interface
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIO& ioAccess, const std::string& devPath) :
     sensor(sensor),
@@ -84,7 +98,7 @@ void Sensor::addRemoveRCs(const std::string& rcList)
     }
 }
 
-int64_t Sensor::adjustValue(int64_t value)
+SensorValueType Sensor::adjustValue(SensorValueType value)
 {
 // Because read doesn't have an out pointer to store errors.
 // let's assume negative values are errors if they have this
@@ -100,6 +114,11 @@ int64_t Sensor::adjustValue(int64_t value)
     value = static_cast<decltype(value)>(
         static_cast<double>(value) * sensorAdjusts.gain + sensorAdjusts.offset);
 
+    if constexpr (std::is_same<SensorValueType, double>::value)
+    {
+        value *= std::pow(10, scale);
+    }
+
     return value;
 }
 
@@ -113,7 +132,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    int64_t val = 0;
+    SensorValueType val = 0;
     std::shared_ptr<StatusObject> statusIface = nullptr;
     auto it = obj.find(InterfaceType::STATUS);
     if (it != obj.end())
@@ -145,7 +164,10 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     if (hwmon::getAttributes(sensor.first, attrs))
     {
         iface->unit(hwmon::getUnit(attrs));
-        iface->scale(hwmon::getScale(attrs));
+
+        setScale(iface, hwmon::getScale(attrs), val);
+
+        scale = hwmon::getScale(attrs);
     }
 
     auto maxValue = env::getEnv("MAXVALUE", sensor);
