@@ -1,6 +1,7 @@
 #pragma once
 
 #include "env.hpp"
+#include "interface.hpp"
 
 /** @class Thresholds
  *  @brief Threshold type traits.
@@ -16,6 +17,7 @@ struct Thresholds
     }
 };
 
+
 /**@brief Thresholds specialization for warning thresholds. */
 template <>
 struct Thresholds<WarningObject>
@@ -23,10 +25,10 @@ struct Thresholds<WarningObject>
     static constexpr InterfaceType type = InterfaceType::WARN;
     static constexpr const char* envLo = "WARNLO";
     static constexpr const char* envHi = "WARNHI";
-    static int64_t (WarningObject::*const setLo)(int64_t);
-    static int64_t (WarningObject::*const setHi)(int64_t);
-    static int64_t (WarningObject::*const getLo)() const;
-    static int64_t (WarningObject::*const getHi)() const;
+    static SensorValueType (WarningObject::*const setLo)(SensorValueType);
+    static SensorValueType (WarningObject::*const setHi)(SensorValueType);
+    static SensorValueType (WarningObject::*const getLo)() const;
+    static SensorValueType (WarningObject::*const getHi)() const;
     static bool (WarningObject::*const alarmLo)(bool);
     static bool (WarningObject::*const alarmHi)(bool);
 };
@@ -38,10 +40,10 @@ struct Thresholds<CriticalObject>
     static constexpr InterfaceType type = InterfaceType::CRIT;
     static constexpr const char* envLo = "CRITLO";
     static constexpr const char* envHi = "CRITHI";
-    static int64_t (CriticalObject::*const setLo)(int64_t);
-    static int64_t (CriticalObject::*const setHi)(int64_t);
-    static int64_t (CriticalObject::*const getLo)() const;
-    static int64_t (CriticalObject::*const getHi)() const;
+    static SensorValueType (CriticalObject::*const setLo)(SensorValueType);
+    static SensorValueType (CriticalObject::*const setHi)(SensorValueType);
+    static SensorValueType (CriticalObject::*const getLo)() const;
+    static SensorValueType (CriticalObject::*const getHi)() const;
     static bool (CriticalObject::*const alarmLo)(bool);
     static bool (CriticalObject::*const alarmHi)(bool);
 };
@@ -57,7 +59,7 @@ struct Thresholds<CriticalObject>
  *  @param[in] value - The sensor reading to compare to thresholds.
  */
 template <typename T>
-void checkThresholds(std::experimental::any& iface, int64_t value)
+void checkThresholds(std::experimental::any& iface, SensorValueType value)
 {
     auto realIface = std::experimental::any_cast<std::shared_ptr<T>>(iface);
     auto lo = (*realIface.*Thresholds<T>::getLo)();
@@ -94,8 +96,8 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
         auto& bus = *std::get<sdbusplus::bus::bus*>(info);
 
         iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
-        auto lo = stoll(tLo);
-        auto hi = stoll(tHi);
+        auto lo = stod(tLo);
+        auto hi = stod(tHi);
         (*iface.*Thresholds<T>::setLo)(lo);
         (*iface.*Thresholds<T>::setHi)(hi);
         (*iface.*Thresholds<T>::alarmLo)(value <= lo);

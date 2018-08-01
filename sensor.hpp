@@ -73,7 +73,7 @@ class Sensor
      *
      * @return - Adjusted sensor value
      */
-    int64_t adjustValue(int64_t value);
+    SensorValueType adjustValue(SensorValueType value);
 
     /**
      * @brief Add value interface and value property for sensor
@@ -126,7 +126,7 @@ class Sensor
     /** @brief Structure for storing sensor adjustments */
     valueAdjust sensorAdjusts;
 
-    /** @brief Optional pointer to GPIO handle. */
+    int64_t scale;
     std::unique_ptr<gpioplus::Handle> handle;
 
     /** @brief default pause after unlocking gpio. */
