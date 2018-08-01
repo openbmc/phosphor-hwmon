@@ -73,7 +73,7 @@ class Sensor
      *
      * @return - Adjusted sensor value
      */
-    int64_t adjustValue(int64_t value);
+    SensorValueType adjustValue(SensorValueType value);
 
     /**
      * @brief Add value interface and value property for sensor
@@ -113,6 +113,11 @@ class Sensor
      */
     void lockGpio();
 
+    inline int64_t getScale(void)
+    {
+        return scale;
+    }
+
   private:
     /** @brief Sensor object's identifiers */
     SensorSet::key_type sensor;
@@ -131,6 +136,9 @@ class Sensor
 
     /** @brief default pause after unlocking gpio. */
     static constexpr std::chrono::milliseconds pause{500};
+
+    /** @brief sensor scale from configuration. */
+    int64_t scale;
 };
 
 } // namespace sensor
