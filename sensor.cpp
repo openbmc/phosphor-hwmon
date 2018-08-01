@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstring>
 #include <experimental/filesystem>
 
@@ -69,7 +70,7 @@ void Sensor::addRemoveRCs(const std::string& rcList)
     }
 }
 
-int64_t Sensor::adjustValue(int64_t value)
+double Sensor::adjustValue(double value)
 {
 // Because read doesn't have an out pointer to store errors.
 // let's assume negative values are errors if they have this
@@ -86,7 +87,7 @@ int64_t Sensor::adjustValue(int64_t value)
                 static_cast<double>(value) * sensorAdjusts.gain
                     + sensorAdjusts.offset);
 
-    return value;
+    return value * std::pow(10, scale);
 }
 
 std::shared_ptr<ValueObject> Sensor::addValue(
@@ -100,7 +101,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
 
-    int64_t val = 0;
+    double val = 0;
     std::shared_ptr<StatusObject> statusIface = nullptr;
     auto it = obj.find(InterfaceType::STATUS);
     if (it != obj.end())
@@ -131,7 +132,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(
     if (hwmon::getAttributes(sensor.first, attrs))
     {
         iface->unit(hwmon::getUnit(attrs));
-        iface->scale(hwmon::getScale(attrs));
+        scale = hwmon::getScale(attrs);
     }
 
     auto maxValue = env::getEnv("MAXVALUE", sensor);

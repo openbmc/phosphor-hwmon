@@ -70,7 +70,7 @@ class Sensor
          *
          * @return - Adjusted sensor value
          */
-        int64_t adjustValue(int64_t value);
+        double adjustValue(double value);
 
         /**
          * @brief Add value interface and value property for sensor
@@ -114,6 +114,8 @@ class Sensor
 
         /** @brief Structure for storing sensor adjustments */
         valueAdjust sensorAdjusts;
+
+        int64_t scale;
 };
 
 } // namespace sensor

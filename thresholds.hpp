@@ -23,10 +23,10 @@ struct Thresholds<WarningObject>
     static constexpr InterfaceType type = InterfaceType::WARN;
     static constexpr const char* envLo = "WARNLO";
     static constexpr const char* envHi = "WARNHI";
-    static int64_t (WarningObject::*const setLo)(int64_t);
-    static int64_t (WarningObject::*const setHi)(int64_t);
-    static int64_t (WarningObject::*const getLo)() const;
-    static int64_t (WarningObject::*const getHi)() const;
+    static double (WarningObject::*const setLo)(double);
+    static double (WarningObject::*const setHi)(double);
+    static double (WarningObject::*const getLo)() const;
+    static double (WarningObject::*const getHi)() const;
     static bool (WarningObject::*const alarmLo)(bool);
     static bool (WarningObject::*const alarmHi)(bool);
 };
@@ -38,10 +38,10 @@ struct Thresholds<CriticalObject>
     static constexpr InterfaceType type = InterfaceType::CRIT;
     static constexpr const char* envLo = "CRITLO";
     static constexpr const char* envHi = "CRITHI";
-    static int64_t (CriticalObject::*const setLo)(int64_t);
-    static int64_t (CriticalObject::*const setHi)(int64_t);
-    static int64_t (CriticalObject::*const getLo)() const;
-    static int64_t (CriticalObject::*const getHi)() const;
+    static double (CriticalObject::*const setLo)(double);
+    static double (CriticalObject::*const setHi)(double);
+    static double (CriticalObject::*const getLo)() const;
+    static double (CriticalObject::*const getHi)() const;
     static bool (CriticalObject::*const alarmLo)(bool);
     static bool (CriticalObject::*const alarmHi)(bool);
 };
@@ -57,7 +57,7 @@ struct Thresholds<CriticalObject>
  *  @param[in] value - The sensor reading to compare to thresholds.
  */
 template <typename T>
-void checkThresholds(std::experimental::any& iface, int64_t value)
+void checkThresholds(std::experimental::any& iface, double value)
 {
     auto realIface = std::experimental::any_cast<std::shared_ptr<T>>
                      (iface);
@@ -82,7 +82,7 @@ void checkThresholds(std::experimental::any& iface, int64_t value)
 template <typename T>
 auto addThreshold(const std::string& sensorType,
                   const std::string& sensorID,
-                  int64_t value,
+                  double value,
                   ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
@@ -97,8 +97,8 @@ auto addThreshold(const std::string& sensorType,
     if (!tLo.empty() && !tHi.empty())
     {
         iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
-        auto lo = stoll(tLo);
-        auto hi = stoll(tHi);
+        auto lo = stod(tLo);
+        auto hi = stod(tHi);
         (*iface.*Thresholds<T>::setLo)(lo);
         (*iface.*Thresholds<T>::setHi)(hi);
         (*iface.*Thresholds<T>::alarmLo)(value <= lo);
