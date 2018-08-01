@@ -214,10 +214,18 @@ std::optional<ObjectStateData>
 #endif
     }
     auto sensorValue = valueInterface->value();
-    addThreshold<WarningObject>(
-        sensor.first.first, std::get<sensorID>(properties), sensorValue, info);
-    addThreshold<CriticalObject>(
-        sensor.first.first, std::get<sensorID>(properties), sensorValue, info);
+    int64_t scale = 0;
+    // scale the thresholds only if we're using doubles
+    if constexpr (std::is_same<SensorValueType, double>::value)
+    {
+        scale = sensorObj->getScale();
+    }
+    addThreshold<WarningObject>(sensor.first.first,
+                                std::get<sensorID>(properties), sensorValue,
+                                info, scale);
+    addThreshold<CriticalObject>(sensor.first.first,
+                                 std::get<sensorID>(properties), sensorValue,
+                                 info, scale);
 
     auto target =
         addTarget<hwmon::FanSpeed>(sensor.first, ioAccess, _devPath, info);
