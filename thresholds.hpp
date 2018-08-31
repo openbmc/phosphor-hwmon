@@ -59,8 +59,7 @@ struct Thresholds<CriticalObject>
 template <typename T>
 void checkThresholds(std::experimental::any& iface, int64_t value)
 {
-    auto realIface = std::experimental::any_cast<std::shared_ptr<T>>
-                     (iface);
+    auto realIface = std::experimental::any_cast<std::shared_ptr<T>>(iface);
     auto lo = (*realIface.*Thresholds<T>::getLo)();
     auto hi = (*realIface.*Thresholds<T>::getHi)();
     (*realIface.*Thresholds<T>::alarmLo)(value <= lo);
@@ -80,10 +79,8 @@ void checkThresholds(std::experimental::any& iface, int64_t value)
  *  @param[in] info - The sdbusplus server connection and interfaces.
  */
 template <typename T>
-auto addThreshold(const std::string& sensorType,
-                  const std::string& sensorID,
-                  int64_t value,
-                  ObjectInfo& info)
+auto addThreshold(const std::string& sensorType, const std::string& sensorID,
+                  int64_t value, ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
 

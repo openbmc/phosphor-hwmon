@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "config.h"
+
+#include "sysfs.hpp"
+
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
@@ -21,20 +25,18 @@
 #include <memory>
 #include <phosphor-logging/log.hpp>
 #include <thread>
-#include "config.h"
-#include "sysfs.hpp"
 
 using namespace std::string_literals;
 namespace fs = std::experimental::filesystem;
 
-namespace sysfs {
+namespace sysfs
+{
 
 static const auto emptyString = ""s;
 static constexpr auto ofRoot = "/sys/firmware/devicetree/base";
 
-std::string findPhandleMatch(
-        const std::string& iochanneldir,
-        const std::string& phandledir)
+std::string findPhandleMatch(const std::string& iochanneldir,
+                             const std::string& phandledir)
 {
     // TODO: At the moment this method only supports device trees
     // with iio-hwmon nodes with a single sensor.  Typically
@@ -56,9 +58,8 @@ std::string findPhandleMatch(
     uint32_t ioChannelsValue;
     std::ifstream ioChannelsFile(ioChannelsPath);
 
-    ioChannelsFile.read(
-            reinterpret_cast<char*>(&ioChannelsValue),
-            sizeof(ioChannelsValue));
+    ioChannelsFile.read(reinterpret_cast<char*>(&ioChannelsValue),
+                        sizeof(ioChannelsValue));
 
     for (const auto& ofInst : fs::recursive_directory_iterator(phandledir))
     {
@@ -70,9 +71,8 @@ std::string findPhandleMatch(
         std::ifstream pHandleFile(path);
         uint32_t pHandleValue;
 
-        pHandleFile.read(
-                reinterpret_cast<char*>(&pHandleValue),
-                sizeof(pHandleValue));
+        pHandleFile.read(reinterpret_cast<char*>(&pHandleValue),
+                         sizeof(pHandleValue));
 
         if (ioChannelsValue == pHandleValue)
         {
@@ -128,7 +128,7 @@ std::string findCalloutPath(const std::string& instancePath)
     // If a match is found, use the corresponding /sys/devices
     // iio device as the callout device.
     static constexpr auto iioDevices = "/sys/bus/iio/devices";
-    for (const auto& iioDev: fs::recursive_directory_iterator(iioDevices))
+    for (const auto& iioDev : fs::recursive_directory_iterator(iioDevices))
     {
         p = iioDev.path();
         p /= "of_node";
@@ -211,9 +211,9 @@ std::string findHwmonFromDevPath(const std::string& devPath)
 
     try
     {
-        //This path is also used as a filesystem path to an environment
-        //file, and that has issues with ':'s in the path so they've
-        //been converted to '--'s.  Convert them back now.
+        // This path is also used as a filesystem path to an environment
+        // file, and that has issues with ':'s in the path so they've
+        // been converted to '--'s.  Convert them back now.
         size_t pos = 0;
         std::string path = p;
         while ((pos = path.find("--")) != std::string::npos)
@@ -224,7 +224,7 @@ std::string findHwmonFromDevPath(const std::string& devPath)
         for (const auto& hwmonInst : fs::directory_iterator(path))
         {
             if ((hwmonInst.path().filename().string().find("hwmon") !=
-                   std::string::npos))
+                 std::string::npos))
             {
                 return hwmonInst.path();
             }
@@ -233,9 +233,8 @@ std::string findHwmonFromDevPath(const std::string& devPath)
     catch (const std::exception& e)
     {
         using namespace phosphor::logging;
-        log<level::ERR>(
-                "Unable to find hwmon directory from the dev path",
-                entry("PATH=%s", devPath.c_str()));
+        log<level::ERR>("Unable to find hwmon directory from the dev path",
+                        entry("PATH=%s", devPath.c_str()));
     }
     return emptyString;
 }

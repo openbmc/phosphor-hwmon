@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
-
 #include "sensorset.hpp"
 
-namespace env {
+#include <string>
+
+namespace env
+{
 
 /** @brief Reads an environment variable
  *
@@ -25,8 +26,7 @@ std::string getEnv(const char* key);
  *
  *  @return string - the env var value
  */
-std::string getEnv(
-    const char* prefix, const SensorSet::key_type& sensor);
+std::string getEnv(const char* prefix, const SensorSet::key_type& sensor);
 
 /** @brief Reads an environment variable, and takes type and id separately
  *
@@ -36,10 +36,8 @@ std::string getEnv(
  *
  *  @return string - the env var value
  */
-std::string getEnv(
-    const char* prefix,
-    const std::string& type,
-    const std::string& id);
+std::string getEnv(const char* prefix, const std::string& type,
+                   const std::string& id);
 
 /** @brief Gets the ID for the sensor with a level of indirection
  *
@@ -50,9 +48,7 @@ std::string getEnv(
  *  @param[in] fileSuffix - The file suffix
  *  @param[in] sensor - Sensor details
  */
-std::string getIndirectID(
-    std::string path,
-    const std::string& fileSuffix,
-    const SensorSet::key_type& sensor);
+std::string getIndirectID(std::string path, const std::string& fileSuffix,
+                          const SensorSet::key_type& sensor);
 
-}  // namespace env
+} // namespace env

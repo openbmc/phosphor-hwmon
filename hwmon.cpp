@@ -1,17 +1,14 @@
 #include "hwmon.hpp"
 
-namespace hwmon {
+namespace hwmon
+{
 
 bool getAttributes(const std::string& type, Attributes& attributes)
 {
     // *INDENT-OFF*
-    auto a = std::find_if(
-                typeAttrMap.begin(),
-                typeAttrMap.end(),
-                [&](const auto & e)
-                {
-                   return type == getHwmonType(e);
-                });
+    auto a =
+        std::find_if(typeAttrMap.begin(), typeAttrMap.end(),
+                     [&](const auto& e) { return type == getHwmonType(e); });
     // *INDENT-ON*
 
     if (a == typeAttrMap.end())
@@ -23,4 +20,4 @@ bool getAttributes(const std::string& type, Attributes& attributes)
     return true;
 }
 
-}  //  namespace hwmon
+} //  namespace hwmon

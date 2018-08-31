@@ -1,15 +1,16 @@
+#include "config.h"
+
+#include "sensor.hpp"
+
+#include "env.hpp"
+#include "hwmon.hpp"
+#include "sensorset.hpp"
+#include "sysfs.hpp"
+
 #include <cstring>
 #include <experimental/filesystem>
-
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
-
-#include "config.h"
-#include "sensor.hpp"
-#include "sensorset.hpp"
-#include "hwmon.hpp"
-#include "env.hpp"
-#include "sysfs.hpp"
 
 namespace sensor
 {
@@ -17,11 +18,9 @@ namespace sensor
 using namespace phosphor::logging;
 
 Sensor::Sensor(const SensorSet::key_type& sensor,
-               const hwmonio::HwmonIO& ioAccess,
-               const std::string& devPath) :
+               const hwmonio::HwmonIO& ioAccess, const std::string& devPath) :
     sensor(sensor),
-    ioAccess(ioAccess),
-    devPath(devPath)
+    ioAccess(ioAccess), devPath(devPath)
 {
     auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
@@ -47,8 +46,7 @@ void Sensor::addRemoveRCs(const std::string& rcList)
     }
 
     // Convert to a char* for strtok
-    std::vector<char> rmRCs(rcList.c_str(),
-                            rcList.c_str() + rcList.size() + 1);
+    std::vector<char> rmRCs(rcList.c_str(), rcList.c_str() + rcList.size() + 1);
     auto rmRC = std::strtok(&rmRCs[0], ", ");
     while (rmRC != nullptr)
     {
@@ -83,15 +81,13 @@ int64_t Sensor::adjustValue(int64_t value)
 
     // Adjust based on gain and offset
     value = static_cast<decltype(value)>(
-                static_cast<double>(value) * sensorAdjusts.gain
-                    + sensorAdjusts.offset);
+        static_cast<double>(value) * sensorAdjusts.gain + sensorAdjusts.offset);
 
     return value;
 }
 
-std::shared_ptr<ValueObject> Sensor::addValue(
-        const RetryIO& retryIO,
-        ObjectInfo& info)
+std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
+                                              ObjectInfo& info)
 {
     static constexpr bool deferSignals = true;
 
@@ -105,8 +101,9 @@ std::shared_ptr<ValueObject> Sensor::addValue(
     auto it = obj.find(InterfaceType::STATUS);
     if (it != obj.end())
     {
-        statusIface = std::experimental::any_cast<
-                std::shared_ptr<StatusObject>>(it->second);
+        statusIface =
+            std::experimental::any_cast<std::shared_ptr<StatusObject>>(
+                it->second);
     }
 
     // If there's no fault file or the sensor has a fault file and
@@ -115,16 +112,14 @@ std::shared_ptr<ValueObject> Sensor::addValue(
     {
         // Retry for up to a second if device is busy
         // or has a transient error.
-        val = ioAccess.read(
-                sensor.first,
-                sensor.second,
-                hwmon::entry::cinput,
-                std::get<size_t>(retryIO),
-                std::get<std::chrono::milliseconds>(retryIO));
+        val = ioAccess.read(sensor.first, sensor.second, hwmon::entry::cinput,
+                            std::get<size_t>(retryIO),
+                            std::get<std::chrono::milliseconds>(retryIO));
         val = adjustValue(val);
     }
 
-    auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
+    auto iface =
+        std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
     iface->value(val);
 
     hwmon::Attributes attrs;
@@ -135,12 +130,12 @@ std::shared_ptr<ValueObject> Sensor::addValue(
     }
 
     auto maxValue = env::getEnv("MAXVALUE", sensor);
-    if(!maxValue.empty())
+    if (!maxValue.empty())
     {
         iface->maxValue(std::stoll(maxValue));
     }
     auto minValue = env::getEnv("MINVALUE", sensor);
-    if(!minValue.empty())
+    if (!minValue.empty())
     {
         iface->minValue(std::stoll(minValue));
     }
@@ -164,20 +159,15 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     std::string faultID = sensor.second;
     std::string entry = hwmon::entry::fault;
 
-    auto sysfsFullPath = sysfs::make_sysfs_path(ioAccess.path(),
-                                                faultName,
-                                                faultID,
-                                                entry);
+    auto sysfsFullPath =
+        sysfs::make_sysfs_path(ioAccess.path(), faultName, faultID, entry);
     if (fs::exists(sysfsFullPath))
     {
         bool functional = true;
         uint32_t fault = 0;
         try
         {
-            fault = ioAccess.read(faultName,
-                                  faultID,
-                                  entry,
-                                  hwmonio::retries,
+            fault = ioAccess.read(faultName, faultID, entry, hwmonio::retries,
                                   hwmonio::delay);
             if (fault != 0)
             {
@@ -186,24 +176,20 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
         }
         catch (const std::system_error& e)
         {
-            using namespace sdbusplus::xyz::openbmc_project::
-                Sensor::Device::Error;
-            using metadata = xyz::openbmc_project::Sensor::
-                Device::ReadFailure;
+            using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::
+                Error;
+            using metadata = xyz::openbmc_project::Sensor::Device::ReadFailure;
 
-            report<ReadFailure>(
-                    metadata::CALLOUT_ERRNO(e.code().value()),
-                    metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
+            report<ReadFailure>(metadata::CALLOUT_ERRNO(e.code().value()),
+                                metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
-            log<level::INFO>("Logging failing sysfs file",
-                    phosphor::logging::entry(
-                            "FILE=%s", sysfsFullPath.c_str()));
+            log<level::INFO>(
+                "Logging failing sysfs file",
+                phosphor::logging::entry("FILE=%s", sysfsFullPath.c_str()));
         }
 
-        iface = std::make_shared<StatusObject>(
-                bus,
-                objPath.c_str(),
-                deferSignals);
+        iface =
+            std::make_shared<StatusObject>(bus, objPath.c_str(), deferSignals);
         // Set functional property
         iface->functional(functional);
 

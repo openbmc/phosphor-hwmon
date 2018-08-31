@@ -11,16 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "config.h"
+
+#include "hwmonio.hpp"
+
+#include "sysfs.hpp"
+
 #include <algorithm>
 #include <exception>
 #include <fstream>
 #include <thread>
 
-#include "config.h"
-#include "hwmonio.hpp"
-#include "sysfs.hpp"
-
-namespace hwmonio {
+namespace hwmonio
+{
 
 static constexpr auto retryableErrors = {
     /*
@@ -72,22 +75,16 @@ HwmonIO::HwmonIO(const std::string& path) : p(path)
 {
 }
 
-int64_t HwmonIO::read(
-        const std::string& type,
-        const std::string& id,
-        const std::string& sensor,
-        size_t retries,
-        std::chrono::milliseconds delay) const
+int64_t HwmonIO::read(const std::string& type, const std::string& id,
+                      const std::string& sensor, size_t retries,
+                      std::chrono::milliseconds delay) const
 {
     int64_t val;
     std::ifstream ifs;
-    auto fullPath = sysfs::make_sysfs_path(
-            p, type, id, sensor);
+    auto fullPath = sysfs::make_sysfs_path(p, type, id, sensor);
 
-    ifs.exceptions(
-            std::ifstream::failbit |
-                std::ifstream::badbit |
-                std::ifstream::eofbit);
+    ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit |
+                   std::ifstream::eofbit);
 
     while (true)
     {
@@ -112,21 +109,19 @@ int64_t HwmonIO::read(
             if (rc == ENOENT || rc == ENODEV)
             {
                 // If the directory or device disappeared then this application
-                // should gracefully exit.  There are race conditions between the
-                // unloading of a hwmon driver and the stopping of this service
-                // by systemd.  To prevent this application from falsely failing
-                // in these scenarios, it will simply exit if the directory or
-                // file can not be found.  It is up to the user(s) of this
-                // provided hwmon object to log the appropriate errors if the
-                // object disappears when it should not.
+                // should gracefully exit.  There are race conditions between
+                // the unloading of a hwmon driver and the stopping of this
+                // service by systemd.  To prevent this application from falsely
+                // failing in these scenarios, it will simply exit if the
+                // directory or file can not be found.  It is up to the user(s)
+                // of this provided hwmon object to log the appropriate errors
+                // if the object disappears when it should not.
                 exit(0);
             }
 
-            if (0 == std::count(
-                        retryableErrors.begin(),
-                        retryableErrors.end(),
-                        rc) ||
-                    !retries)
+            if (0 == std::count(retryableErrors.begin(), retryableErrors.end(),
+                                rc) ||
+                !retries)
             {
                 // Not a retryable error or out of retries.
 #ifdef NEGATIVE_ERRNO_ON_FAIL
@@ -148,23 +143,16 @@ int64_t HwmonIO::read(
     return val;
 }
 
-void HwmonIO::write(
-        uint32_t val,
-        const std::string& type,
-        const std::string& id,
-        const std::string& sensor,
-        size_t retries,
-        std::chrono::milliseconds delay) const
+void HwmonIO::write(uint32_t val, const std::string& type,
+                    const std::string& id, const std::string& sensor,
+                    size_t retries, std::chrono::milliseconds delay) const
 
 {
     std::ofstream ofs;
-    auto fullPath = sysfs::make_sysfs_path(
-            p, type, id, sensor);
+    auto fullPath = sysfs::make_sysfs_path(p, type, id, sensor);
 
-    ofs.exceptions(
-            std::ofstream::failbit |
-                std::ofstream::badbit |
-                std::ofstream::eofbit);
+    ofs.exceptions(std::ofstream::failbit | std::ofstream::badbit |
+                   std::ofstream::eofbit);
 
     // See comments in the read method for an explanation of the odd exception
     // handling behavior here.
@@ -195,11 +183,9 @@ void HwmonIO::write(
                 exit(0);
             }
 
-            if (0 == std::count(
-                        retryableErrors.begin(),
-                        retryableErrors.end(),
-                        rc) ||
-                    !retries)
+            if (0 == std::count(retryableErrors.begin(), retryableErrors.end(),
+                                rc) ||
+                !retries)
             {
                 // Not a retryable error or out of retries.
 
@@ -221,4 +207,4 @@ std::string HwmonIO::path() const
     return p;
 }
 
-} // hwmonio
+} // namespace hwmonio

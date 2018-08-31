@@ -1,15 +1,15 @@
-#include "env.hpp"
 #include "fan_pwm.hpp"
+
+#include "env.hpp"
 #include "hwmon.hpp"
 #include "hwmonio.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 
-#include <phosphor-logging/elog-errors.hpp>
-#include <xyz/openbmc_project/Control/Device/error.hpp>
-
 #include <experimental/filesystem>
+#include <phosphor-logging/elog-errors.hpp>
 #include <string>
+#include <xyz/openbmc_project/Control/Device/error.hpp>
 
 using namespace phosphor::logging;
 
@@ -21,32 +21,22 @@ uint64_t FanPwm::target(uint64_t value)
     using namespace std::literals;
 
     std::string empty;
-    //Write target out to sysfs
+    // Write target out to sysfs
     try
     {
-        ioAccess->write(
-            value,
-            type,
-            id,
-            empty,
-            hwmonio::retries,
-            hwmonio::delay);
+        ioAccess->write(value, type, id, empty, hwmonio::retries,
+                        hwmonio::delay);
     }
     catch (const std::system_error& e)
     {
-        using namespace sdbusplus::xyz::openbmc_project::Control::
-            Device::Error;
+        using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
         report<WriteFailure>(
-            xyz::openbmc_project::Control::Device::
-            WriteFailure::CALLOUT_ERRNO(e.code().value()),
-            xyz::openbmc_project::Control::Device::
-            WriteFailure::CALLOUT_DEVICE_PATH(devPath.c_str()));
+            xyz::openbmc_project::Control::Device::WriteFailure::CALLOUT_ERRNO(
+                e.code().value()),
+            xyz::openbmc_project::Control::Device::WriteFailure::
+                CALLOUT_DEVICE_PATH(devPath.c_str()));
 
-        auto file = sysfs::make_sysfs_path(
-                        ioAccess->path(),
-                        type,
-                        id,
-                        empty);
+        auto file = sysfs::make_sysfs_path(ioAccess->path(), type, id, empty);
 
         log<level::INFO>("Logging failing sysfs file",
                          phosphor::logging::entry("FILE=%s", file.c_str()));
@@ -58,4 +48,3 @@ uint64_t FanPwm::target(uint64_t value)
 }
 
 } // namespace hwmon
-
