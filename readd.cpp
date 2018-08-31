@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
-#include <memory>
+#include "config.h"
+
 #include "argument.hpp"
 #include "mainloop.hpp"
-#include "config.h"
 #include "sysfs.hpp"
+
+#include <iostream>
+#include <memory>
 
 static void exit_with_error(const char* err, char** argv)
 {
@@ -71,13 +73,8 @@ int main(int argc, char** argv)
         exit_with_error("Unable to determine callout path.", argv);
     }
 
-    MainLoop loop(
-        sdbusplus::bus::new_default(),
-        param,
-        path,
-        calloutPath,
-        BUSNAME_PREFIX,
-        SENSOR_ROOT);
+    MainLoop loop(sdbusplus::bus::new_default(), param, path, calloutPath,
+                  BUSNAME_PREFIX, SENSOR_ROOT);
     loop.run();
 
     return 0;

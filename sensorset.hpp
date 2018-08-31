@@ -19,58 +19,56 @@
  */
 class SensorSet
 {
-    public:
-        typedef std::map<std::pair<std::string, std::string>,
-                std::set<std::string>> container_t;
-        using mapped_type = container_t::mapped_type;
-        using key_type = container_t::key_type;
+  public:
+    typedef std::map<std::pair<std::string, std::string>, std::set<std::string>>
+        container_t;
+    using mapped_type = container_t::mapped_type;
+    using key_type = container_t::key_type;
 
-        /**
-         * @brief Constructor
-         * @details Builds a map of the hwmon sysfs files in the passed
-         *          in directory.
-         *
-         * @param[in] path - path to the hwmon device directory
-         *
-         */
-        explicit SensorSet(const std::string& path);
-        ~SensorSet() = default;
-        SensorSet() = delete;
-        SensorSet(const SensorSet&) = delete;
-        SensorSet& operator=(const SensorSet&) = delete;
-        SensorSet(SensorSet&&) = default;
-        SensorSet& operator=(SensorSet&&) = default;
+    /**
+     * @brief Constructor
+     * @details Builds a map of the hwmon sysfs files in the passed
+     *          in directory.
+     *
+     * @param[in] path - path to the hwmon device directory
+     *
+     */
+    explicit SensorSet(const std::string& path);
+    ~SensorSet() = default;
+    SensorSet() = delete;
+    SensorSet(const SensorSet&) = delete;
+    SensorSet& operator=(const SensorSet&) = delete;
+    SensorSet(SensorSet&&) = default;
+    SensorSet& operator=(SensorSet&&) = default;
 
-        /**
-         * @brief Returns an iterator to the beginning of the map
-         *
-         * @return const_iterator
-         */
-        container_t::const_iterator begin()
-        {
-            return const_cast<const container_t&>(container).begin();
-        }
+    /**
+     * @brief Returns an iterator to the beginning of the map
+     *
+     * @return const_iterator
+     */
+    container_t::const_iterator begin()
+    {
+        return const_cast<const container_t&>(container).begin();
+    }
 
-        /**
-         * @brief Returns an iterator to the end of the map
-         *
-         * @return const_iterator
-         */
-        container_t::const_iterator end()
-        {
-            return const_cast<const container_t&>(container).end();
-        }
+    /**
+     * @brief Returns an iterator to the end of the map
+     *
+     * @return const_iterator
+     */
+    container_t::const_iterator end()
+    {
+        return const_cast<const container_t&>(container).end();
+    }
 
-    private:
-
-        /**
-         * @brief The map of hwmon files in the directory
-         * @details For example:
-         *          key = pair("temp", "1")
-         *          value = "input"
-         */
-        container_t container;
-
+  private:
+    /**
+     * @brief The map of hwmon files in the directory
+     * @details For example:
+     *          key = pair("temp", "1")
+     *          value = "input"
+     */
+    container_t container;
 };
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

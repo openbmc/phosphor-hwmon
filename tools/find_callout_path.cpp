@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
 #include "../sysfs.hpp"
+
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
     if (argc < 2)
     {
-        std::cerr << "Usage: " << argv[0]
-            << " HWMON_INST_PATH" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " HWMON_INST_PATH" << std::endl;
         return 1;
     }
 

@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <experimental/filesystem>
-#include <regex>
-#include <iostream>
 #include "sensorset.hpp"
+
 #include "hwmon.hpp"
+
+#include <experimental/filesystem>
+#include <iostream>
+#include <regex>
 
 // TODO: Issue#2 - STL regex generates really bloated code.  Use POSIX regex
 //       interfaces instead.
-static const std::regex sensors_regex =
-    std::regex("^(fan|in|temp|power|energy|curr)([0-9]+)_([a-z]*)",
-               std::regex::extended);
+static const std::regex sensors_regex = std::regex(
+    "^(fan|in|temp|power|energy|curr)([0-9]+)_([a-z]*)", std::regex::extended);
 static const auto sensor_regex_match_count = 4;
 
 SensorSet::SensorSet(const std::string& path)

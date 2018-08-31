@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+#include "env.hpp"
+
+#include "hwmon.hpp"
+
 #include <cstdlib>
 #include <fstream>
 
-#include "env.hpp"
-#include "hwmon.hpp"
-
-namespace env {
+namespace env
+{
 
 std::string getEnv(const char* key)
 {
@@ -28,8 +30,7 @@ std::string getEnv(const char* key)
     return (value) ? std::string(value) : std::string();
 }
 
-std::string getEnv(
-    const char* prefix, const SensorSet::key_type& sensor)
+std::string getEnv(const char* prefix, const SensorSet::key_type& sensor)
 {
     std::string key;
 
@@ -41,19 +42,15 @@ std::string getEnv(
     return getEnv(key.c_str());
 }
 
-std::string getEnv(
-    const char* prefix,
-    const std::string& type,
-    const std::string& id)
+std::string getEnv(const char* prefix, const std::string& type,
+                   const std::string& id)
 {
     SensorSet::key_type sensor{type, id};
     return getEnv(prefix, sensor);
 }
 
-std::string getIndirectID(
-        std::string path,
-        const std::string& fileSuffix,
-        const SensorSet::key_type& sensor)
+std::string getIndirectID(std::string path, const std::string& fileSuffix,
+                          const SensorSet::key_type& sensor)
 {
     std::string content;
 
@@ -65,13 +62,12 @@ std::string getIndirectID(
     std::ifstream handle(path.c_str());
     if (!handle.fail())
     {
-        content.assign(
-                (std::istreambuf_iterator<char>(handle)),
-                (std::istreambuf_iterator<char>()));
+        content.assign((std::istreambuf_iterator<char>(handle)),
+                       (std::istreambuf_iterator<char>()));
 
         if (!content.empty())
         {
-            //remove the newline
+            // remove the newline
             content.pop_back();
         }
     }
@@ -79,6 +75,6 @@ std::string getIndirectID(
     return content;
 }
 
-}  // namespace env
+} // namespace env
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
