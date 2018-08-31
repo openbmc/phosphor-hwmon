@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
-#include <iterator>
+#include "argument.hpp"
+
 #include <algorithm>
 #include <cassert>
-#include "argument.hpp"
+#include <iostream>
+#include <iterator>
 
 ArgumentParser::ArgumentParser(int argc, char** argv)
 {
@@ -66,13 +67,14 @@ void ArgumentParser::usage(char** argv)
     std::cerr << std::flush;
 }
 
-const option ArgumentParser::options[] =
-{
-    { "path",   required_argument,  NULL,   'p' },
-    { "dev-path", required_argument,  NULL, 'o' },
-    { "help",   no_argument,        NULL,   'h' },
-    { 0, 0, 0, 0},
+// clang-format off
+const option ArgumentParser::options[] = {
+    {"path",     required_argument, NULL, 'p'},
+    {"dev-path", required_argument, NULL, 'o'},
+    {"help",     no_argument,       NULL, 'h'},
+    {0, 0, 0, 0},
 };
+// clang-format on
 
 const char* ArgumentParser::optionstr = "o:p:?h";
 

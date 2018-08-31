@@ -5,7 +5,8 @@
 #include <fstream>
 #include <string>
 
-namespace sysfs {
+namespace sysfs
+{
 
 inline std::string make_sysfs_path(const std::string& path,
                                    const std::string& type,
@@ -14,7 +15,8 @@ inline std::string make_sysfs_path(const std::string& path,
 {
     using namespace std::literals;
 
-    if (entry.empty()) {
+    if (entry.empty())
+    {
         return path + "/"s + type + id;
     }
 
@@ -35,9 +37,8 @@ inline std::string make_sysfs_path(const std::string& path,
  *
  *  @return Path to phandle file with value matching that in io-channels
  */
-std::string findPhandleMatch(
-        const std::string& iochanneldir,
-        const std::string& phandledir);
+std::string findPhandleMatch(const std::string& iochanneldir,
+                             const std::string& phandledir);
 
 /** @brief Find hwmon instances from an open-firmware device tree path
  *

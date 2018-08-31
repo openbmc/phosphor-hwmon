@@ -1,9 +1,9 @@
 #pragma once
 
+#include "interface.hpp"
+
 #include <string>
 #include <tuple>
-
-#include "interface.hpp"
 
 namespace hwmon
 {
@@ -20,7 +20,7 @@ static const std::string label = clabel;
 static const std::string target = ctarget;
 static const std::string enable = cenable;
 static const std::string fault = cfault;
-}
+} // namespace entry
 
 namespace type
 {
@@ -32,7 +32,6 @@ static constexpr auto cenergy = "energy";
 static constexpr auto cpower = "power";
 static constexpr auto cpwm = "pwm";
 
-
 static const std::string fan = cfan;
 static const std::string temp = ctemp;
 static const std::string volt = cvolt;
@@ -40,44 +39,25 @@ static const std::string curr = ccurr;
 static const std::string energy = cenergy;
 static const std::string power = cpower;
 static const std::string pwm = cpwm;
-}
+} // namespace type
 
-static constexpr auto typeAttrMap =
-{
+static constexpr auto typeAttrMap = {
     // 1 - hwmon class
     // 2 - unit
     // 3 - sysfs scaling factor
     // 4 - namespace
-    std::make_tuple(
-        hwmon::type::ctemp,
-        ValueInterface::Unit::DegreesC,
-        -3,
-        "temperature"),
-    std::make_tuple(
-        hwmon::type::cfan,
-        ValueInterface::Unit::RPMS,
-        0,
-        "fan_tach"),
-    std::make_tuple(
-        hwmon::type::cvolt,
-        ValueInterface::Unit::Volts,
-        -3,
-        "voltage"),
-    std::make_tuple(
-        hwmon::type::ccurr,
-        ValueInterface::Unit::Amperes,
-        -3,
-        "current"),
-    std::make_tuple(
-        hwmon::type::cenergy,
-        ValueInterface::Unit::Joules,
-        -6,
-        "energy"),
-    std::make_tuple(
-        hwmon::type::cpower,
-        ValueInterface::Unit::Watts,
-        -6,
-        "power"),
+    std::make_tuple(hwmon::type::ctemp, ValueInterface::Unit::DegreesC, -3,
+                    "temperature"),
+    std::make_tuple(hwmon::type::cfan, ValueInterface::Unit::RPMS, 0,
+                    "fan_tach"),
+    std::make_tuple(hwmon::type::cvolt, ValueInterface::Unit::Volts, -3,
+                    "voltage"),
+    std::make_tuple(hwmon::type::ccurr, ValueInterface::Unit::Amperes, -3,
+                    "current"),
+    std::make_tuple(hwmon::type::cenergy, ValueInterface::Unit::Joules, -6,
+                    "energy"),
+    std::make_tuple(hwmon::type::cpower, ValueInterface::Unit::Watts, -6,
+                    "power"),
 };
 
 inline auto getHwmonType(decltype(typeAttrMap)::const_reference attrs)
@@ -101,8 +81,8 @@ inline auto getNamespace(decltype(typeAttrMap)::const_reference attrs)
 }
 
 using AttributeIterator = decltype(*typeAttrMap.begin());
-using Attributes
-    = std::remove_cv<std::remove_reference<AttributeIterator>::type>::type;
+using Attributes =
+    std::remove_cv<std::remove_reference<AttributeIterator>::type>::type;
 
 /** @brief Get Attribute tuple for the type
  *
@@ -113,6 +93,6 @@ using Attributes
  */
 bool getAttributes(const std::string& type, Attributes& attributes);
 
-}  //  namespace hwmon
+} //  namespace hwmon
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
