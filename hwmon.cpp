@@ -5,11 +5,16 @@ namespace hwmon
 
 bool getAttributes(const std::string& type, Attributes& attributes)
 {
-    // *INDENT-OFF*
+    // clang-format off
     auto a =
-        std::find_if(typeAttrMap.begin(), typeAttrMap.end(),
-                     [&](const auto& e) { return type == getHwmonType(e); });
-    // *INDENT-ON*
+        std::find_if(
+            typeAttrMap.begin(),
+            typeAttrMap.end(),
+            [&](const auto& e)
+            {
+                return type == getHwmonType(e);
+            });
+    // clang-format on
 
     if (a == typeAttrMap.end())
     {
