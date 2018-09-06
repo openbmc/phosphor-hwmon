@@ -275,6 +275,7 @@ void MainLoop::shutdown() noexcept
 void MainLoop::run()
 {
     init();
+    read();
 
     sd_event_default(&loop);
 
