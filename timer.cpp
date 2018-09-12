@@ -1,8 +1,7 @@
 #include "timer.hpp"
 
-#include <string.h>
-
 #include <chrono>
+#include <cstring>
 #include <system_error>
 
 namespace phosphor
@@ -30,7 +29,7 @@ Timer::Timer(sd_event* event, std::function<void()> callback,
                                this);          // User data
     if (r < 0)
     {
-        throw std::system_error(r, std::generic_category(), strerror(-r));
+        throw std::system_error(r, std::generic_category(), std::strerror(-r));
     }
 }
 
@@ -45,12 +44,14 @@ int Timer::timeoutHandler(sd_event_source* eventSource, uint64_t usec,
             eventSource, (getTime() + timer->getDuration()).count());
         if (r < 0)
         {
-            throw std::system_error(r, std::generic_category(), strerror(-r));
+            throw std::system_error(r, std::generic_category(),
+                                    std::strerror(-r));
         }
         r = sd_event_source_set_enabled(eventSource, timer::ON);
         if (r < 0)
         {
-            throw std::system_error(r, std::generic_category(), strerror(-r));
+            throw std::system_error(r, std::generic_category(),
+                                    std::strerror(-r));
         }
     }
 
