@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gpio.hpp"
 #include "hwmonio.hpp"
 #include "sensorset.hpp"
 #include "types.hpp"
@@ -101,6 +102,16 @@ class Sensor
      */
     std::shared_ptr<StatusObject> addStatus(ObjectInfo& info);
 
+    /**
+     * @brief Unlock the gpio, set to high if relevant.
+     */
+    void unlockGpio();
+
+    /**
+     * @brief Lock the gpio, set to low if relevant.
+     */
+    void lockGpio();
+
   private:
     /** @brief Sensor object's identifiers */
     SensorSet::key_type sensor;
@@ -113,6 +124,9 @@ class Sensor
 
     /** @brief Structure for storing sensor adjustments */
     valueAdjust sensorAdjusts;
+
+    /** @brief Optional pointer to GPIO handle. */
+    std::unique_ptr<gpio::GpioHandle> handle;
 };
 
 } // namespace sensor
