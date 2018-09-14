@@ -387,11 +387,17 @@ void MainLoop::read()
 
                 // Retry for up to a second if device is busy
                 // or has a transient error.
+                std::unique_ptr<sensor::Sensor>& sensor =
+                    sensorObjects[i.first];
+
+                sensor->unlockGpio();
 
                 value = ioAccess.read(i.first.first, i.first.second, input,
                                       hwmonio::retries, hwmonio::delay);
 
-                value = sensorObjects[i.first]->adjustValue(value);
+                sensor->lockGpio();
+
+                value = sensor->adjustValue(value);
 
                 for (auto& iface : obj)
                 {
