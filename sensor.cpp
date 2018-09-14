@@ -3,6 +3,7 @@
 #include "sensor.hpp"
 
 #include "env.hpp"
+#include "gpio_handle.hpp"
 #include "hwmon.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
@@ -10,18 +11,34 @@
 #include <cstring>
 #include <experimental/filesystem>
 #include <phosphor-logging/elog-errors.hpp>
+#include <thread>
+#include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 namespace sensor
 {
 
 using namespace phosphor::logging;
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIO& ioAccess, const std::string& devPath) :
     sensor(sensor),
     ioAccess(ioAccess), devPath(devPath)
 {
+    auto chip = env::getEnv("GPIOCHIP", sensor);
+    auto access = env::getEnv("GPIO", sensor);
+    if (!access.empty() && !chip.empty())
+    {
+        handle = gpio::BuildGpioHandle(chip, access);
+
+        if (!handle)
+        {
+            log<level::ERR>("Unable to set up gpio locking");
+            elog<InternalFailure>();
+        }
+    }
+
     auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
     {
@@ -110,11 +127,15 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     // its status is functional, read the input value.
     if (!statusIface || (statusIface && statusIface->functional()))
     {
+        unlockGpio();
+
         // Retry for up to a second if device is busy
         // or has a transient error.
         val = ioAccess.read(sensor.first, sensor.second, hwmon::entry::cinput,
                             std::get<size_t>(retryIO),
                             std::get<std::chrono::milliseconds>(retryIO));
+
+        lockGpio();
         val = adjustValue(val);
     }
 
@@ -197,6 +218,23 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     }
 
     return iface;
+}
+
+void Sensor::unlockGpio()
+{
+    if (handle)
+    {
+        handle->setValues({1});
+        std::this_thread::sleep_for(pause);
+    }
+}
+
+void Sensor::lockGpio()
+{
+    if (handle)
+    {
+        handle->setValues({0});
+    }
 }
 
 } // namespace sensor
