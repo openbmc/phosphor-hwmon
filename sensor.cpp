@@ -22,6 +22,18 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     sensor(sensor),
     ioAccess(ioAccess), devPath(devPath)
 {
+    auto chip = env::getEnv("GPIOCHIP", sensor);
+    auto access = env::getEnv("GPIO", sensor);
+    if (!access.empty() && !chip.empty())
+    {
+        handle = gpio::GpioHandle::BuildGpioHandle(chip, access);
+
+        if (!handle)
+        {
+            log<level::ERR>("Unable to set up gpio locking");
+        }
+    }
+
     auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
     {
@@ -110,11 +122,15 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     // its status is functional, read the input value.
     if (!statusIface || (statusIface && statusIface->functional()))
     {
+        unlockGpio();
+
         // Retry for up to a second if device is busy
         // or has a transient error.
         val = ioAccess.read(sensor.first, sensor.second, hwmon::entry::cinput,
                             std::get<size_t>(retryIO),
                             std::get<std::chrono::milliseconds>(retryIO));
+
+        lockGpio();
         val = adjustValue(val);
     }
 
@@ -197,6 +213,22 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     }
 
     return iface;
+}
+
+void Sensor::unlockGpio()
+{
+    if (handle)
+    {
+        handle->setValue(1);
+    }
+}
+
+void Sensor::lockGpio()
+{
+    if (handle)
+    {
+        handle->setValue(0);
+    }
 }
 
 } // namespace sensor
