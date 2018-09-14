@@ -10,11 +10,13 @@ libhwmon_la_LIBADD = \
 	-lstdc++fs \
 	$(SDBUSPLUS_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
-	$(PHOSPHOR_LOGGING_LIBS)
+	$(PHOSPHOR_LOGGING_LIBS) \
+	$(GPIOPLUS_LIBS)
 libhwmon_la_CXXFLAGS = \
 	$(SDBUSPLUS_CFLAGS) \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	$(PHOSPHOR_LOGGING_CFLAGS)
+	$(PHOSPHOR_LOGGING_CFLAGS) \
+	$(GPIOPLUS_CFLAGS)
 
 libhwmon_la_SOURCES = \
 	argument.cpp \
@@ -27,6 +29,7 @@ libhwmon_la_SOURCES = \
 	timer.cpp \
 	hwmon.cpp \
 	hwmonio.cpp \
-	sensor.cpp
+	sensor.cpp \
+	gpio.cpp
 
 SUBDIRS = . msl test tools
