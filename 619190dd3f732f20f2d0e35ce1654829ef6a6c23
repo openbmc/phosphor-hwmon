@@ -1,0 +1,10 @@
+Code-Review+1: Vernon Mauery <vernon.mauery@linux.intel.com>
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Lei YU <mine260309@gmail.com>
+Code-Review+2: Matt Spinler <spinler@us.ibm.com>
+Submitted-by: Patrick Venture <venture@google.com>
+Submitted-at: Tue, 18 Sep 2018 15:26:10 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/12650
+Project: openbmc/phosphor-hwmon
+Branch: refs/heads/master
