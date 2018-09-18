@@ -25,3 +25,8 @@ ltmain.sh
 missing
 stamp-h1
 test-driver
+*_unittest
+*_unittest.log
+*_unittest.trs
+libtool
+*~
