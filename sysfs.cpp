@@ -221,13 +221,16 @@ std::string findHwmonFromDevPath(const std::string& devPath)
             path.replace(pos, 2, ":");
         }
 
-        for (const auto& hwmonInst : fs::directory_iterator(path))
+        auto testPath = [](const fs::directory_entry& d) {
+            return (d.path().filename().string().find("hwmon") !=
+                    std::string::npos);
+        };
+
+        auto dir_iter = fs::directory_iterator(path);
+        const auto& hwmonInst = std::find_if(dir_iter, end(dir_iter), testPath);
+        if (hwmonInst != end(dir_iter))
         {
-            if ((hwmonInst.path().filename().string().find("hwmon") !=
-                 std::string::npos))
-            {
-                return hwmonInst.path();
-            }
+            return (*hwmonInst).path();
         }
     }
     catch (const std::exception& e)
