@@ -359,7 +359,6 @@ void MainLoop::read()
         if (attrs.find(hwmon::entry::input) != attrs.end())
         {
             // Read value from sensor.
-            int64_t value;
             std::string input = hwmon::entry::cinput;
             if (i.first.first == "pwm")
             {
@@ -368,6 +367,7 @@ void MainLoop::read()
 
             try
             {
+                int64_t value;
                 auto& objInfo = std::get<ObjectInfo>(i.second);
                 auto& obj = std::get<Object>(objInfo);
 

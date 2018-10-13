@@ -69,9 +69,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
 {
     std::shared_ptr<T> target;
     namespace fs = std::experimental::filesystem;
-    static constexpr bool deferSignals = true;
 
-    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);
     auto type = Targets<T>::type;
@@ -158,6 +156,9 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                     "Logging failing sysfs file",
                     phosphor::logging::entry("FILE=%s", sysfsFullPath.c_str()));
             }
+
+            static constexpr bool deferSignals = true;
+            auto& bus = *std::get<sdbusplus::bus::bus*>(info);
 
             // ioAccess.path() is a path like: /sys/class/hwmon/hwmon1
             target = std::make_shared<T>(

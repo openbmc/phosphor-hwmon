@@ -170,8 +170,6 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     namespace fs = std::experimental::filesystem;
 
     std::shared_ptr<StatusObject> iface = nullptr;
-    static constexpr bool deferSignals = true;
-    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<Object>(info);
 
@@ -185,11 +183,10 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     if (fs::exists(sysfsFullPath))
     {
         bool functional = true;
-        uint32_t fault = 0;
         try
         {
-            fault = ioAccess.read(faultName, faultID, entry, hwmonio::retries,
-                                  hwmonio::delay);
+            uint32_t fault = ioAccess.read(faultName, faultID, entry,
+                                           hwmonio::retries, hwmonio::delay);
             if (fault != 0)
             {
                 functional = false;
@@ -208,6 +205,9 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
                 "Logging failing sysfs file",
                 phosphor::logging::entry("FILE=%s", sysfsFullPath.c_str()));
         }
+
+        static constexpr bool deferSignals = true;
+        auto& bus = *std::get<sdbusplus::bus::bus*>(info);
 
         iface =
             std::make_shared<StatusObject>(bus, objPath.c_str(), deferSignals);
