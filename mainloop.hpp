@@ -5,14 +5,15 @@
 #include "sensor.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
-#include "timer.hpp"
 #include "types.hpp"
 
 #include <any>
 #include <memory>
 #include <optional>
 #include <sdbusplus/server.hpp>
+#include <sdeventplus/clock.hpp>
 #include <sdeventplus/event.hpp>
+#include <sdeventplus/utility/timer.hpp>
 #include <string>
 #include <vector>
 
@@ -31,8 +32,8 @@ class MainLoop
     MainLoop() = delete;
     MainLoop(const MainLoop&) = delete;
     MainLoop& operator=(const MainLoop&) = delete;
-    MainLoop(MainLoop&&) = default;
-    MainLoop& operator=(MainLoop&&) = default;
+    MainLoop(MainLoop&&) = delete;
+    MainLoop& operator=(MainLoop&&) = delete;
     ~MainLoop() = default;
 
     /** @brief Constructor
@@ -98,10 +99,10 @@ class MainLoop
     uint64_t _interval = default_interval;
     /** @brief Hwmon sysfs access. */
     hwmonio::HwmonIO ioAccess;
-    /** @brief Timer */
-    std::unique_ptr<phosphor::hwmon::Timer> timer;
     /** @brief the Event Loop structure */
     sdeventplus::Event event;
+    /** @brief Read Timer */
+    sdeventplus::utility::Timer<sdeventplus::ClockId::Monotonic> timer;
     /** @brief Store the specifications of sensor objects */
     std::map<SensorSet::key_type, std::unique_ptr<sensor::Sensor>>
         sensorObjects;
