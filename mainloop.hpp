@@ -12,6 +12,7 @@
 #include <memory>
 #include <optional>
 #include <sdbusplus/server.hpp>
+#include <sdeventplus/event.hpp>
 #include <string>
 #include <vector>
 
@@ -99,8 +100,8 @@ class MainLoop
     hwmonio::HwmonIO ioAccess;
     /** @brief Timer */
     std::unique_ptr<phosphor::hwmon::Timer> timer;
-    /** @brief the sd_event structure */
-    sd_event* loop = nullptr;
+    /** @brief the Event Loop structure */
+    sdeventplus::Event event;
     /** @brief Store the specifications of sensor objects */
     std::map<SensorSet::key_type, std::unique_ptr<sensor::Sensor>>
         sensorObjects;

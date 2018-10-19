@@ -243,7 +243,8 @@ MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
                    const char* prefix, const char* root) :
     _bus(std::move(bus)),
     _manager(_bus, root), _pathParam(param), _hwmonRoot(), _instance(),
-    _devPath(devPath), _prefix(prefix), _root(root), state(), ioAccess(path)
+    _devPath(devPath), _prefix(prefix), _root(root), state(), ioAccess(path),
+    event(sdeventplus::Event::get_default())
 {
     // Strip off any trailing slashes.
     std::string p = path;
@@ -268,21 +269,18 @@ MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
 void MainLoop::shutdown() noexcept
 {
     timer->state(phosphor::hwmon::timer::OFF);
-    sd_event_exit(loop, 0);
-    loop = nullptr;
+    event.exit(0);
 }
 
 void MainLoop::run()
 {
     init();
 
-    sd_event_default(&loop);
-
     std::function<void()> callback(std::bind(&MainLoop::read, this));
     try
     {
         timer = std::make_unique<phosphor::hwmon::Timer>(
-            loop, callback, std::chrono::microseconds(_interval),
+            event.get(), callback, std::chrono::microseconds(_interval),
             phosphor::hwmon::timer::ON);
 
         // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
@@ -290,10 +288,10 @@ void MainLoop::run()
         // TODO: Issue#7 - Should probably periodically check the SensorSet
         //       for new entries.
 
-        _bus.attach_event(loop, SD_EVENT_PRIORITY_IMPORTANT);
-        sd_event_loop(loop);
+        _bus.attach_event(event.get(), SD_EVENT_PRIORITY_IMPORTANT);
+        event.loop();
     }
-    catch (const std::system_error& e)
+    catch (const std::exception& e)
     {
         log<level::ERR>("Error in sysfs polling loop",
                         entry("ERROR=%s", e.what()));
