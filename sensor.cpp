@@ -118,9 +118,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     auto it = obj.find(InterfaceType::STATUS);
     if (it != obj.end())
     {
-        statusIface =
-            std::experimental::any_cast<std::shared_ptr<StatusObject>>(
-                it->second);
+        statusIface = std::any_cast<std::shared_ptr<StatusObject>>(it->second);
     }
 
     // If there's no fault file or the sensor has a fault file and

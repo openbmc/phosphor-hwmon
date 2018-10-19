@@ -57,9 +57,9 @@ struct Thresholds<CriticalObject>
  *  @param[in] value - The sensor reading to compare to thresholds.
  */
 template <typename T>
-void checkThresholds(std::experimental::any& iface, int64_t value)
+void checkThresholds(std::any& iface, int64_t value)
 {
-    auto realIface = std::experimental::any_cast<std::shared_ptr<T>>(iface);
+    auto realIface = std::any_cast<std::shared_ptr<T>>(iface);
     auto lo = (*realIface.*Thresholds<T>::getLo)();
     auto hi = (*realIface.*Thresholds<T>::getHi)();
     (*realIface.*Thresholds<T>::alarmLo)(value <= lo);

@@ -131,7 +131,7 @@ SensorIdentifiers
  * are created and the InterfacesAdded signal is emitted. The object's state
  * data is then returned for sensor state monitoring within the main loop.
  */
-optional_ns::optional<ObjectStateData>
+std::optional<ObjectStateData>
     MainLoop::getObject(SensorSet::container_t::const_reference sensor)
 {
     auto properties = getIdentifiers(sensor);
@@ -377,8 +377,9 @@ void MainLoop::read()
                     auto fault = ioAccess.read(
                         i.first.first, i.first.second, hwmon::entry::fault,
                         hwmonio::retries, hwmonio::delay);
-                    auto statusIface = std::experimental::any_cast<
-                        std::shared_ptr<StatusObject>>(it->second);
+                    auto statusIface =
+                        std::any_cast<std::shared_ptr<StatusObject>>(
+                            it->second);
                     if (!statusIface->functional((fault == 0) ? true : false))
                     {
                         continue;
@@ -408,8 +409,9 @@ void MainLoop::read()
                     switch (iface.first)
                     {
                         case InterfaceType::VALUE:
-                            valueIface = std::experimental::any_cast<
-                                std::shared_ptr<ValueObject>>(iface.second);
+                            valueIface =
+                                std::any_cast<std::shared_ptr<ValueObject>>(
+                                    iface.second);
                             valueIface->value(value);
                             break;
                         case InterfaceType::WARN:

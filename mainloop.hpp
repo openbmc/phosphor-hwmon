@@ -8,9 +8,9 @@
 #include "timer.hpp"
 #include "types.hpp"
 
-#include <experimental/any>
-#include <experimental/optional>
+#include <any>
 #include <memory>
+#include <optional>
 #include <sdbusplus/server.hpp>
 #include <string>
 #include <vector>
@@ -20,8 +20,6 @@ static constexpr auto default_interval = 1000000;
 static constexpr auto sensorID = 0;
 static constexpr auto sensorLabel = 1;
 using SensorIdentifiers = std::tuple<std::string, std::string>;
-
-namespace optional_ns = std::experimental;
 
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
@@ -135,6 +133,6 @@ class MainLoop
      * @return - Optional
      *     Object state data on success, nothing on failure
      */
-    optional_ns::optional<ObjectStateData>
+    std::optional<ObjectStateData>
         getObject(SensorSet::container_t::const_reference sensor);
 };
