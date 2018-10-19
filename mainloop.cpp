@@ -252,7 +252,8 @@ MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
     _bus(std::move(bus)),
     _manager(_bus, root), _pathParam(param), _hwmonRoot(), _instance(),
     _devPath(devPath), _prefix(prefix), _root(root), state(), ioAccess(path),
-    event(sdeventplus::Event::get_default())
+    event(sdeventplus::Event::get_default()),
+    timer(event, std::bind(&MainLoop::read, this))
 {
     // Strip off any trailing slashes.
     std::string p = path;
@@ -276,7 +277,6 @@ MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
 
 void MainLoop::shutdown() noexcept
 {
-    timer->state(phosphor::hwmon::timer::OFF);
     event.exit(0);
 }
 
@@ -287,9 +287,7 @@ void MainLoop::run()
     std::function<void()> callback(std::bind(&MainLoop::read, this));
     try
     {
-        timer = std::make_unique<phosphor::hwmon::Timer>(
-            event.get(), callback, std::chrono::microseconds(_interval),
-            phosphor::hwmon::timer::ON);
+        timer.restart(std::chrono::microseconds(_interval));
 
         // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
 

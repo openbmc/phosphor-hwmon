@@ -28,7 +28,6 @@ libhwmon_la_SOURCES = \
 	env.cpp \
 	fan_speed.cpp \
 	fan_pwm.cpp \
-	timer.cpp \
 	hwmon.cpp \
 	hwmonio.cpp \
 	sensor.cpp \
