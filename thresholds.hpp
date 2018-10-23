@@ -60,7 +60,7 @@ struct Thresholds<CriticalObject>
  *  @param[in] value - The sensor reading to compare to thresholds.
  */
 template <typename T>
-void checkThresholds(std::any& iface, SensorValueType value)
+void checkThresholds(const std::any& iface, SensorValueType value)
 {
     auto realIface = std::any_cast<std::shared_ptr<T>>(iface);
     auto lo = (*realIface.*Thresholds<T>::getLo)();
