@@ -359,7 +359,7 @@ void MainLoop::read()
     //       ensure the objects all exist?
 
     // Iterate through all the sensors.
-    for (auto& i : state)
+    for (const auto& i : state)
     {
         auto& attrs = std::get<0>(i.second);
         if (attrs.find(hwmon::entry::input) != attrs.end())
@@ -477,7 +477,7 @@ void MainLoop::read()
     }
 
     // Remove any sensors marked for removal
-    for (auto& i : rmSensors)
+    for (const auto& i : rmSensors)
     {
         state.erase(i.first);
     }
