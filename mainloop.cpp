@@ -312,7 +312,7 @@ void MainLoop::init()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
-    for (auto& i : *sensors)
+    for (const auto& i : *sensors)
     {
         auto object = getObject(i);
         if (object)
@@ -477,7 +477,7 @@ void MainLoop::read()
     }
 
     // Remove any sensors marked for removal
-    for (auto& i : rmSensors)
+    for (const auto& i : rmSensors)
     {
         state.erase(i.first);
     }
