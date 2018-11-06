@@ -28,6 +28,7 @@
 #include "targets.hpp"
 #include "thresholds.hpp"
 
+#include <cassert>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
