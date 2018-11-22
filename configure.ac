@@ -13,11 +13,36 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
-PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus], [], [AC_MSG_ERROR(["sdbusplus required and not found."])])
-PKG_CHECK_MODULES([SDEVENTPLUS], [sdeventplus], [], [AC_MSG_ERROR(["sdeventplus required and not found."])])
-PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces], [], [AC_MSG_ERROR(["phosphor-dbus-interfaces required and not found."])])
-PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging], [], [AC_MSG_ERROR(["phosphor-logging required and not found."])])
-PKG_CHECK_MODULES([GPIOPLUS], [gpioplus],, [AC_MSG_ERROR([Could not find gpioplus...openbmc/gpioplus package required])])
+PKG_CHECK_MODULES(
+    [SDBUSPLUS],
+    [sdbusplus],
+    [],
+    [AC_MSG_ERROR(["sdbusplus required and not found."])]
+)
+PKG_CHECK_MODULES(
+    [SDEVENTPLUS],
+    [sdeventplus],
+    [],
+    [AC_MSG_ERROR(["sdeventplus required and not found."])]
+)
+PKG_CHECK_MODULES(
+    [PHOSPHOR_DBUS_INTERFACES],
+    [phosphor-dbus-interfaces],
+    [],
+    [AC_MSG_ERROR(["phosphor-dbus-interfaces required and not found."])]
+)
+PKG_CHECK_MODULES(
+    [PHOSPHOR_LOGGING],
+    [phosphor-logging],
+    [],
+    [AC_MSG_ERROR(["phosphor-logging required and not found."])]
+)
+PKG_CHECK_MODULES(
+    [GPIOPLUS],
+    [gpioplus],
+    [],
+    [AC_MSG_ERROR([Could not find gpioplus...openbmc/gpioplus package required])]
+)
 AX_PTHREAD([], [AC_MSG_ERROR(["pthread required and not found"])])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -25,7 +50,11 @@ AX_CXX_COMPILE_STDCXX_17([noext])
 AX_APPEND_COMPILE_FLAGS([-fpic -Wall -Werror], [CXXFLAGS])
 
 # Checks for header files.
-AC_CHECK_HEADER(experimental/filesystem, [], [AC_MSG_ERROR([Could not find experimental/filesystem...libstdc++fs development package required])])
+AC_CHECK_HEADER(
+    experimental/filesystem,
+    [],
+    [AC_MSG_ERROR([Could not find experimental/filesystem...libstdc++fs development package required])]
+)
 
 # Checks for library functions.
 LT_INIT
@@ -42,7 +71,8 @@ AC_ARG_ENABLE([oe-sdk],
 
 # Check for OECORE_TARGET_SYSROOT in the environment.
 AC_ARG_VAR(OECORE_TARGET_SYSROOT,
-    [Path to the OE SDK SYSROOT])
+    [Path to the OE SDK SYSROOT]
+)
 
 # Configure OESDK_TESTCASE_FLAGS environment variable, which will be later
 # used in test/Makefile.am
