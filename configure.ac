@@ -25,8 +25,7 @@ AX_CXX_COMPILE_STDCXX_17([noext])
 AX_APPEND_COMPILE_FLAGS([-fpic -Wall -Werror], [CXXFLAGS])
 
 # Checks for header files.
-AC_CHECK_HEADER(sdbusplus/server.hpp, ,[AC_MSG_ERROR([Could not find sdbusplus/server.hpp...sdbusplus development package required])])
-AC_CHECK_HEADER(experimental/filesystem, ,[AC_MSG_ERROR([Could not find experimental/filesystem...libstdc++fs development package required])])
+AC_CHECK_HEADER(experimental/filesystem, [], [AC_MSG_ERROR([Could not find experimental/filesystem...libstdc++fs development package required])])
 
 # Checks for library functions.
 LT_INIT
