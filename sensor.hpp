@@ -62,7 +62,7 @@ class Sensor
      */
     inline const valueAdjust& getAdjusts()
     {
-        return sensorAdjusts;
+        return _sensorAdjusts;
     }
 
     /**
@@ -121,30 +121,30 @@ class Sensor
      */
     inline int64_t getScale(void)
     {
-        return scale;
+        return _scale;
     }
 
   private:
     /** @brief Sensor object's identifiers */
-    SensorSet::key_type sensor;
+    SensorSet::key_type _sensor;
 
     /** @brief Hwmon sysfs access. */
-    const hwmonio::HwmonIOInterface* ioAccess;
+    const hwmonio::HwmonIOInterface* _ioAccess;
 
     /** @brief Physical device sysfs path. */
-    const std::string& devPath;
+    const std::string& _devPath;
 
     /** @brief Structure for storing sensor adjustments */
-    valueAdjust sensorAdjusts;
+    valueAdjust _sensorAdjusts;
 
     /** @brief Optional pointer to GPIO handle. */
-    std::unique_ptr<gpioplus::HandleInterface> handle;
+    std::unique_ptr<gpioplus::HandleInterface> _handle;
 
     /** @brief default pause after unlocking gpio. */
-    static constexpr std::chrono::milliseconds pause{500};
+    static constexpr std::chrono::milliseconds _pause{500};
 
     /** @brief sensor scale from configuration. */
-    int64_t scale;
+    int64_t _scale;
 };
 
 } // namespace sensor
