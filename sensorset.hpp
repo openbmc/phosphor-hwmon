@@ -48,7 +48,7 @@ class SensorSet
      */
     container_t::const_iterator begin()
     {
-        return const_cast<const container_t&>(container).begin();
+        return const_cast<const container_t&>(_container).begin();
     }
 
     /**
@@ -58,7 +58,7 @@ class SensorSet
      */
     container_t::const_iterator end()
     {
-        return const_cast<const container_t&>(container).end();
+        return const_cast<const container_t&>(_container).end();
     }
 
   private:
@@ -68,7 +68,7 @@ class SensorSet
      *          key = pair("temp", "1")
      *          value = "input"
      */
-    container_t container;
+    container_t _container;
 };
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
