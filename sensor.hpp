@@ -138,7 +138,7 @@ class Sensor
     valueAdjust sensorAdjusts;
 
     /** @brief Optional pointer to GPIO handle. */
-    std::unique_ptr<gpioplus::Handle> handle;
+    std::unique_ptr<gpioplus::HandleInterface> handle;
 
     /** @brief default pause after unlocking gpio. */
     static constexpr std::chrono::milliseconds pause{500};
