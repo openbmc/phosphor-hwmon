@@ -71,7 +71,7 @@ static constexpr auto retryableErrors = {
     EMSGSIZE,
 };
 
-HwmonIO::HwmonIO(const std::string& path) : p(path)
+HwmonIO::HwmonIO(const std::string& path) : _p(path)
 {
 }
 
@@ -81,7 +81,7 @@ int64_t HwmonIO::read(const std::string& type, const std::string& id,
 {
     int64_t val;
     std::ifstream ifs;
-    auto fullPath = sysfs::make_sysfs_path(p, type, id, sensor);
+    auto fullPath = sysfs::make_sysfs_path(_p, type, id, sensor);
 
     ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit |
                    std::ifstream::eofbit);
@@ -149,7 +149,7 @@ void HwmonIO::write(uint32_t val, const std::string& type,
 
 {
     std::ofstream ofs;
-    auto fullPath = sysfs::make_sysfs_path(p, type, id, sensor);
+    auto fullPath = sysfs::make_sysfs_path(_p, type, id, sensor);
 
     ofs.exceptions(std::ofstream::failbit | std::ofstream::badbit |
                    std::ofstream::eofbit);
@@ -204,7 +204,7 @@ void HwmonIO::write(uint32_t val, const std::string& type,
 
 std::string HwmonIO::path() const
 {
-    return p;
+    return _p;
 }
 
 } // namespace hwmonio
