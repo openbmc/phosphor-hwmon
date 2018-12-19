@@ -107,7 +107,7 @@ class HwmonIO : public HwmonIOInterface
     std::string path() const override;
 
   private:
-    std::string p;
+    std::string _p;
 };
 } // namespace hwmonio
 
