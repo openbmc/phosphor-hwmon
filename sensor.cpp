@@ -38,16 +38,16 @@ void setScale(T& iface, int64_t value, int64_t)
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
-    sensor(sensor),
-    ioAccess(ioAccess), devPath(devPath)
+    _sensor(sensor),
+    _ioAccess(ioAccess), _devPath(devPath)
 {
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
     if (!access.empty() && !chip.empty())
     {
-        handle = gpio::BuildGpioHandle(chip, access);
+        _handle = gpio::BuildGpioHandle(chip, access);
 
-        if (!handle)
+        if (!_handle)
         {
             log<level::ERR>("Unable to set up gpio locking");
             elog<InternalFailure>();
@@ -57,13 +57,13 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     auto gain = env::getEnv("GAIN", sensor);
     if (!gain.empty())
     {
-        sensorAdjusts.gain = std::stod(gain);
+        _sensorAdjusts.gain = std::stod(gain);
     }
 
     auto offset = env::getEnv("OFFSET", sensor);
     if (!offset.empty())
     {
-        sensorAdjusts.offset = std::stoi(offset);
+        _sensorAdjusts.offset = std::stoi(offset);
     }
     auto senRmRCs = env::getEnv("REMOVERCS", sensor);
     // Add sensor removal return codes defined per sensor
@@ -84,12 +84,12 @@ void Sensor::addRemoveRCs(const std::string& rcList)
     {
         try
         {
-            sensorAdjusts.rmRCs.insert(std::stoi(rmRC));
+            _sensorAdjusts.rmRCs.insert(std::stoi(rmRC));
         }
         catch (const std::logic_error& le)
         {
             // Unable to convert to int, continue to next token
-            std::string name = sensor.first + "_" + sensor.second;
+            std::string name = _sensor.first + "_" + _sensor.second;
             log<level::INFO>("Unable to convert sensor removal return code",
                              entry("SENSOR=%s", name.c_str()),
                              entry("RC=%s", rmRC),
@@ -112,12 +112,13 @@ SensorValueType Sensor::adjustValue(SensorValueType value)
 #endif
 
     // Adjust based on gain and offset
-    value = static_cast<decltype(value)>(
-        static_cast<double>(value) * sensorAdjusts.gain + sensorAdjusts.offset);
+    value = static_cast<decltype(value)>(static_cast<double>(value) *
+                                             _sensorAdjusts.gain +
+                                         _sensorAdjusts.offset);
 
     if constexpr (std::is_same<SensorValueType, double>::value)
     {
-        value *= std::pow(10, scale);
+        value *= std::pow(10, _scale);
     }
 
     return value;
@@ -149,9 +150,9 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 
         // Retry for up to a second if device is busy
         // or has a transient error.
-        val = ioAccess->read(sensor.first, sensor.second, hwmon::entry::cinput,
-                             std::get<size_t>(retryIO),
-                             std::get<std::chrono::milliseconds>(retryIO));
+        val = _ioAccess->read(_sensor.first, _sensor.second,
+                              hwmon::entry::cinput, std::get<size_t>(retryIO),
+                              std::get<std::chrono::milliseconds>(retryIO));
 
         lockGpio();
         val = adjustValue(val);
@@ -162,21 +163,21 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     iface->value(val);
 
     hwmon::Attributes attrs;
-    if (hwmon::getAttributes(sensor.first, attrs))
+    if (hwmon::getAttributes(_sensor.first, attrs))
     {
         iface->unit(hwmon::getUnit(attrs));
 
         setScale(iface, hwmon::getScale(attrs), val);
 
-        scale = hwmon::getScale(attrs);
+        _scale = hwmon::getScale(attrs);
     }
 
-    auto maxValue = env::getEnv("MAXVALUE", sensor);
+    auto maxValue = env::getEnv("MAXVALUE", _sensor);
     if (!maxValue.empty())
     {
         iface->maxValue(std::stoll(maxValue));
     }
-    auto minValue = env::getEnv("MINVALUE", sensor);
+    auto minValue = env::getEnv("MINVALUE", _sensor);
     if (!minValue.empty())
     {
         iface->minValue(std::stoll(minValue));
@@ -195,19 +196,19 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     auto& obj = std::get<Object>(info);
 
     // Check if fault sysfs file exists
-    std::string faultName = sensor.first;
-    std::string faultID = sensor.second;
+    std::string faultName = _sensor.first;
+    std::string faultID = _sensor.second;
     std::string entry = hwmon::entry::fault;
 
     auto sysfsFullPath =
-        sysfs::make_sysfs_path(ioAccess->path(), faultName, faultID, entry);
+        sysfs::make_sysfs_path(_ioAccess->path(), faultName, faultID, entry);
     if (fs::exists(sysfsFullPath))
     {
         bool functional = true;
         try
         {
-            uint32_t fault = ioAccess->read(faultName, faultID, entry,
-                                            hwmonio::retries, hwmonio::delay);
+            uint32_t fault = _ioAccess->read(faultName, faultID, entry,
+                                             hwmonio::retries, hwmonio::delay);
             if (fault != 0)
             {
                 functional = false;
@@ -219,8 +220,9 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
                 Error;
             using metadata = xyz::openbmc_project::Sensor::Device::ReadFailure;
 
-            report<ReadFailure>(metadata::CALLOUT_ERRNO(e.code().value()),
-                                metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
+            report<ReadFailure>(
+                metadata::CALLOUT_ERRNO(e.code().value()),
+                metadata::CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
             log<level::INFO>(
                 "Logging failing sysfs file",
@@ -243,18 +245,18 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
 
 void Sensor::unlockGpio()
 {
-    if (handle)
+    if (_handle)
     {
-        handle->setValues({1});
-        std::this_thread::sleep_for(pause);
+        _handle->setValues({1});
+        std::this_thread::sleep_for(_pause);
     }
 }
 
 void Sensor::lockGpio()
 {
-    if (handle)
+    if (_handle)
     {
-        handle->setValues({0});
+        _handle->setValues({0});
     }
 }
 
