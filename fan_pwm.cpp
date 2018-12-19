@@ -24,8 +24,8 @@ uint64_t FanPwm::target(uint64_t value)
     // Write target out to sysfs
     try
     {
-        ioAccess->write(value, type, id, empty, hwmonio::retries,
-                        hwmonio::delay);
+        _ioAccess->write(value, _type, _id, empty, hwmonio::retries,
+                         hwmonio::delay);
     }
     catch (const std::system_error& e)
     {
@@ -34,9 +34,10 @@ uint64_t FanPwm::target(uint64_t value)
             xyz::openbmc_project::Control::Device::WriteFailure::CALLOUT_ERRNO(
                 e.code().value()),
             xyz::openbmc_project::Control::Device::WriteFailure::
-                CALLOUT_DEVICE_PATH(devPath.c_str()));
+                CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-        auto file = sysfs::make_sysfs_path(ioAccess->path(), type, id, empty);
+        auto file =
+            sysfs::make_sysfs_path(_ioAccess->path(), _type, _id, empty);
 
         log<level::INFO>("Logging failing sysfs file",
                          phosphor::logging::entry("FILE=%s", file.c_str()));

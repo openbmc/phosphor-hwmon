@@ -33,7 +33,7 @@ class FanPwm : public FanPwmObject
            sdbusplus::bus::bus& bus, const char* objPath, bool defer,
            uint64_t target) :
         FanPwmObject(bus, objPath, defer),
-        id(id), ioAccess(std::move(io)), devPath(devPath)
+        _id(id), _ioAccess(std::move(io)), _devPath(devPath)
     {
         FanPwmObject::target(target);
     }
@@ -47,13 +47,13 @@ class FanPwm : public FanPwmObject
 
   private:
     /** @brief hwmon type */
-    static constexpr auto type = "pwm";
+    static constexpr auto _type = "pwm";
     /** @brief hwmon id */
-    std::string id;
+    std::string _id;
     /** @brief Hwmon sysfs access. */
-    std::unique_ptr<hwmonio::HwmonIOInterface> ioAccess;
+    std::unique_ptr<hwmonio::HwmonIOInterface> _ioAccess;
     /** @brief Physical device path. */
-    std::string devPath;
+    std::string _devPath;
 };
 
 } // namespace hwmon
