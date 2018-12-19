@@ -23,8 +23,8 @@ uint64_t FanSpeed::target(uint64_t value)
         // Write target out to sysfs
         try
         {
-            ioAccess->write(value, type, id, entry::target, hwmonio::retries,
-                            hwmonio::delay);
+            _ioAccess->write(value, _type, _id, entry::target, hwmonio::retries,
+                             hwmonio::delay);
         }
         catch (const std::system_error& e)
         {
@@ -34,9 +34,9 @@ uint64_t FanSpeed::target(uint64_t value)
                 xyz::openbmc_project::Control::Device::WriteFailure::
                     CALLOUT_ERRNO(e.code().value()),
                 xyz::openbmc_project::Control::Device::WriteFailure::
-                    CALLOUT_DEVICE_PATH(devPath.c_str()));
+                    CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            auto file = sysfs::make_sysfs_path(ioAccess->path(), type, id,
+            auto file = sysfs::make_sysfs_path(_ioAccess->path(), _type, _id,
                                                entry::target);
 
             log<level::INFO>("Logging failing sysfs file",
@@ -51,15 +51,15 @@ uint64_t FanSpeed::target(uint64_t value)
 
 void FanSpeed::enable()
 {
-    auto enable = env::getEnv("ENABLE", type, id);
+    auto enable = env::getEnv("ENABLE", _type, _id);
     if (!enable.empty())
     {
         auto val = std::stoul(enable);
 
         try
         {
-            ioAccess->write(val, type::pwm, id, entry::enable, hwmonio::retries,
-                            hwmonio::delay);
+            _ioAccess->write(val, type::pwm, _id, entry::enable,
+                             hwmonio::retries, hwmonio::delay);
         }
         catch (const std::system_error& e)
         {
@@ -69,10 +69,10 @@ void FanSpeed::enable()
                 xyz::openbmc_project::Control::Device::WriteFailure::
                     CALLOUT_ERRNO(e.code().value()),
                 xyz::openbmc_project::Control::Device::WriteFailure::
-                    CALLOUT_DEVICE_PATH(devPath.c_str()));
+                    CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            auto fullPath = sysfs::make_sysfs_path(ioAccess->path(), type::pwm,
-                                                   id, entry::enable);
+            auto fullPath = sysfs::make_sysfs_path(_ioAccess->path(), type::pwm,
+                                                   _id, entry::enable);
 
             log<level::INFO>(
                 "Logging failing sysfs file",
