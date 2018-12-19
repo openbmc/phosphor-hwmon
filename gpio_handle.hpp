@@ -12,9 +12,9 @@ namespace gpio
  *
  * @param[in] gpiochip - gpiochip id as string, e.g. "0", or "1"
  * @param[in] line - gpio line offset as string.
- * @return A gpioplus::Handle on success nullptr on failure.
+ * @return A gpioplus::HandleInterface on success nullptr on failure.
  */
-std::unique_ptr<gpioplus::Handle> BuildGpioHandle(const std::string& gpiochip,
-                                                  const std::string& line);
+std::unique_ptr<gpioplus::HandleInterface>
+    BuildGpioHandle(const std::string& gpiochip, const std::string& line);
 
 } // namespace gpio
