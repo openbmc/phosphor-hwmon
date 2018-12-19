@@ -94,23 +94,23 @@ class MainLoop
     /** @brief DBus sensors namespace root. */
     const char* _root;
     /** @brief DBus object state. */
-    SensorState state;
+    SensorState _state;
     /** @brief Sleep interval in microseconds. */
     uint64_t _interval = default_interval;
     /** @brief Hwmon sysfs access. */
-    hwmonio::HwmonIO ioAccess;
+    hwmonio::HwmonIO _ioAccess;
     /** @brief the Event Loop structure */
-    sdeventplus::Event event;
+    sdeventplus::Event _event;
     /** @brief Read Timer */
-    sdeventplus::utility::Timer<sdeventplus::ClockId::Monotonic> timer;
+    sdeventplus::utility::Timer<sdeventplus::ClockId::Monotonic> _timer;
     /** @brief Store the specifications of sensor objects */
     std::map<SensorSet::key_type, std::unique_ptr<sensor::Sensor>>
-        sensorObjects;
+        _sensorObjects;
 
     /**
      * @brief Map of removed sensors
      */
-    std::map<SensorSet::key_type, SensorSet::mapped_type> rmSensors;
+    std::map<SensorSet::key_type, SensorSet::mapped_type> _rmSensors;
 
     /**
      * @brief Get the ID of the sensor

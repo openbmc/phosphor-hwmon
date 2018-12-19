@@ -150,7 +150,7 @@ std::optional<ObjectStateData>
 
     /* Note: The sensor objects all share the same ioAccess object. */
     auto sensorObj =
-        std::make_unique<sensor::Sensor>(sensor.first, &ioAccess, _devPath);
+        std::make_unique<sensor::Sensor>(sensor.first, &_ioAccess, _devPath);
 
     // Get list of return codes for removing sensors on device
     auto devRmRCs = env::getEnv("REMOVERCS");
@@ -165,7 +165,7 @@ std::optional<ObjectStateData>
 
     ObjectInfo info(&_bus, std::move(objectPath), Object());
     RetryIO retryIO(hwmonio::retries, hwmonio::delay);
-    if (rmSensors.find(sensor.first) != rmSensors.end())
+    if (_rmSensors.find(sensor.first) != _rmSensors.end())
     {
         // When adding a sensor that was purposely removed,
         // don't retry on errors when reading its value
@@ -181,7 +181,7 @@ std::optional<ObjectStateData>
     catch (const std::system_error& e)
     {
         auto file =
-            sysfs::make_sysfs_path(ioAccess.path(), sensor.first.first,
+            sysfs::make_sysfs_path(_ioAccess.path(), sensor.first.first,
                                    sensor.first.second, hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
         // Check sensorAdjusts for sensor removal RCs
@@ -189,13 +189,13 @@ std::optional<ObjectStateData>
         if (sAdjusts.rmRCs.count(e.code().value()) > 0)
         {
             // Return code found in sensor return code removal list
-            if (rmSensors.find(sensor.first) == rmSensors.end())
+            if (_rmSensors.find(sensor.first) == _rmSensors.end())
             {
                 // Trace for sensor not already removed from dbus
                 log<level::INFO>("Sensor not added to dbus for read fail",
                                  entry("FILE=%s", file.c_str()),
                                  entry("RC=%d", e.code().value()));
-                rmSensors[std::move(sensor.first)] = std::move(sensor.second);
+                _rmSensors[std::move(sensor.first)] = std::move(sensor.second);
             }
             return {};
         }
@@ -230,19 +230,19 @@ std::optional<ObjectStateData>
                                  info, scale);
 
     auto target =
-        addTarget<hwmon::FanSpeed>(sensor.first, ioAccess, _devPath, info);
+        addTarget<hwmon::FanSpeed>(sensor.first, _ioAccess, _devPath, info);
     if (target)
     {
         target->enable();
     }
-    addTarget<hwmon::FanPwm>(sensor.first, ioAccess, _devPath, info);
+    addTarget<hwmon::FanPwm>(sensor.first, _ioAccess, _devPath, info);
 
     // All the interfaces have been created.  Go ahead
     // and emit InterfacesAdded.
     valueInterface->emit_object_added();
 
     // Save sensor object specifications
-    sensorObjects[sensor.first] = std::move(sensorObj);
+    _sensorObjects[sensor.first] = std::move(sensorObj);
 
     return std::make_pair(std::move(std::get<sensorLabel>(properties)),
                           std::move(info));
@@ -253,9 +253,9 @@ MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
                    const char* prefix, const char* root) :
     _bus(std::move(bus)),
     _manager(_bus, root), _pathParam(param), _hwmonRoot(), _instance(),
-    _devPath(devPath), _prefix(prefix), _root(root), state(), ioAccess(path),
-    event(sdeventplus::Event::get_default()),
-    timer(event, std::bind(&MainLoop::read, this))
+    _devPath(devPath), _prefix(prefix), _root(root), _state(), _ioAccess(path),
+    _event(sdeventplus::Event::get_default()),
+    _timer(_event, std::bind(&MainLoop::read, this))
 {
     // Strip off any trailing slashes.
     std::string p = path;
@@ -279,7 +279,7 @@ MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
 
 void MainLoop::shutdown() noexcept
 {
-    event.exit(0);
+    _event.exit(0);
 }
 
 void MainLoop::run()
@@ -289,15 +289,15 @@ void MainLoop::run()
     std::function<void()> callback(std::bind(&MainLoop::read, this));
     try
     {
-        timer.restart(std::chrono::microseconds(_interval));
+        _timer.restart(std::chrono::microseconds(_interval));
 
         // TODO: Issue#6 - Optionally look at polling interval sysfs entry.
 
         // TODO: Issue#7 - Should probably periodically check the SensorSet
         //       for new entries.
 
-        _bus.attach_event(event.get(), SD_EVENT_PRIORITY_IMPORTANT);
-        event.loop();
+        _bus.attach_event(_event.get(), SD_EVENT_PRIORITY_IMPORTANT);
+        _event.loop();
     }
     catch (const std::exception& e)
     {
@@ -325,12 +325,12 @@ void MainLoop::init()
                 std::make_tuple(std::move(i.second), std::move((*object).first),
                                 std::move((*object).second));
 
-            state[std::move(i.first)] = std::move(value);
+            _state[std::move(i.first)] = std::move(value);
         }
     }
 
     /* If there are no sensors specified by labels, exit. */
-    if (0 == state.size())
+    if (0 == _state.size())
     {
         exit(0);
     }
@@ -359,7 +359,7 @@ void MainLoop::read()
     //       ensure the objects all exist?
 
     // Iterate through all the sensors.
-    for (auto& i : state)
+    for (auto& i : _state)
     {
         auto& attrs = std::get<0>(i.second);
         if (attrs.find(hwmon::entry::input) != attrs.end())
@@ -380,7 +380,7 @@ void MainLoop::read()
                 auto it = obj.find(InterfaceType::STATUS);
                 if (it != obj.end())
                 {
-                    auto fault = ioAccess.read(
+                    auto fault = _ioAccess.read(
                         i.first.first, i.first.second, hwmon::entry::fault,
                         hwmonio::retries, hwmonio::delay);
                     auto statusIface =
@@ -395,12 +395,12 @@ void MainLoop::read()
                 // Retry for up to a second if device is busy
                 // or has a transient error.
                 std::unique_ptr<sensor::Sensor>& sensor =
-                    sensorObjects[i.first];
+                    _sensorObjects[i.first];
 
                 sensor->unlockGpio();
 
-                value = ioAccess.read(i.first.first, i.first.second, input,
-                                      hwmonio::retries, hwmonio::delay);
+                value = _ioAccess.read(i.first.first, i.first.second, input,
+                                       hwmonio::retries, hwmonio::delay);
 
                 sensor->lockGpio();
 
@@ -435,15 +435,15 @@ void MainLoop::read()
             catch (const std::system_error& e)
             {
                 auto file = sysfs::make_sysfs_path(
-                    ioAccess.path(), i.first.first, i.first.second,
+                    _ioAccess.path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
                 // Check sensorAdjusts for sensor removal RCs
-                auto& sAdjusts = sensorObjects[i.first]->getAdjusts();
+                auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
                 if (sAdjusts.rmRCs.count(e.code().value()) > 0)
                 {
                     // Return code found in sensor return code removal list
-                    if (rmSensors.find(i.first) == rmSensors.end())
+                    if (_rmSensors.find(i.first) == _rmSensors.end())
                     {
                         // Trace for sensor not already removed from dbus
                         log<level::INFO>(
@@ -451,7 +451,7 @@ void MainLoop::read()
                             entry("FILE=%s", file.c_str()),
                             entry("RC=%d", e.code().value()));
                         // Mark this sensor to be removed from dbus
-                        rmSensors[i.first] = std::get<0>(i.second);
+                        _rmSensors[i.first] = std::get<0>(i.second);
                     }
                     continue;
                 }
@@ -468,7 +468,7 @@ void MainLoop::read()
                                  entry("FILE=%s", file.c_str()));
 
 #ifdef REMOVE_ON_FAIL
-                rmSensors[i.first] = std::get<0>(i.second);
+                _rmSensors[i.first] = std::get<0>(i.second);
 #else
                 exit(EXIT_FAILURE);
 #endif
@@ -477,17 +477,17 @@ void MainLoop::read()
     }
 
     // Remove any sensors marked for removal
-    for (const auto& i : rmSensors)
+    for (const auto& i : _rmSensors)
     {
-        state.erase(i.first);
+        _state.erase(i.first);
     }
 
 #ifndef REMOVE_ON_FAIL
     // Attempt to add any sensors that were removed
-    auto it = rmSensors.begin();
-    while (it != rmSensors.end())
+    auto it = _rmSensors.begin();
+    while (it != _rmSensors.end())
     {
-        if (state.find(it->first) == state.end())
+        if (_state.find(it->first) == _state.end())
         {
             SensorSet::container_t::value_type ssValueType =
                 std::make_pair(it->first, it->second);
@@ -502,15 +502,15 @@ void MainLoop::read()
                                              std::move((*object).first),
                                              std::move((*object).second));
 
-                state[std::move(ssValueType.first)] = std::move(value);
+                _state[std::move(ssValueType.first)] = std::move(value);
 
                 // Sensor object added, erase entry from removal list
                 auto file = sysfs::make_sysfs_path(
-                    ioAccess.path(), it->first.first, it->first.second,
+                    _ioAccess.path(), it->first.first, it->first.second,
                     hwmon::entry::cinput);
                 log<level::INFO>("Added sensor to dbus after successful read",
                                  entry("FILE=%s", file.c_str()));
-                it = rmSensors.erase(it);
+                it = _rmSensors.erase(it);
             }
             else
             {
@@ -520,7 +520,7 @@ void MainLoop::read()
         else
         {
             // Sanity check to remove sensors that were re-added
-            it = rmSensors.erase(it);
+            it = _rmSensors.erase(it);
         }
     }
 #endif
