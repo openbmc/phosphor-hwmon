@@ -30,5 +30,5 @@ sensor_unittest_LDADD = \
 	$(GPIOPLUS_LIBS) \
 	$(top_builddir)/sensor.o \
 	$(top_builddir)/hwmon.o \
-	$(top_builddir)/gpio_handle.o \
-	env.o
+	env.o \
+	gpio.o
