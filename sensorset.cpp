@@ -47,7 +47,7 @@ SensorSet::SensorSet(const std::string& path)
             continue;
         }
 
-        container[make_pair(match[1], match[2])].emplace(match[3]);
+        _container[make_pair(match[1], match[2])].emplace(match[3]);
     }
 }
 
