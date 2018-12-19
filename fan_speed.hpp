@@ -34,7 +34,7 @@ class FanSpeed : public FanSpeedObject
              sdbusplus::bus::bus& bus, const char* objPath, bool defer,
              uint64_t target) :
         FanSpeedObject(bus, objPath, defer),
-        id(id), ioAccess(std::move(io)), devPath(devPath)
+        _id(id), _ioAccess(std::move(io)), _devPath(devPath)
     {
         FanSpeedObject::target(target);
     }
@@ -54,13 +54,13 @@ class FanSpeed : public FanSpeedObject
 
   private:
     /** @brief hwmon type */
-    static constexpr auto type = "fan";
+    static constexpr auto _type = "fan";
     /** @brief hwmon id */
-    std::string id;
+    std::string _id;
     /** @brief Hwmon sysfs access. */
-    std::unique_ptr<hwmonio::HwmonIOInterface> ioAccess;
+    std::unique_ptr<hwmonio::HwmonIOInterface> _ioAccess;
     /** @brief Physical device path. */
-    std::string devPath;
+    std::string _devPath;
 };
 
 } // namespace hwmon
