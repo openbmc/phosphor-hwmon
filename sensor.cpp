@@ -36,7 +36,8 @@ void setScale(T& iface, int64_t value, int64_t)
 
 // todo: this can be simplified once we move to the double interface
 Sensor::Sensor(const SensorSet::key_type& sensor,
-               const hwmonio::HwmonIO& ioAccess, const std::string& devPath) :
+               const hwmonio::HwmonIOInterface* ioAccess,
+               const std::string& devPath) :
     sensor(sensor),
     ioAccess(ioAccess), devPath(devPath)
 {
@@ -148,9 +149,9 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 
         // Retry for up to a second if device is busy
         // or has a transient error.
-        val = ioAccess.read(sensor.first, sensor.second, hwmon::entry::cinput,
-                            std::get<size_t>(retryIO),
-                            std::get<std::chrono::milliseconds>(retryIO));
+        val = ioAccess->read(sensor.first, sensor.second, hwmon::entry::cinput,
+                             std::get<size_t>(retryIO),
+                             std::get<std::chrono::milliseconds>(retryIO));
 
         lockGpio();
         val = adjustValue(val);
@@ -199,14 +200,14 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     std::string entry = hwmon::entry::fault;
 
     auto sysfsFullPath =
-        sysfs::make_sysfs_path(ioAccess.path(), faultName, faultID, entry);
+        sysfs::make_sysfs_path(ioAccess->path(), faultName, faultID, entry);
     if (fs::exists(sysfsFullPath))
     {
         bool functional = true;
         try
         {
-            uint32_t fault = ioAccess.read(faultName, faultID, entry,
-                                           hwmonio::retries, hwmonio::delay);
+            uint32_t fault = ioAccess->read(faultName, faultID, entry,
+                                            hwmonio::retries, hwmonio::delay);
             if (fault != 0)
             {
                 functional = false;

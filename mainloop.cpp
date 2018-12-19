@@ -148,8 +148,9 @@ std::optional<ObjectStateData>
         return {};
     }
 
+    /* Note: The sensor objects all share the same ioAccess object. */
     auto sensorObj =
-        std::make_unique<sensor::Sensor>(sensor.first, ioAccess, _devPath);
+        std::make_unique<sensor::Sensor>(sensor.first, &ioAccess, _devPath);
 
     // Get list of return codes for removing sensors on device
     auto devRmRCs = env::getEnv("REMOVERCS");

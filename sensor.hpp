@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <gpioplus/handle.hpp>
+#include <memory>
 #include <unordered_set>
 
 namespace sensor
@@ -42,7 +43,7 @@ class Sensor
      * @param[in] devPath - Device sysfs path
      */
     explicit Sensor(const SensorSet::key_type& sensor,
-                    const hwmonio::HwmonIO& ioAccess,
+                    const hwmonio::HwmonIOInterface* ioAccess,
                     const std::string& devPath);
 
     /**
@@ -128,7 +129,7 @@ class Sensor
     SensorSet::key_type sensor;
 
     /** @brief Hwmon sysfs access. */
-    const hwmonio::HwmonIO& ioAccess;
+    const hwmonio::HwmonIOInterface* ioAccess;
 
     /** @brief Physical device sysfs path. */
     const std::string& devPath;
