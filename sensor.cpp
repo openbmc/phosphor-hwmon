@@ -38,6 +38,7 @@ void setScale(T& iface, int64_t value, int64_t)
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
+    _scale(0),
     _sensor(sensor),
     _ioAccess(ioAccess), _devPath(devPath)
 {
