@@ -39,7 +39,7 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
     _sensor(sensor),
-    _ioAccess(ioAccess), _devPath(devPath)
+    _ioAccess(ioAccess), _devPath(devPath), _scale(0)
 {
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
