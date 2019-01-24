@@ -38,8 +38,8 @@ void setScale(T& iface, int64_t value, int64_t)
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
-    _sensor(sensor),
-    _ioAccess(ioAccess), _devPath(devPath)
+    _scale(0),
+    _sensor(sensor), _ioAccess(ioAccess), _devPath(devPath)
 {
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
