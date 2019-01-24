@@ -94,3 +94,38 @@ TEST_F(SensorTest, SensorRequiresGpio)
         std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
     EXPECT_FALSE(sensor == nullptr);
 }
+
+TEST_F(SensorTest, SensorHasGainAndOffsetAdjustValue)
+{
+    /* Construct a sensor that has a gain and offset, then verify they are used
+     * when adjusting the value.
+     */
+
+    StrictMock<EnvMock> eMock;
+    envIntf = &eMock;
+
+    auto sensorKey = std::make_pair(std::string("temp"), std::string("5"));
+    std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
+        std::make_unique<hwmonio::HwmonIOMock>();
+    std::string path = "/";
+
+    /* Always calls GPIOCHIP and GPIO checks, returning empty string. */
+    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Eq(sensorKey)))
+        .WillOnce(Return(""));
+    EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Eq(sensorKey))).WillOnce(Return(""));
+
+    EXPECT_CALL(eMock, getEnv(Eq("GAIN"), Eq(sensorKey)))
+        .WillOnce(Return("10"));
+    EXPECT_CALL(eMock, getEnv(Eq("OFFSET"), Eq(sensorKey)))
+        .WillOnce(Return("15"));
+    EXPECT_CALL(eMock, getEnv(Eq("REMOVERCS"), Eq(sensorKey)))
+        .WillOnce(Return(""));
+
+    auto sensor =
+        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
+    EXPECT_FALSE(sensor == nullptr);
+
+    double startingValue = 1.0;
+    double resultValue = sensor->adjustValue(startingValue);
+    EXPECT_DOUBLE_EQ(resultValue, 25.0);
+}
