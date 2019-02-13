@@ -13,36 +13,11 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
-PKG_CHECK_MODULES(
-    [SDBUSPLUS],
-    [sdbusplus],
-    [],
-    [AC_MSG_ERROR(["sdbusplus required and not found."])]
-)
-PKG_CHECK_MODULES(
-    [SDEVENTPLUS],
-    [sdeventplus],
-    [],
-    [AC_MSG_ERROR(["sdeventplus required and not found."])]
-)
-PKG_CHECK_MODULES(
-    [PHOSPHOR_DBUS_INTERFACES],
-    [phosphor-dbus-interfaces],
-    [],
-    [AC_MSG_ERROR(["phosphor-dbus-interfaces required and not found."])]
-)
-PKG_CHECK_MODULES(
-    [PHOSPHOR_LOGGING],
-    [phosphor-logging],
-    [],
-    [AC_MSG_ERROR(["phosphor-logging required and not found."])]
-)
-PKG_CHECK_MODULES(
-    [GPIOPLUS],
-    [gpioplus],
-    [],
-    [AC_MSG_ERROR([Could not find gpioplus...openbmc/gpioplus package required])]
-)
+PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus])
+PKG_CHECK_MODULES([SDEVENTPLUS], [sdeventplus])
+PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces])
+PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
+PKG_CHECK_MODULES([GPIOPLUS], [gpioplus])
 AX_PTHREAD([], [AC_MSG_ERROR(["pthread required and not found"])])
 
 # Checks for typedefs, structures, and compiler characteristics.
