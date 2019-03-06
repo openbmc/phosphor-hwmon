@@ -6,6 +6,19 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror foreign dist-xz])
 AM_SILENT_RULES([yes])
 
+# Make sure the default CFLAGS of `-O2 -g` don't override CODE_COVERAGE_CFLAGS
+# It is important that this comes before AC_PROG_C{C,XX}, as we are attempting
+# to stop them from populating default CFLAGS and CXXFLAGS.
+AS_IF([test "x$enable_tests" = "xno"], [enable_code_coverage=no])
+AS_IF([test "x$enable_code_coverage" != "xno"], [
+    AS_IF([test "x${CXXFLAGS+set}" != "xset"], [
+        AC_SUBST(CXXFLAGS, [""])
+    ])
+    AS_IF([test "x${CFLAGS+set}" != "xset"], [
+        AC_SUBST(CFLAGS, [""])
+    ])
+])
+
 # Checks for programs.
 AC_PROG_CXX
 AM_PROG_AR
@@ -36,25 +49,32 @@ AC_CHECK_HEADER(
 # Checks for library functions.
 LT_INIT
 
-# Check/set gtest specific functions.
-PKG_CHECK_MODULES(
-    [GTEST],
-    [gtest],
-    [],
-    [AC_MSG_NOTICE([gtest not found, tests will not build])]
-)
-PKG_CHECK_MODULES(
-    [GMOCK],
-    [gmock],
-    [],
-    [AC_MSG_NOTICE([gmock not found, tests will not build])]
-)
-PKG_CHECK_MODULES(
-    [GTEST_MAIN],
-    [gtest_main],
-    [],
-    [AC_MSG_NOTICE([gtest_main not found, tests will not build])]
-)
+# Make it possible for users to choose if they want test support
+# explicitly or not at all
+AC_ARG_ENABLE([tests], AC_HELP_STRING([--disable-tests],
+                                      [Build test cases]))
+
+AS_IF([test "x$enable_tests" != "xno"], [
+    # Check/set gtest specific functions.
+    PKG_CHECK_MODULES(
+        [GTEST],
+        [gtest],
+        [],
+        [AC_MSG_NOTICE([gtest not found, tests will not build])]
+    )
+    PKG_CHECK_MODULES(
+        [GMOCK],
+        [gmock],
+        [],
+        [AC_MSG_NOTICE([gmock not found, tests will not build])]
+    )
+    PKG_CHECK_MODULES(
+        [GTEST_MAIN],
+        [gtest_main],
+        [],
+        [AC_MSG_NOTICE([gtest_main not found, tests will not build])]
+    )
+])
 
 # Add --enable-oe-sdk flag to configure script
 AC_ARG_ENABLE([oe-sdk],
@@ -83,6 +103,23 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
     ]
     AC_SUBST([OESDK_TESTCASE_FLAGS], [$testcase_flags])
 )
+
+# Check for valgrind
+AS_IF([test "x$enable_tests" = "xno"], [enable_valgrind=no])
+m4_foreach([vgtool], [valgrind_tool_list],
+    [AX_VALGRIND_DFLT(vgtool, [off])])
+AX_VALGRIND_DFLT([memcheck], [on])
+AX_VALGRIND_CHECK
+AM_EXTRA_RECURSIVE_TARGETS([check-valgrind])
+m4_foreach([vgtool], [valgrind_tool_list],
+    [AM_EXTRA_RECURSIVE_TARGETS([check-valgrind-]vgtool)])
+
+# Code coverage
+AX_CODE_COVERAGE
+AM_EXTRA_RECURSIVE_TARGETS([check-code-coverage])
+AS_IF([test "x$CODE_COVERAGE_ENABLED" = "xyes"], [
+    AX_APPEND_COMPILE_FLAGS([-DHAVE_GCOV], [CODE_COVERAGE_CPPFLAGS])
+])
 
 # When a sensor access fails, just remove the sensor from dbus instead of exiting the daemon.
 AC_ARG_ENABLE([remove-from-dbus-on-fail],

@@ -41,6 +41,7 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     _sensor(sensor),
     _ioAccess(ioAccess), _devPath(devPath), _scale(0)
 {
+    std::fprintf(stderr, "entered sensor constructor!\n");
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
     if (!access.empty() && !chip.empty())
