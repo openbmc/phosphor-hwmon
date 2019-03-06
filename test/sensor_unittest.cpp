@@ -18,10 +18,14 @@ class SensorTest : public ::testing::Test
         envIntf = nullptr;
         gpioIntf = nullptr;
     }
+
+    std::string temp = "temp";
+    std::string five = "5";
 };
 
 using ::testing::Eq;
 using ::testing::Invoke;
+using ::testing::Pair;
 using ::testing::Return;
 using ::testing::StrictMock;
 
@@ -32,21 +36,23 @@ TEST_F(SensorTest, BasicConstructorTest)
     StrictMock<EnvMock> eMock;
     envIntf = &eMock;
 
-    auto sensorKey = std::make_pair(std::string("temp"), std::string("5"));
+    auto sensorKey = std::make_pair(temp, five);
     std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
         std::make_unique<hwmonio::HwmonIOMock>();
     std::string path = "/";
 
     /* Always calls GPIOCHIP and GPIO checks, returning empty string. */
-    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Pair(temp, five)))
         .WillOnce(Return(""));
-    EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Eq(sensorKey))).WillOnce(Return(""));
+    EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Pair(temp, five)))
+        .WillOnce(Return(""));
 
     /* Always calls GAIN and OFFSET, can use ON_CALL instead of EXPECT_CALL */
-    EXPECT_CALL(eMock, getEnv(Eq("GAIN"), Eq(sensorKey))).WillOnce(Return(""));
-    EXPECT_CALL(eMock, getEnv(Eq("OFFSET"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("GAIN"), Pair(temp, five)))
         .WillOnce(Return(""));
-    EXPECT_CALL(eMock, getEnv(Eq("REMOVERCS"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("OFFSET"), Pair(temp, five)))
+        .WillOnce(Return(""));
+    EXPECT_CALL(eMock, getEnv(Eq("REMOVERCS"), Pair(temp, five)))
         .WillOnce(Return(""));
 
     auto sensor =
@@ -69,14 +75,15 @@ TEST_F(SensorTest, SensorRequiresGpio)
      */
     auto handleMock = std::make_unique<gpioplus::test::HandleMock>();
 
-    auto sensorKey = std::make_pair(std::string("temp"), std::string("5"));
+    auto sensorKey = std::make_pair(temp, five);
     std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
         std::make_unique<hwmonio::HwmonIOMock>();
     std::string path = "/";
 
-    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Pair(temp, five)))
         .WillOnce(Return("chipA"));
-    EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Eq(sensorKey))).WillOnce(Return("5"));
+    EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Pair(temp, five)))
+        .WillOnce(Return("5"));
 
     EXPECT_CALL(gMock, build(Eq("chipA"), Eq("5")))
         .WillOnce(Invoke([&](const std::string& chip, const std::string& line) {
@@ -84,10 +91,11 @@ TEST_F(SensorTest, SensorRequiresGpio)
         }));
 
     /* Always calls GAIN and OFFSET, can use ON_CALL instead of EXPECT_CALL */
-    EXPECT_CALL(eMock, getEnv(Eq("GAIN"), Eq(sensorKey))).WillOnce(Return(""));
-    EXPECT_CALL(eMock, getEnv(Eq("OFFSET"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("GAIN"), Pair(temp, five)))
         .WillOnce(Return(""));
-    EXPECT_CALL(eMock, getEnv(Eq("REMOVERCS"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("OFFSET"), Pair(temp, five)))
+        .WillOnce(Return(""));
+    EXPECT_CALL(eMock, getEnv(Eq("REMOVERCS"), Pair(temp, five)))
         .WillOnce(Return(""));
 
     auto sensor =
@@ -104,21 +112,22 @@ TEST_F(SensorTest, SensorHasGainAndOffsetAdjustValue)
     StrictMock<EnvMock> eMock;
     envIntf = &eMock;
 
-    auto sensorKey = std::make_pair(std::string("temp"), std::string("5"));
+    auto sensorKey = std::make_pair(temp, five);
     std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
         std::make_unique<hwmonio::HwmonIOMock>();
     std::string path = "/";
 
     /* Always calls GPIOCHIP and GPIO checks, returning empty string. */
-    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Pair(temp, five)))
         .WillOnce(Return(""));
-    EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Eq(sensorKey))).WillOnce(Return(""));
+    EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Pair(temp, five)))
+        .WillOnce(Return(""));
 
-    EXPECT_CALL(eMock, getEnv(Eq("GAIN"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("GAIN"), Pair(temp, five)))
         .WillOnce(Return("10"));
-    EXPECT_CALL(eMock, getEnv(Eq("OFFSET"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("OFFSET"), Pair(temp, five)))
         .WillOnce(Return("15"));
-    EXPECT_CALL(eMock, getEnv(Eq("REMOVERCS"), Eq(sensorKey)))
+    EXPECT_CALL(eMock, getEnv(Eq("REMOVERCS"), Pair(temp, five)))
         .WillOnce(Return(""));
 
     auto sensor =
