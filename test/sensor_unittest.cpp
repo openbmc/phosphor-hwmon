@@ -38,8 +38,7 @@ TEST_F(SensorTest, BasicConstructorTest)
     std::string path = "/";
 
     /* Always calls GPIOCHIP and GPIO checks, returning empty string. */
-    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), Eq(sensorKey)))
-        .WillOnce(Return(""));
+    EXPECT_CALL(eMock, getEnv(Eq("GPIOCHIP"), sensorKey)).WillOnce(Return(""));
     EXPECT_CALL(eMock, getEnv(Eq("GPIO"), Eq(sensorKey))).WillOnce(Return(""));
 
     /* Always calls GAIN and OFFSET, can use ON_CALL instead of EXPECT_CALL */
