@@ -5,7 +5,7 @@
 #include "fan_speed.hpp"
 #include "hwmonio.hpp"
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
@@ -68,7 +68,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                              const std::string& devPath, ObjectInfo& info)
 {
     std::shared_ptr<T> target;
-    namespace fs = std::experimental::filesystem;
+    namespace fs = std::filesystem;
 
     auto& obj = std::get<Object>(info);
     auto& objPath = std::get<std::string>(info);

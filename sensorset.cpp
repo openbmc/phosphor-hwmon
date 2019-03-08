@@ -17,7 +17,7 @@
 
 #include "hwmon.hpp"
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <iostream>
 #include <regex>
 
@@ -29,7 +29,7 @@ static const auto sensor_regex_match_count = 4;
 
 SensorSet::SensorSet(const std::string& path)
 {
-    namespace fs = std::experimental::filesystem;
+    namespace fs = std::filesystem;
 
     for (const auto& file : fs::directory_iterator(path))
     {
