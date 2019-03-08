@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include <cstring>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include <thread>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -189,7 +189,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 
 std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
 {
-    namespace fs = std::experimental::filesystem;
+    namespace fs = std::filesystem;
 
     std::shared_ptr<StatusObject> iface = nullptr;
     auto& objPath = std::get<std::string>(info);
