@@ -57,7 +57,6 @@ libhwmon_la_CXXFLAGS = \
 	$(CODE_COVERAGE_CXXFLAGS)
 
 libhwmon_la_SOURCES = \
-	argument.cpp \
 	sensorset.cpp \
 	mainloop.cpp \
 	sysfs.cpp \

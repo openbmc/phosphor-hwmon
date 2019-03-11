@@ -15,17 +15,16 @@
  */
 #include "config.h"
 
-#include "argument.hpp"
 #include "mainloop.hpp"
 #include "sysfs.hpp"
 
+#include <CLI/CLI.hpp>
 #include <iostream>
 #include <memory>
 
-static void exit_with_error(const char* err, char** argv)
+static void exit_with_error(const std::string& help, const char* err)
 {
-    ArgumentParser::usage(argv);
-    std::cerr << std::endl;
+    std::cerr << help << std::endl;
     std::cerr << "ERROR: " << err << std::endl;
     exit(-1);
 }
@@ -33,12 +32,19 @@ static void exit_with_error(const char* err, char** argv)
 int main(int argc, char** argv)
 {
     // Read arguments.
-    auto options = std::make_unique<ArgumentParser>(argc, argv);
+    std::string syspath = "";
+    std::string devpath = "";
+
+    CLI::App app{"OpenBMC Hwmon Daemon"};
+    app.add_option("-p,--path", syspath, "sysfs location to monitor");
+    app.add_option("-o,--dev-path", devpath, "device path to monitor");
+
+    CLI11_PARSE(app, argc, argv);
 
     // Parse out path argument.
-    auto path = (*options)["dev-path"];
+    auto path = devpath;
     auto param = path;
-    if (path != ArgumentParser::empty_string)
+    if (!path.empty())
     {
         // This path may either be a device path (starts with
         // /devices), or an open firmware device tree path.
@@ -52,25 +58,24 @@ int main(int argc, char** argv)
         }
     }
 
-    if (path == ArgumentParser::empty_string)
+    if (path.empty())
     {
-        path = (*options)["path"];
+        path = syspath;
         param = path;
     }
 
-    if (path == ArgumentParser::empty_string)
+    if (path.empty())
     {
-        exit_with_error("Path not specified or invalid.", argv);
+        exit_with_error(app.help("", CLI::AppFormatMode::All),
+                        "Path not specified or invalid.");
     }
-
-    // Finished getting options out, so cleanup the parser.
-    options.reset();
 
     // Determine the physical device sysfs path.
     auto calloutPath = sysfs::findCalloutPath(path);
     if (calloutPath.empty())
     {
-        exit_with_error("Unable to determine callout path.", argv);
+        exit_with_error(app.help("", CLI::AppFormatMode::All),
+                        "Unable to determine callout path.");
     }
 
     MainLoop loop(sdbusplus::bus::new_default(), param, path, calloutPath,
