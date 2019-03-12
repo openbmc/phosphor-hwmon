@@ -24,8 +24,7 @@
 
 static void exit_with_error(const std::string& help, const char* err)
 {
-    std::cerr << help << std::endl;
-    std::cerr << "ERROR: " << err << std::endl;
+    std::cerr << "ERROR: " << err << std::endl << help << std::endl;
     exit(-1);
 }
 
