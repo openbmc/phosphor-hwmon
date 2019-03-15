@@ -162,9 +162,15 @@ std::string findCalloutPath(const std::string& instancePath)
     return emptyString;
 }
 
-std::string findHwmonFromOFPath(const std::string& ofNode)
+std::string findHwmonFromOFPath(std::string ofNode)
 {
     static constexpr auto hwmonRoot = "/sys/class/hwmon";
+
+    // Can't append an absolute path
+    if (!ofNode.empty() && (ofNode.front() == '/'))
+    {
+        ofNode = ofNode.substr(1);
+    }
 
     fs::path fullOfPath{ofRoot};
     fullOfPath /= ofNode;
@@ -203,8 +209,14 @@ std::string findHwmonFromOFPath(const std::string& ofNode)
     return emptyString;
 }
 
-std::string findHwmonFromDevPath(const std::string& devPath)
+std::string findHwmonFromDevPath(std::string devPath)
 {
+    // Can't append an absolute path
+    if (!devPath.empty() && devPath.front() == '/')
+    {
+        devPath = devPath.substr(1);
+    }
+
     fs::path p{"/sys"};
     p /= devPath;
     p /= "hwmon";
