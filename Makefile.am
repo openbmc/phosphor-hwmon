@@ -32,7 +32,7 @@ else
 @CODE_COVERAGE_RULES@
 endif
 
-sbin_PROGRAMS = phosphor-hwmon-readd
+bin_PROGRAMS = phosphor-hwmon-readd
 
 phosphor_hwmon_readd_SOURCES = readd.cpp
 phosphor_hwmon_readd_LDADD = $(SDBUSPLUS_LIBS) $(CODE_COVERAGE_LIBS) libhwmon.la
