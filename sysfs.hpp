@@ -50,7 +50,7 @@ std::string findPhandleMatch(const std::string& iochanneldir,
  *  @returns[in] - The hwmon instance path or an empty
  *                 string if no match is found.
  */
-std::string findHwmonFromOFPath(std::string ofNode);
+std::string findHwmonFromOFPath(const std::string& ofNode);
 
 /** @brief Find hwmon instances from a device path
  *
@@ -63,7 +63,7 @@ std::string findHwmonFromOFPath(std::string ofNode);
  *  @return - The hwmon instance path or an empty
  *            string if no match is found.
  */
-std::string findHwmonFromDevPath(std::string devPath);
+std::string findHwmonFromDevPath(const std::string& devPath);
 
 /** @brief Return the path to use for a call out.
  *
