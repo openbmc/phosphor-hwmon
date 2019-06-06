@@ -479,6 +479,11 @@ void MainLoop::read()
     // Remove any sensors marked for removal
     for (const auto& i : _rmSensors)
     {
+        // Remove sensor object from dbus using emit_object_removed()
+        auto& objInfo = std::get<ObjectInfo>(_state[i.first]);
+        auto& objPath = std::get<std::string>(objInfo);
+        _bus.emit_object_removed(objPath.c_str());
+        // Erase sensor object info
         _state.erase(i.first);
     }
 
