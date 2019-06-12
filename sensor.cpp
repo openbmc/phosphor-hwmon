@@ -148,12 +148,25 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     {
         unlockGpio();
 
-        // Retry for up to a second if device is busy
-        // or has a transient error.
-        val = _ioAccess->read(_sensor.first, _sensor.second,
-                              hwmon::entry::cinput, std::get<size_t>(retryIO),
-                              std::get<std::chrono::milliseconds>(retryIO));
-
+        try
+        {
+            // Retry for up to a second if device is busy
+            // or has a transient error.
+            val =
+                _ioAccess->read(_sensor.first, _sensor.second,
+                                hwmon::entry::cinput, std::get<size_t>(retryIO),
+                                std::get<std::chrono::milliseconds>(retryIO));
+        }
+        catch (const sdbusplus::xyz::openbmc_project::Sensor::Device::Error::
+                   ReadFailure& e)
+        {
+            // If THROW_READFAILURE_ON_FAIL was defined, we are catching
+            // the ReadFailure to be able to lock the GPIO before
+            // re-throwing ReadFailure to be handled by the D-Bus Daemon.
+            lockGpio();
+            throw sdbusplus::xyz::openbmc_project::Sensor::Device::Error::
+                ReadFailure();
+        }
         lockGpio();
         val = adjustValue(val);
     }

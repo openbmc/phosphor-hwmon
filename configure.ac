@@ -181,7 +181,7 @@ AS_IF(
 )
 
 # When a sensor read fails, set the Value on dbus with -errno.
-# Incompatible with remove-from-dbus-on-fail.
+# Incompatible with remove-from-dbus-on-fail or throw-readfailure-on-fail.
 AC_ARG_ENABLE([negative-errno-on-fail],
     AS_HELP_STRING([--enable-negative-errno-on-fail], [Set sensor value to -errno on read failures])
 )
@@ -193,6 +193,22 @@ AS_IF(
     AC_DEFINE_UNQUOTED(
         [NEGATIVE_ERRNO_ON_FAIL],
         ["$NEGATIVE_ERRNO_ON_FAIL"], [Set sensor value to -errno on read failures]
+    )
+)
+
+# When a sensor read fails, throw ReadFailure for Value.
+# Incompatible with remove-from-dbus-on-fail or negative-errno-on-fail
+AC_ARG_ENABLE([throw-readfailure-on-fail],
+    AS_HELP_STRING([--enable-throw-readfailure-on-fail], [Throw ReadFailure on read failures])
+)
+
+AC_ARG_VAR(THROW_READFAILURE_ON_FAIL, [Throw ReadFailure on read failures])
+AS_IF(
+    [test "x$enable_throw_readfailure_on_fail" == "xyes"],
+    [THROW_READFAILURE_ON_FAIL="yes"]
+    AC_DEFINE_UNQUOTED(
+        [THROW_READFAILURE_ON_FAIL],
+        ["$THROW_READFAILURE_ON_FAIL"], [Throw ReadFailure on read failures]
     )
 )
 
