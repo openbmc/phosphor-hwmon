@@ -21,6 +21,7 @@
 #include <exception>
 #include <fstream>
 #include <thread>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 namespace hwmonio
 {
@@ -124,8 +125,9 @@ int64_t HwmonIO::read(const std::string& type, const std::string& id,
                 !retries)
             {
                 // Not a retryable error or out of retries.
-#ifdef NEGATIVE_ERRNO_ON_FAIL
-                return -rc;
+#ifdef THROW_READFAILURE_ON_FAIL
+                throw sdbusplus::xyz::openbmc_project::Sensor::Device::Error::
+                    ReadFailure();
 #endif
 
                 // Work around GCC bugs 53984 and 66145 for callers by

@@ -5,7 +5,9 @@
 
 #include <gpioplus/test/handle.hpp>
 #include <memory>
+#include <sdbusplus/test/sdbus_mock.hpp>
 #include <utility>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -23,12 +25,14 @@ class SensorTest : public ::testing::Test
     std::string five = "5";
 };
 
+using ::testing::_;
 using ::testing::Eq;
 using ::testing::Invoke;
 using ::testing::Pair;
 using ::testing::Return;
 using ::testing::StrEq;
 using ::testing::StrictMock;
+using ::testing::Throw;
 
 TEST_F(SensorTest, BasicConstructorTest)
 {
@@ -104,18 +108,16 @@ TEST_F(SensorTest, SensorRequiresGpio)
     EXPECT_FALSE(sensor == nullptr);
 }
 
-TEST_F(SensorTest, SensorHasGainAndOffsetAdjustValue)
+TEST_F(SensorTest, SensorAddValueReThrowsReadFailure)
 {
-    /* Construct a sensor that has a gain and offset, then verify they are used
-     * when adjusting the value.
+    /* When read fails and throws ReadFailure, we expect addValue to rethrow it
      */
 
     StrictMock<EnvMock> eMock;
     envIntf = &eMock;
+    hwmonio::HwmonIOMock hwmonio_mock;
 
     auto sensorKey = std::make_pair(temp, five);
-    std::unique_ptr<hwmonio::HwmonIOInterface> hwmonio_mock =
-        std::make_unique<hwmonio::HwmonIOMock>();
     std::string path = "/";
 
     /* Always calls GPIOCHIP and GPIO checks, returning empty string. */
@@ -132,10 +134,16 @@ TEST_F(SensorTest, SensorHasGainAndOffsetAdjustValue)
         .WillOnce(Return(""));
 
     auto sensor =
-        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
+        std::make_unique<sensor::Sensor>(sensorKey, &hwmonio_mock, path);
     EXPECT_FALSE(sensor == nullptr);
 
-    double startingValue = 1.0;
-    double resultValue = sensor->adjustValue(startingValue);
-    EXPECT_DOUBLE_EQ(resultValue, 25.0);
+    RetryIO retryIO;
+    ObjectInfo info;
+
+    EXPECT_CALL(hwmonio_mock, read(_, _, _, _, _))
+        .WillOnce(Throw(sdbusplus::xyz::openbmc_project::Sensor::Device::Error::
+                            ReadFailure()));
+    EXPECT_THROW(
+        sensor->addValue(retryIO, info),
+        sdbusplus::xyz::openbmc_project::Sensor::Device::Error::ReadFailure);
 }
