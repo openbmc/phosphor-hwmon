@@ -105,16 +105,6 @@ class Sensor
     std::shared_ptr<StatusObject> addStatus(ObjectInfo& info);
 
     /**
-     * @brief Unlock the gpio, set to high if relevant.
-     */
-    void unlockGpio();
-
-    /**
-     * @brief Lock the gpio, set to low if relevant.
-     */
-    void lockGpio();
-
-    /**
      * @brief Get the scale from the sensor.
      *
      * @return - Scale value
@@ -122,6 +112,16 @@ class Sensor
     inline int64_t getScale(void)
     {
         return _scale;
+    }
+
+    /**
+     * @brief Get the GPIO handle from the sensor.
+     *
+     * @return - Pointer to the GPIO handle interface
+     */
+    inline const gpioplus::HandleInterface* getGpio(void)
+    {
+        return _handle.get();
     }
 
   private:
@@ -140,11 +140,52 @@ class Sensor
     /** @brief Optional pointer to GPIO handle. */
     std::unique_ptr<gpioplus::HandleInterface> _handle;
 
-    /** @brief default pause after unlocking gpio. */
-    static constexpr std::chrono::milliseconds _pause{500};
-
     /** @brief sensor scale from configuration. */
     int64_t _scale;
+};
+
+/** @class GpioLock
+ *  @brief RAII class for GPIO unlock and lock
+ *  @details Create this object in the stack to unlock the GPIO. GPIO will
+ *  be locked by the destructor when we go out of scope.
+ */
+class GpioLock
+{
+  public:
+    GpioLock() = delete;
+    GpioLock(const GpioLock&) = delete;
+    GpioLock(GpioLock&&) = default;
+    GpioLock& operator=(const GpioLock&) = delete;
+    GpioLock& operator=(GpioLock&&) = default;
+
+    /**
+     * @brief Constructs GpioLock RAII object. Unlocks the GPIO.
+     *
+     * @param[in] handle - Pointer to GPIO handle
+     */
+    explicit GpioLock(const gpioplus::HandleInterface* handle);
+
+    /**
+     * @brief Destructs GpioLock RAII object. Locks the GPIO.
+     */
+    ~GpioLock();
+
+    /**
+     * @brief Unlock the gpio, set to high if relevant.
+     */
+    void unlockGpio();
+
+    /**
+     * @brief Lock the gpio, set to low if relevant.
+     */
+    void lockGpio();
+
+  private:
+    /** @brief Pointer to GPIO handle. */
+    const gpioplus::HandleInterface* _handle;
+
+    /** @brief default pause after unlocking gpio. */
+    static constexpr std::chrono::milliseconds _pause{500};
 };
 
 } // namespace sensor
