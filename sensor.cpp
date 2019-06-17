@@ -146,7 +146,8 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     // its status is functional, read the input value.
     if (!statusIface || (statusIface && statusIface->functional()))
     {
-        unlockGpio();
+        // RAII object for GPIO unlock / lock
+        GpioLock gpioLock(getGpio());
 
         // Retry for up to a second if device is busy
         // or has a transient error.
@@ -154,7 +155,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
                               hwmon::entry::cinput, std::get<size_t>(retryIO),
                               std::get<std::chrono::milliseconds>(retryIO));
 
-        lockGpio();
+        gpioLock.lockGpio();
         val = adjustValue(val);
     }
 
@@ -243,7 +244,17 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     return iface;
 }
 
-void Sensor::unlockGpio()
+GpioLock::GpioLock(const gpioplus::HandleInterface* handle) : _handle(handle)
+{
+    unlockGpio();
+}
+
+GpioLock::~GpioLock()
+{
+    lockGpio();
+}
+
+void GpioLock::unlockGpio()
 {
     if (_handle)
     {
@@ -252,7 +263,7 @@ void Sensor::unlockGpio()
     }
 }
 
-void Sensor::lockGpio()
+void GpioLock::lockGpio()
 {
     if (_handle)
     {
