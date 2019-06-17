@@ -397,14 +397,15 @@ void MainLoop::read()
                 std::unique_ptr<sensor::Sensor>& sensor =
                     _sensorObjects[i.first];
 
-                sensor->unlockGpio();
+                {
+                    // RAII object for GPIO unlock / lock
+                    sensor::GpioLock gpioLock(sensor->getGpio());
 
-                value = _ioAccess.read(i.first.first, i.first.second, input,
-                                       hwmonio::retries, hwmonio::delay);
+                    value = _ioAccess.read(i.first.first, i.first.second, input,
+                                           hwmonio::retries, hwmonio::delay);
 
-                sensor->lockGpio();
-
-                value = sensor->adjustValue(value);
+                    value = sensor->adjustValue(value);
+                }
 
                 for (auto& iface : obj)
                 {
