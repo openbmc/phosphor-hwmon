@@ -80,7 +80,8 @@ class Sensor
      * @brief Add value interface and value property for sensor
      * @details When a sensor has an associated input file, the Sensor.Value
      * interface is added along with setting the Value property to the
-     * corresponding value found in the input file.
+     * corresponding value found in the input file. Functional property of the
+     * OperationalStatus interface is also updated to the status of the sensor.
      *
      * @param[in] retryIO - Hwmon sysfs file retry constraints
      *                      (number of and delay between)
@@ -93,10 +94,9 @@ class Sensor
 
     /**
      * @brief Add status interface and functional property for sensor
-     * @details When a sensor has an associated fault file, the
-     * OperationalStatus interface is added along with setting the
-     * Functional property to the corresponding value found in the
-     * fault file.
+     * @details OperationalStatus interface is added and the Functional
+     * property is set depending on the content of any existing fault file
+     * corresponding to the sensor.
      *
      * @param[in] info - Sensor object information
      *

@@ -362,6 +362,8 @@ void MainLoop::read()
     for (auto& i : _state)
     {
         auto& attrs = std::get<0>(i.second);
+        std::shared_ptr<StatusObject> statusIface = nullptr;
+
         if (attrs.find(hwmon::entry::input) != attrs.end())
         {
             // Read value from sensor.
@@ -380,16 +382,20 @@ void MainLoop::read()
                 auto it = obj.find(InterfaceType::STATUS);
                 if (it != obj.end())
                 {
-                    auto fault = _ioAccess.read(
-                        i.first.first, i.first.second, hwmon::entry::fault,
-                        hwmonio::retries, hwmonio::delay);
-                    auto statusIface =
-                        std::any_cast<std::shared_ptr<StatusObject>>(
-                            it->second);
-                    if (!statusIface->functional((fault == 0) ? true : false))
+                    statusIface = std::any_cast<std::shared_ptr<StatusObject>>(
+                        it->second);
+
+                    // If sensor is not functional, skip reading this sensor
+                    if (!statusIface->functional())
                     {
                         continue;
                     }
+                }
+                else
+                {
+                    // All sensors should have StatusObject, skip reading this
+                    // sensor as the initialization might have been faulty
+                    continue;
                 }
 
                 // Retry for up to a second if device is busy
@@ -438,6 +444,11 @@ void MainLoop::read()
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess.path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
+
+                if (statusIface)
+                {
+                    statusIface->functional(false);
+                }
 #ifndef REMOVE_ON_FAIL
                 // Check sensorAdjusts for sensor removal RCs
                 auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
