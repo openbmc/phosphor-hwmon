@@ -34,10 +34,12 @@ sensor_unittest_SOURCES = sensor_unittest.cpp
 sensor_unittest_CXXFLAGS = \
 	$(PHOSPHOR_LOGGING_CFLAGS) \
 	$(GPIOPLUS_CFLAGS)
+	$(STDPLUS_CFLAGS)
 sensor_unittest_LDADD = \
 	-lstdc++fs \
 	$(PHOSPHOR_LOGGING_LIBS) \
 	$(GPIOPLUS_LIBS) \
+	$(STDPLUS_LIBS) \
 	$(top_builddir)/sensor.o \
 	$(top_builddir)/hwmon.o \
 	env.o \

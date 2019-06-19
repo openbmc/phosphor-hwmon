@@ -4,9 +4,9 @@
 #include "sensorset.hpp"
 #include "types.hpp"
 
-#include <chrono>
 #include <gpioplus/handle.hpp>
 #include <memory>
+#include <stdplus/handle/managed.hpp>
 #include <unordered_set>
 
 namespace sensor
@@ -144,48 +144,23 @@ class Sensor
     int64_t _scale;
 };
 
-/** @class GpioLock
- *  @brief RAII class for GPIO unlock and lock
- *  @details Create this object in the stack to unlock the GPIO. GPIO will
- *  be locked by the destructor when we go out of scope.
+/**
+ * @brief Locks the gpio represented by the handle
+ *
+ * @param[in] handle - The gpio handle to lock
  */
-class GpioLock
-{
-  public:
-    GpioLock() = delete;
-    GpioLock(const GpioLock&) = delete;
-    GpioLock(GpioLock&&) = default;
-    GpioLock& operator=(const GpioLock&) = delete;
-    GpioLock& operator=(GpioLock&&) = default;
+void gpioLock(const gpioplus::HandleInterface*&& handle);
 
-    /**
-     * @brief Constructs GpioLock RAII object. Unlocks the GPIO.
-     *
-     * @param[in] handle - Pointer to a GPIO handle interface, can be nullptr.
-     */
-    explicit GpioLock(const gpioplus::HandleInterface* handle);
+/** @brief The type which is responsible for managing the lock */
+using GpioLocker =
+    stdplus::Managed<const gpioplus::HandleInterface*>::Handle<gpioLock>;
 
-    /**
-     * @brief Destructs GpioLock RAII object. Locks the GPIO.
-     */
-    ~GpioLock();
-
-    /**
-     * @brief Unlock the gpio, set to high if relevant.
-     */
-    void unlockGpio();
-
-    /**
-     * @brief Lock the gpio, set to low if relevant.
-     */
-    void lockGpio();
-
-  private:
-    /** @brief Pointer to GPIO handle. */
-    const gpioplus::HandleInterface* _handle;
-
-    /** @brief default pause after unlocking gpio. */
-    static constexpr std::chrono::milliseconds _pause{500};
-};
+/**
+ * @brief Unlocks the gpio and creates a lock object to ensure
+ *        the gpio is locked again.
+ *
+ * @param[in] handle - The gpio handle to unlock and wrap
+ */
+GpioLocker gpioUnlock(const gpioplus::HandleInterface* handle);
 
 } // namespace sensor

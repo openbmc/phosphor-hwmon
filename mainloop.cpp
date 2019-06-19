@@ -399,7 +399,7 @@ void MainLoop::read()
 
                 {
                     // RAII object for GPIO unlock / lock
-                    sensor::GpioLock gpioLock(sensor->getGpio());
+                    auto locker = sensor::gpioUnlock(sensor->getGpio());
 
                     value = _ioAccess.read(i.first.first, i.first.second, input,
                                            hwmonio::retries, hwmonio::delay);
