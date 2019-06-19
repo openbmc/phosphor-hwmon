@@ -376,31 +376,34 @@ void MainLoop::read()
                 int64_t value;
                 auto& objInfo = std::get<ObjectInfo>(i.second);
                 auto& obj = std::get<Object>(objInfo);
+                std::unique_ptr<sensor::Sensor>& sensor =
+                    _sensorObjects[i.first];
 
-                auto it = obj.find(InterfaceType::STATUS);
-                if (it != obj.end())
+                auto& statusIface =
+                    std::any_cast<std::shared_ptr<StatusObject>&>(
+                        obj[InterfaceType::STATUS]);
+                // If addStatus was called before addValue,
+                // statusIface should never be nullptr
+                assert(statusIface);
+
+                if (sensor->hasFaultFile())
                 {
                     auto fault = _ioAccess.read(
                         i.first.first, i.first.second, hwmon::entry::fault,
                         hwmonio::retries, hwmonio::delay);
-                    auto statusIface =
-                        std::any_cast<std::shared_ptr<StatusObject>>(
-                            it->second);
-                    if (!statusIface->functional((fault == 0) ? true : false))
-                    {
-                        continue;
-                    }
+                    statusIface->functional(fault == 0);
                 }
-
-                // Retry for up to a second if device is busy
-                // or has a transient error.
-                std::unique_ptr<sensor::Sensor>& sensor =
-                    _sensorObjects[i.first];
+                if (!statusIface->functional())
+                {
+                    continue;
+                }
 
                 {
                     // RAII object for GPIO unlock / lock
                     sensor::GpioLock gpioLock(sensor->getGpio());
 
+                    // Retry for up to a second if device is busy
+                    // or has a transient error.
                     value = _ioAccess.read(i.first.first, i.first.second, input,
                                            hwmonio::retries, hwmonio::delay);
 
