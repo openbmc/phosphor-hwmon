@@ -31,6 +31,7 @@ PKG_CHECK_MODULES([SDEVENTPLUS], [sdeventplus])
 PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces])
 PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 PKG_CHECK_MODULES([GPIOPLUS], [gpioplus])
+PKG_CHECK_MODULES([STDPLUS], [stdplus])
 # We need the header only CLI library
 AC_CHECK_HEADERS(
     [CLI/CLI.hpp],
