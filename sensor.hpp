@@ -93,10 +93,10 @@ class Sensor
 
     /**
      * @brief Add status interface and functional property for sensor
-     * @details When a sensor has an associated fault file, the
-     * OperationalStatus interface is added along with setting the
-     * Functional property to the corresponding value found in the
-     * fault file.
+     * @details OperationalStatus interface is added and the Functional
+     * property is set depending on the content of any existing fault file
+     * corresponding to the sensor. If a fault file exists, _hasFaultFile is
+     * also set to true.
      *
      * @param[in] info - Sensor object information
      *
@@ -124,6 +124,26 @@ class Sensor
         return _handle.get();
     }
 
+    /**
+     * @brief Get whether the sensor has a fault file or not.
+     *
+     * @return - Boolean on whether the sensor has a fault file
+     */
+    inline bool getHasFaultFile(void)
+    {
+        return _hasFaultFile;
+    }
+
+    /**
+     * @brief Set whether the sensor has a fault file or not.
+     *
+     * @param[in] hasFaultFile - Boolean on whether the sensor has a fault file
+     */
+    inline void setHasFaultFile(bool hasFaultFile)
+    {
+        _hasFaultFile = hasFaultFile;
+    }
+
   private:
     /** @brief Sensor object's identifiers */
     SensorSet::key_type _sensor;
@@ -142,6 +162,9 @@ class Sensor
 
     /** @brief sensor scale from configuration. */
     int64_t _scale;
+
+    /** @brief Tracks whether the sensor has a fault file or not. */
+    bool _hasFaultFile;
 };
 
 /** @class GpioLock

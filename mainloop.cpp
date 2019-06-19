@@ -362,6 +362,8 @@ void MainLoop::read()
     for (auto& i : _state)
     {
         auto& attrs = std::get<0>(i.second);
+        std::shared_ptr<StatusObject> statusIface = nullptr;
+
         if (attrs.find(hwmon::entry::input) != attrs.end())
         {
             // Read value from sensor.
@@ -376,31 +378,38 @@ void MainLoop::read()
                 int64_t value;
                 auto& objInfo = std::get<ObjectInfo>(i.second);
                 auto& obj = std::get<Object>(objInfo);
+                std::unique_ptr<sensor::Sensor>& sensor =
+                    _sensorObjects[i.first];
 
                 auto it = obj.find(InterfaceType::STATUS);
                 if (it != obj.end())
                 {
-                    auto fault = _ioAccess.read(
-                        i.first.first, i.first.second, hwmon::entry::fault,
-                        hwmonio::retries, hwmonio::delay);
                     auto statusIface =
                         std::any_cast<std::shared_ptr<StatusObject>>(
                             it->second);
-                    if (!statusIface->functional((fault == 0) ? true : false))
+                    if (sensor->getHasFaultFile())
                     {
-                        continue;
+                        auto fault = _ioAccess.read(
+                            i.first.first, i.first.second, hwmon::entry::fault,
+                            hwmonio::retries, hwmonio::delay);
+                        statusIface->functional(fault == 0);
                     }
                 }
-
-                // Retry for up to a second if device is busy
-                // or has a transient error.
-                std::unique_ptr<sensor::Sensor>& sensor =
-                    _sensorObjects[i.first];
+                if (statusIface == nullptr || !statusIface->functional())
+                {
+                    // All sensors in hwmon should have a StatusObject to
+                    // keep track of OperationalStatus interface's Functional
+                    // property. Skip reading this sensor as initialization may
+                    // have been faulty or the sensor is not functinoal.
+                    continue;
+                }
 
                 {
                     // RAII object for GPIO unlock / lock
                     sensor::GpioLock gpioLock(sensor->getGpio());
 
+                    // Retry for up to a second if device is busy
+                    // or has a transient error.
                     value = _ioAccess.read(i.first.first, i.first.second, input,
                                            hwmonio::retries, hwmonio::delay);
 

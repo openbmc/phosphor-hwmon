@@ -39,7 +39,7 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
     _sensor(sensor),
-    _ioAccess(ioAccess), _devPath(devPath), _scale(0)
+    _ioAccess(ioAccess), _devPath(devPath), _scale(0), _hasFaultFile(false)
 {
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
@@ -140,22 +140,22 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     if (it != obj.end())
     {
         statusIface = std::any_cast<std::shared_ptr<StatusObject>>(it->second);
-    }
 
-    // If there's no fault file or the sensor has a fault file and
-    // its status is functional, read the input value.
-    if (!statusIface || (statusIface && statusIface->functional()))
-    {
-        // RAII object for GPIO unlock / lock
-        GpioLock gpioLock(getGpio());
+        // Only read the input value if the status is functional
+        if (statusIface->functional())
+        {
+            // RAII object for GPIO unlock / lock
+            GpioLock gpioLock(getGpio());
 
-        // Retry for up to a second if device is busy
-        // or has a transient error.
-        val = _ioAccess->read(_sensor.first, _sensor.second,
-                              hwmon::entry::cinput, std::get<size_t>(retryIO),
-                              std::get<std::chrono::milliseconds>(retryIO));
+            // Retry for up to a second if device is busy
+            // or has a transient error.
+            val =
+                _ioAccess->read(_sensor.first, _sensor.second,
+                                hwmon::entry::cinput, std::get<size_t>(retryIO),
+                                std::get<std::chrono::milliseconds>(retryIO));
 
-        val = adjustValue(val);
+            val = adjustValue(val);
+        }
     }
 
     auto iface =
@@ -200,11 +200,12 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     std::string faultID = _sensor.second;
     std::string entry = hwmon::entry::fault;
 
+    bool functional = true;
     auto sysfsFullPath =
         sysfs::make_sysfs_path(_ioAccess->path(), faultName, faultID, entry);
     if (fs::exists(sysfsFullPath))
     {
-        bool functional = true;
+        setHasFaultFile(true);
         try
         {
             uint32_t fault = _ioAccess->read(faultName, faultID, entry,
@@ -228,17 +229,16 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
                 "Logging failing sysfs file",
                 phosphor::logging::entry("FILE=%s", sysfsFullPath.c_str()));
         }
-
-        static constexpr bool deferSignals = true;
-        auto& bus = *std::get<sdbusplus::bus::bus*>(info);
-
-        iface =
-            std::make_shared<StatusObject>(bus, objPath.c_str(), deferSignals);
-        // Set functional property
-        iface->functional(functional);
-
-        obj[InterfaceType::STATUS] = iface;
     }
+
+    static constexpr bool deferSignals = true;
+    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
+
+    iface = std::make_shared<StatusObject>(bus, objPath.c_str(), deferSignals);
+    // Set functional property
+    iface->functional(functional);
+
+    obj[InterfaceType::STATUS] = iface;
 
     return iface;
 }
