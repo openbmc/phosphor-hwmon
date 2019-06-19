@@ -9,6 +9,7 @@
 #include "sysfs.hpp"
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <filesystem>
@@ -147,7 +148,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     if (statusIface->functional())
     {
         // RAII object for GPIO unlock / lock
-        GpioLock gpioLock(getGpio());
+        auto locker = gpioUnlock(getGpio());
 
         // Retry for up to a second if device is busy
         // or has a transient error.
@@ -243,31 +244,17 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     return iface;
 }
 
-GpioLock::GpioLock(const gpioplus::HandleInterface* handle) : _handle(handle)
+void gpioLock(const gpioplus::HandleInterface*&& handle)
 {
-    unlockGpio();
+    handle->setValues({0});
 }
 
-GpioLock::~GpioLock()
+GpioLocker gpioUnlock(const gpioplus::HandleInterface* handle)
 {
-    lockGpio();
-}
-
-void GpioLock::unlockGpio()
-{
-    if (_handle)
-    {
-        _handle->setValues({1});
-        std::this_thread::sleep_for(_pause);
-    }
-}
-
-void GpioLock::lockGpio()
-{
-    if (_handle)
-    {
-        _handle->setValues({0});
-    }
+    handle->setValues({1});
+    // Default pause needed to guarantee sensors are ready
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    return GpioLocker(std::move(handle));
 }
 
 } // namespace sensor
