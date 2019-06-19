@@ -427,7 +427,7 @@ void MainLoop::read()
 
             {
                 // RAII object for GPIO unlock / lock
-                sensor::GpioLock gpioLock(sensor->getGpio());
+                auto locker = sensor::gpioUnlock(sensor->getGpio());
 
                 // Retry for up to a second if device is busy
                 // or has a transient error.
