@@ -131,7 +131,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 
     // Get the initial value for the value interface.
     auto& bus = *std::get<sdbusplus::bus::bus*>(info);
-    auto& obj = std::get<Object>(info);
+    auto& obj = std::get<InterfaceMap>(info);
     auto& objPath = std::get<std::string>(info);
 
     SensorValueType val = 0;
@@ -193,7 +193,7 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
 
     std::shared_ptr<StatusObject> iface = nullptr;
     auto& objPath = std::get<std::string>(info);
-    auto& obj = std::get<Object>(info);
+    auto& obj = std::get<InterfaceMap>(info);
 
     // Check if fault sysfs file exists
     std::string faultName = _sensor.first;
