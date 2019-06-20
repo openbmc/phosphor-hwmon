@@ -393,21 +393,19 @@ void MainLoop::read()
                 input = "";
             }
 
+            int64_t value;
+            auto& objInfo = std::get<ObjectInfo>(i.second);
+            auto& obj = std::get<InterfaceMap>(objInfo);
+            std::unique_ptr<sensor::Sensor>& sensor = _sensorObjects[i.first];
+
+            auto& statusIface = std::any_cast<std::shared_ptr<StatusObject>&>(
+                obj[InterfaceType::STATUS]);
+            // As long as addStatus is called before addValue, statusIface
+            // should never be nullptr.
+            assert(statusIface);
+
             try
             {
-                int64_t value;
-                auto& objInfo = std::get<ObjectInfo>(i.second);
-                auto& obj = std::get<InterfaceMap>(objInfo);
-                std::unique_ptr<sensor::Sensor>& sensor =
-                    _sensorObjects[i.first];
-
-                auto& statusIface =
-                    std::any_cast<std::shared_ptr<StatusObject>&>(
-                        obj[InterfaceType::STATUS]);
-                // As long as addStatus is called before addValue, statusIface
-                // should never be nullptr.
-                assert(statusIface);
-
                 if (sensor->hasFaultFile())
                 {
                     auto fault = _ioAccess->read(
@@ -430,6 +428,8 @@ void MainLoop::read()
                     value =
                         _ioAccess->read(i.first.first, i.first.second, input,
                                         hwmonio::retries, hwmonio::delay);
+                    // Set functional property to true if we could read sensor
+                    statusIface->functional(true);
 
                     value = sensor->adjustValue(value);
                 }
@@ -438,6 +438,12 @@ void MainLoop::read()
             }
             catch (const std::system_error& e)
             {
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+                // If UPDATE_FUNCTIONAL_ON_FAIL is defined, set the functional
+                // property to false and skip the "Remove RCs" check below
+                statusIface->functional(false);
+                continue;
+#endif
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess->path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
