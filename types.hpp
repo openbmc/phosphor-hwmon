@@ -3,6 +3,11 @@
 #include "interface.hpp"
 
 #include <any>
+#include <chrono>
+#include <map>
+#include <string>
+#include <tuple>
+#include <utility>
 
 using Object = std::map<InterfaceType, std::any>;
 using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, Object>;
