@@ -163,7 +163,7 @@ std::optional<ObjectStateData>
     objectPath.append(1, '/');
     objectPath.append(std::get<sensorLabel>(properties));
 
-    ObjectInfo info(&_bus, std::move(objectPath), Object());
+    ObjectInfo info(&_bus, std::move(objectPath), InterfaceMap());
     RetryIO retryIO(hwmonio::retries, hwmonio::delay);
     if (_rmSensors.find(sensor.first) != _rmSensors.end())
     {
@@ -375,7 +375,7 @@ void MainLoop::read()
             {
                 int64_t value;
                 auto& objInfo = std::get<ObjectInfo>(i.second);
-                auto& obj = std::get<Object>(objInfo);
+                auto& obj = std::get<InterfaceMap>(objInfo);
 
                 auto it = obj.find(InterfaceType::STATUS);
                 if (it != obj.end())

@@ -86,7 +86,7 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
                   int64_t value, ObjectInfo& info, int64_t scale)
 {
     auto& objPath = std::get<std::string>(info);
-    auto& obj = std::get<Object>(info);
+    auto& obj = std::get<InterfaceMap>(info);
     std::shared_ptr<T> iface;
 
     auto tLo = env::getEnv(Thresholds<T>::envLo, sensorType, sensorID);

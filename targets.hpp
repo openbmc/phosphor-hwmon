@@ -70,7 +70,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
     std::shared_ptr<T> target;
     namespace fs = std::filesystem;
 
-    auto& obj = std::get<Object>(info);
+    auto& obj = std::get<InterfaceMap>(info);
     auto& objPath = std::get<std::string>(info);
     auto type = Targets<T>::type;
 
