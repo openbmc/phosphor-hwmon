@@ -161,8 +161,13 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
 )
 
 # When a sensor read fails, set the Value on dbus with -errno.
+# It will also skip the "Remove RCs" check.
+# Incompatible with update-functional-on-fail.
 AC_ARG_ENABLE([negative-errno-on-fail],
-    AS_HELP_STRING([--enable-negative-errno-on-fail], [Set sensor value to -errno on read failures])
+    AS_HELP_STRING(
+        [--enable-negative-errno-on-fail],
+        [Set sensor value to -errno on read failures. Incompatible with update-functional-on-fail]
+    )
 )
 
 AC_ARG_VAR(NEGATIVE_ERRNO_ON_FAIL, [Set sensor value to -errno on read failures])
@@ -171,7 +176,30 @@ AS_IF(
     [NEGATIVE_ERRNO_ON_FAIL="yes"]
     AC_DEFINE_UNQUOTED(
         [NEGATIVE_ERRNO_ON_FAIL],
-        ["$NEGATIVE_ERRNO_ON_FAIL"], [Set sensor value to -errno on read failures]
+        ["$NEGATIVE_ERRNO_ON_FAIL"],
+        [Set sensor value to -errno on read failures]
+    )
+)
+
+# When a sensor read fails, update the OperationalState interface's Functional property.
+# This will mark the sensor as not functional and skip reading from that sensor.
+# It will also skip the "Remove RCs" check.
+# Incompatible with negative-errno-on-fail.
+AC_ARG_ENABLE([update-functional-on-fail],
+    AS_HELP_STRING(
+        [--enable-update-functional-on-fail],
+        [Update functional property on read failures. Incompatible with negative-errno-on-fail]
+    )
+)
+
+AC_ARG_VAR(UPDATE_FUNCTIONAL_ON_FAIL, [Update functional property on read failures])
+AS_IF(
+    [test "x$enable_update_functional_on_fail" == "xyes"],
+    [UPDATE_FUNCTIONAL_ON_FAIL="yes"]
+    AC_DEFINE_UNQUOTED(
+        [UPDATE_FUNCTIONAL_ON_FAIL],
+        ["$UPDATE_FUNCTIONAL_ON_FAIL"],
+        [Update functional property on sensor read failures]
     )
 )
 
