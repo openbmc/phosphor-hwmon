@@ -362,6 +362,8 @@ void MainLoop::read()
     for (auto& i : _state)
     {
         auto& attrs = std::get<0>(i.second);
+        std::shared_ptr<StatusObject> statusIface = nullptr;
+
         if (attrs.find(hwmon::entry::input) != attrs.end())
         {
             // Read value from sensor.
@@ -379,9 +381,8 @@ void MainLoop::read()
                 std::unique_ptr<sensor::Sensor>& sensor =
                     _sensorObjects[i.first];
 
-                auto& statusIface =
-                    std::any_cast<std::shared_ptr<StatusObject>&>(
-                        obj[InterfaceType::STATUS]);
+                statusIface = std::any_cast<std::shared_ptr<StatusObject>>(
+                    obj[InterfaceType::STATUS]);
                 // If addStatus was called before addValue,
                 // statusIface should never be nullptr
                 assert(statusIface);
@@ -438,6 +439,13 @@ void MainLoop::read()
             }
             catch (const std::system_error& e)
             {
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+                // If addStatus was called before addValue,
+                // statusIface should never be nullptr
+                assert(statusIface);
+                statusIface->functional(false);
+                continue;
+#endif
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess.path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
