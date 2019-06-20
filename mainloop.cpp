@@ -200,7 +200,8 @@ std::optional<ObjectStateData>
 
     // Add status interface based on _fault file being present.
     // addStatus will not except and will always create a sensor interface.
-    sensorObj->addStatus(info);
+    auto statusIface = sensorObj->addStatus(info);
+    assert(statusIface);
     try
     {
         valueInterface = sensorObj->addValue(retryIO, info);
@@ -210,8 +211,13 @@ std::optional<ObjectStateData>
         auto file =
             sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
                                    sensor.first.second, hwmon::entry::cinput);
-
-        // Always log sysfs file failure.
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+        // Always set the functional property to false.
+        // We cannot set this with the return in the lower block as the code
+        // may exit before reaching it.
+        statusIface->functional(false);
+#else
+        // Always log sysfs file failure unless UPDATE_FUNCTIONAL_ON_FAIL is set
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::ReadFailure::CALLOUT_ERRNO(
@@ -221,6 +227,7 @@ std::optional<ObjectStateData>
 
         log<level::INFO>("Logging failing sysfs file",
                          entry("FILE=%s", file.c_str()));
+#endif
 
 #ifdef REMOVE_ON_FAIL
         return {}; /* skip adding this sensor for now. */
@@ -240,6 +247,10 @@ std::optional<ObjectStateData>
             }
             return {};
         }
+#endif
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+        // Do not exit with failure
+        return {};
 #endif
         exit(EXIT_FAILURE);
     }
@@ -400,21 +411,19 @@ void MainLoop::read()
                 input = "";
             }
 
+            int64_t value;
+            auto& objInfo = std::get<ObjectInfo>(i.second);
+            auto& obj = std::get<InterfaceMap>(objInfo);
+            std::unique_ptr<sensor::Sensor>& sensor = _sensorObjects[i.first];
+
+            auto& statusIface = std::any_cast<std::shared_ptr<StatusObject>&>(
+                obj[InterfaceType::STATUS]);
+            // As long as addStatus is called before addValue, statusIface
+            // should never be nullptr.
+            assert(statusIface);
+
             try
             {
-                int64_t value;
-                auto& objInfo = std::get<ObjectInfo>(i.second);
-                auto& obj = std::get<InterfaceMap>(objInfo);
-                std::unique_ptr<sensor::Sensor>& sensor =
-                    _sensorObjects[i.first];
-
-                auto& statusIface =
-                    std::any_cast<std::shared_ptr<StatusObject>&>(
-                        obj[InterfaceType::STATUS]);
-                // As long as addStatus is called before addValue, statusIface
-                // should never be nullptr.
-                assert(statusIface);
-
                 if (sensor->hasFaultFile())
                 {
                     auto fault = _ioAccess->read(
@@ -437,6 +446,8 @@ void MainLoop::read()
                     value =
                         _ioAccess->read(i.first.first, i.first.second, input,
                                         hwmonio::retries, hwmonio::delay);
+                    // Set functional property to true if we could read sensor
+                    statusIface->functional(true);
 
                     value = sensor->adjustValue(value);
                 }
@@ -448,8 +459,14 @@ void MainLoop::read()
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess->path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
-
-                // Always log sysfs file failure.
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+                // Always set the functional property to false.
+                // We cannot set this with the continue in the lower block
+                // as the code may exit before reaching it.
+                statusIface->functional(false);
+#else
+                // Always log sysfs file failure unless
+                // UPDATE_FUNCTIONAL_ON_FAIL is set
                 using namespace sdbusplus::xyz::openbmc_project::Sensor::
                     Device::Error;
                 report<ReadFailure>(
@@ -460,6 +477,7 @@ void MainLoop::read()
 
                 log<level::INFO>("Logging failing sysfs file",
                                  entry("FILE=%s", file.c_str()));
+#endif
 
 #ifdef REMOVE_ON_FAIL
                 _rmSensors[i.first] = std::get<0>(i.second);
@@ -482,7 +500,10 @@ void MainLoop::read()
                     continue;
                 }
 #endif
-
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+                // Do not exit with failure
+                continue;
+#endif
                 exit(EXIT_FAILURE);
             }
         }
