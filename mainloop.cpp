@@ -477,6 +477,7 @@ void MainLoop::read()
         }
     }
 
+#ifndef REMOVE_ON_FAIL
     // Remove any sensors marked for removal
     for (const auto& i : _rmSensors)
     {
@@ -488,7 +489,6 @@ void MainLoop::read()
         _state.erase(i.first);
     }
 
-#ifndef REMOVE_ON_FAIL
     // Attempt to add any sensors that were removed
     auto it = _rmSensors.begin();
     while (it != _rmSensors.end())
