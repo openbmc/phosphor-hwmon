@@ -150,7 +150,7 @@ std::optional<ObjectStateData>
 
     /* Note: The sensor objects all share the same ioAccess object. */
     auto sensorObj =
-        std::make_unique<sensor::Sensor>(sensor.first, &_ioAccess, _devPath);
+        std::make_unique<sensor::Sensor>(sensor.first, _ioAccess, _devPath);
 
     // Get list of return codes for removing sensors on device
     auto devRmRCs = env::getEnv("REMOVERCS");
@@ -181,7 +181,7 @@ std::optional<ObjectStateData>
     catch (const std::system_error& e)
     {
         auto file =
-            sysfs::make_sysfs_path(_ioAccess.path(), sensor.first.first,
+            sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
                                    sensor.first.second, hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
         // Check sensorAdjusts for sensor removal RCs
@@ -250,11 +250,12 @@ std::optional<ObjectStateData>
 
 MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
                    const std::string& path, const std::string& devPath,
-                   const char* prefix, const char* root) :
+                   const char* prefix, const char* root,
+                   const hwmonio::HwmonIOInterface* ioIntf) :
     _bus(std::move(bus)),
     _manager(_bus, root), _pathParam(param), _hwmonRoot(), _instance(),
-    _devPath(devPath), _prefix(prefix), _root(root), _state(), _ioAccess(path),
-    _event(sdeventplus::Event::get_default()),
+    _devPath(devPath), _prefix(prefix), _root(root), _state(),
+    _ioAccess(ioIntf), _event(sdeventplus::Event::get_default()),
     _timer(_event, std::bind(&MainLoop::read, this))
 {
     // Strip off any trailing slashes.
@@ -380,7 +381,7 @@ void MainLoop::read()
                 auto it = obj.find(InterfaceType::STATUS);
                 if (it != obj.end())
                 {
-                    auto fault = _ioAccess.read(
+                    auto fault = _ioAccess->read(
                         i.first.first, i.first.second, hwmon::entry::fault,
                         hwmonio::retries, hwmonio::delay);
                     auto statusIface =
@@ -401,8 +402,9 @@ void MainLoop::read()
                     // RAII object for GPIO unlock / lock
                     sensor::GpioLock gpioLock(sensor->getGpio());
 
-                    value = _ioAccess.read(i.first.first, i.first.second, input,
-                                           hwmonio::retries, hwmonio::delay);
+                    value =
+                        _ioAccess->read(i.first.first, i.first.second, input,
+                                        hwmonio::retries, hwmonio::delay);
 
                     value = sensor->adjustValue(value);
                 }
@@ -436,7 +438,7 @@ void MainLoop::read()
             catch (const std::system_error& e)
             {
                 auto file = sysfs::make_sysfs_path(
-                    _ioAccess.path(), i.first.first, i.first.second,
+                    _ioAccess->path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
 #ifndef REMOVE_ON_FAIL
                 // Check sensorAdjusts for sensor removal RCs
@@ -526,7 +528,7 @@ void MainLoop::addDroppedSensors()
 
                 // Sensor object added, erase entry from removal list
                 auto file = sysfs::make_sysfs_path(
-                    _ioAccess.path(), it->first.first, it->first.second,
+                    _ioAccess->path(), it->first.first, it->first.second,
                     hwmon::entry::cinput);
 
                 log<level::INFO>("Added sensor to dbus after successful read",

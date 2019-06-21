@@ -109,6 +109,7 @@ class HwmonIO : public HwmonIOInterface
   private:
     std::string _p;
 };
+
 } // namespace hwmonio
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
