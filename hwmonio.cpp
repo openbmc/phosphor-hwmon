@@ -25,6 +25,40 @@
 namespace hwmonio
 {
 
+int64_t FileSystem::read(const std::string& path) const
+{
+    int64_t val;
+    std::ifstream ifs;
+    ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit |
+                   std::ifstream::eofbit);
+
+    errno = 0;
+    if (!ifs.is_open())
+        ifs.open(path);
+    ifs.clear();
+    ifs.seekg(0);
+    ifs >> val;
+
+    return val;
+}
+
+void FileSystem::write(const std::string& path, uint32_t value) const
+{
+    std::ofstream ofs;
+    ofs.exceptions(std::ofstream::failbit | std::ofstream::badbit |
+                   std::ofstream::eofbit);
+
+    errno = 0;
+    if (!ofs.is_open())
+        ofs.open(path);
+    ofs.clear();
+    ofs.seekp(0);
+    ofs << value;
+    ofs.flush();
+}
+
+FileSystem fileSystemImpl;
+
 static constexpr auto retryableErrors = {
     /*
      * Retry on bus or device errors or timeouts in case
@@ -71,7 +105,8 @@ static constexpr auto retryableErrors = {
     EMSGSIZE,
 };
 
-HwmonIO::HwmonIO(const std::string& path) : _p(path)
+HwmonIO::HwmonIO(const std::string& path, const FileSystemInterface* intf) :
+    _p(path), _intf(intf)
 {
 }
 
@@ -80,22 +115,13 @@ int64_t HwmonIO::read(const std::string& type, const std::string& id,
                       std::chrono::milliseconds delay) const
 {
     int64_t val;
-    std::ifstream ifs;
     auto fullPath = sysfs::make_sysfs_path(_p, type, id, sensor);
-
-    ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit |
-                   std::ifstream::eofbit);
 
     while (true)
     {
         try
         {
-            errno = 0;
-            if (!ifs.is_open())
-                ifs.open(fullPath);
-            ifs.clear();
-            ifs.seekg(0);
-            ifs >> val;
+            val = _intf->read(fullPath);
         }
         catch (const std::exception& e)
         {
@@ -148,11 +174,7 @@ void HwmonIO::write(uint32_t val, const std::string& type,
                     size_t retries, std::chrono::milliseconds delay) const
 
 {
-    std::ofstream ofs;
     auto fullPath = sysfs::make_sysfs_path(_p, type, id, sensor);
-
-    ofs.exceptions(std::ofstream::failbit | std::ofstream::badbit |
-                   std::ofstream::eofbit);
 
     // See comments in the read method for an explanation of the odd exception
     // handling behavior here.
@@ -161,13 +183,7 @@ void HwmonIO::write(uint32_t val, const std::string& type,
     {
         try
         {
-            errno = 0;
-            if (!ofs.is_open())
-                ofs.open(fullPath);
-            ofs.clear();
-            ofs.seekp(0);
-            ofs << val;
-            ofs.flush();
+            _intf->write(fullPath, val);
         }
         catch (const std::exception& e)
         {
