@@ -144,7 +144,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 
     // If there's no fault file or the sensor has a fault file and
     // its status is functional, read the input value.
-    if (!statusIface || (statusIface && statusIface->functional()))
+    if (!statusIface || statusIface->functional())
     {
         // RAII object for GPIO unlock / lock
         GpioLock gpioLock(getGpio());
