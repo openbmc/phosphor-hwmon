@@ -66,6 +66,14 @@ class MainLoop
      */
     void shutdown() noexcept;
 
+    /** @brief Remove sensors slated for removal.
+     */
+    void removeSensors();
+
+    /** @brief Attempt to add sensors back that had been removed.
+     */
+    void addDroppedSensors();
+
   private:
     using mapped_type =
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
