@@ -9,6 +9,28 @@ namespace hwmonio
 static constexpr auto retries = 10;
 static constexpr auto delay = std::chrono::milliseconds{100};
 
+/** @class FileSystemInterface
+ *  @brief Abstract base class allowing testing of HwmonIO.
+ *
+ *  This is used to provide testing of behaviors within HwmonIO.
+ */
+class FileSystemInterface
+{
+  public:
+    virtual ~FileSystemInterface() = default;
+    virtual int64_t read(const std::string& path) const = 0;
+    virtual void write(const std::string& path, uint32_t value) const = 0;
+};
+
+class FileSystem : public FileSystemInterface
+{
+  public:
+    int64_t read(const std::string& path) const override;
+    void write(const std::string& path, uint32_t value) const override;
+};
+
+extern FileSystem fileSystemImpl;
+
 /** @class HwmonIOInterface
  *  @brief Abstract base class defining a HwmonIOInterface.
  *
@@ -56,7 +78,8 @@ class HwmonIO : public HwmonIOInterface
      *  @param[in] path - hwmon instance root - eg:
      *      /sys/class/hwmon/hwmon<N>
      */
-    explicit HwmonIO(const std::string& path);
+    explicit HwmonIO(const std::string& path,
+                     const FileSystemInterface* intf = &fileSystemImpl);
 
     /** @brief Perform formatted hwmon sysfs read.
      *
@@ -108,6 +131,7 @@ class HwmonIO : public HwmonIOInterface
 
   private:
     std::string _p;
+    const FileSystemInterface* _intf;
 };
 
 } // namespace hwmonio

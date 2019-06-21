@@ -21,7 +21,7 @@ AM_LDFLAGS = \
 	$(CODE_COVERAGE_LIBS)
 
 # Run all 'check' test programs
-check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest
+check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_unittest
 TESTS = $(check_PROGRAMS)
 
 hwmon_unittest_SOURCES = hwmon_unittest.cpp
@@ -42,3 +42,6 @@ sensor_unittest_LDADD = \
 	$(top_builddir)/hwmon.o \
 	env.o \
 	gpio.o
+
+hwmonio_default_unittest_SOURCES = hwmonio_default_unittest.cpp
+hwmonio_default_unittest_LDADD = $(top_builddir)/hwmonio.o
