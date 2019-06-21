@@ -477,18 +477,31 @@ void MainLoop::read()
         }
     }
 
+    removeSensors();
+
+#ifndef REMOVE_ON_FAIL
+    addDroppedSensors();
+#endif
+}
+
+void Mainloop::removeSensors()
+{
     // Remove any sensors marked for removal
     for (const auto& i : _rmSensors)
     {
         // Remove sensor object from dbus using emit_object_removed()
         auto& objInfo = std::get<ObjectInfo>(_state[i.first]);
         auto& objPath = std::get<std::string>(objInfo);
+
         _bus.emit_object_removed(objPath.c_str());
+
         // Erase sensor object info
         _state.erase(i.first);
     }
+}
 
-#ifndef REMOVE_ON_FAIL
+void Mainloop::addDroppedSensors()
+{
     // Attempt to add any sensors that were removed
     auto it = _rmSensors.begin();
     while (it != _rmSensors.end())
@@ -497,6 +510,7 @@ void MainLoop::read()
         {
             SensorSet::container_t::value_type ssValueType =
                 std::make_pair(it->first, it->second);
+
             auto object = getObject(ssValueType);
             if (object)
             {
@@ -514,8 +528,10 @@ void MainLoop::read()
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess.path(), it->first.first, it->first.second,
                     hwmon::entry::cinput);
+
                 log<level::INFO>("Added sensor to dbus after successful read",
                                  entry("FILE=%s", file.c_str()));
+
                 it = _rmSensors.erase(it);
             }
             else
@@ -529,7 +545,6 @@ void MainLoop::read()
             it = _rmSensors.erase(it);
         }
     }
-#endif
 }
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
