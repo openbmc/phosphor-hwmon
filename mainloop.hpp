@@ -53,7 +53,8 @@ class MainLoop
      */
     MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
              const std::string& path, const std::string& devPath,
-             const char* prefix, const char* root);
+             const char* prefix, const char* root,
+             const hwmonio::HwmonIOInterface* ioIntf);
 
     /** @brief Setup polling timer in a sd event loop and attach to D-Bus
      *         event loop.
@@ -106,7 +107,7 @@ class MainLoop
     /** @brief Sleep interval in microseconds. */
     uint64_t _interval = default_interval;
     /** @brief Hwmon sysfs access. */
-    hwmonio::HwmonIO _ioAccess;
+    const hwmonio::HwmonIOInterface* _ioAccess;
     /** @brief the Event Loop structure */
     sdeventplus::Event _event;
     /** @brief Read Timer */

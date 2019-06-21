@@ -15,6 +15,7 @@
  */
 #include "config.h"
 
+#include "hwmonio.hpp"
 #include "mainloop.hpp"
 #include "sysfs.hpp"
 
@@ -77,8 +78,9 @@ int main(int argc, char** argv)
                         "Unable to determine callout path.");
     }
 
+    hwmonio::HwmonIO io(path);
     MainLoop loop(sdbusplus::bus::new_default(), param, path, calloutPath,
-                  BUSNAME_PREFIX, SENSOR_ROOT);
+                  BUSNAME_PREFIX, SENSOR_ROOT, &io);
     loop.run();
 
     return 0;

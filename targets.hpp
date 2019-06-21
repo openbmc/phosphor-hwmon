@@ -64,7 +64,7 @@ struct Targets<hwmon::FanPwm>
  */
 template <typename T>
 std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
-                             const hwmonio::HwmonIO& ioAccess,
+                             const hwmonio::HwmonIOInterface* ioAccess,
                              const std::string& devPath, ObjectInfo& info)
 {
     std::shared_ptr<T> target;
@@ -97,7 +97,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
     }
 
     sysfsFullPath =
-        sysfs::make_sysfs_path(ioAccess.path(), targetName, targetId, entry);
+        sysfs::make_sysfs_path(ioAccess->path(), targetName, targetId, entry);
     if (fs::exists(sysfsFullPath))
     {
         auto useTarget = true;
@@ -137,8 +137,8 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
 
             try
             {
-                targetSpeed = ioAccess.read(targetName, targetId, entry,
-                                            hwmonio::retries, hwmonio::delay);
+                targetSpeed = ioAccess->read(targetName, targetId, entry,
+                                             hwmonio::retries, hwmonio::delay);
             }
             catch (const std::system_error& e)
             {
@@ -160,9 +160,11 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
             static constexpr bool deferSignals = true;
             auto& bus = *std::get<sdbusplus::bus::bus*>(info);
 
-            // ioAccess.path() is a path like: /sys/class/hwmon/hwmon1
+            // ioAccess->path() is a path like: /sys/class/hwmon/hwmon1
+            // NOTE: When unit-testing, the target won't have an inject-ible
+            // ioAccess: fan_pwm/fan_speed.
             target = std::make_shared<T>(
-                std::move(std::make_unique<hwmonio::HwmonIO>(ioAccess.path())),
+                std::move(std::make_unique<hwmonio::HwmonIO>(ioAccess->path())),
                 devPath, targetId, bus, objPath.c_str(), deferSignals,
                 targetSpeed);
             obj[type] = target;
