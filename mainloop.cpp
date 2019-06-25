@@ -183,7 +183,20 @@ std::optional<ObjectStateData>
         auto file =
             sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
                                    sensor.first.second, hwmon::entry::cinput);
-#ifndef REMOVE_ON_FAIL
+
+#ifdef REMOVE_ON_FAIL
+        using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
+        report<ReadFailure>(
+            xyz::openbmc_project::Sensor::Device::ReadFailure::CALLOUT_ERRNO(
+                e.code().value()),
+            xyz::openbmc_project::Sensor::Device::ReadFailure::
+                CALLOUT_DEVICE_PATH(_devPath.c_str()));
+
+        log<level::INFO>("Logging failing sysfs file",
+                         entry("FILE=%s", file.c_str()));
+
+        return {}; /* skip adding this sensor for now. */
+#else
         // Check sensorAdjusts for sensor removal RCs
         auto& sAdjusts = sensorObj->getAdjusts();
         if (sAdjusts.rmRCs.count(e.code().value()) > 0)
@@ -200,6 +213,7 @@ std::optional<ObjectStateData>
             return {};
         }
 #endif
+
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::ReadFailure::CALLOUT_ERRNO(
@@ -209,11 +223,8 @@ std::optional<ObjectStateData>
 
         log<level::INFO>("Logging failing sysfs file",
                          entry("FILE=%s", file.c_str()));
-#ifdef REMOVE_ON_FAIL
-        return {}; /* skip adding this sensor for now. */
-#else
+
         exit(EXIT_FAILURE);
-#endif
     }
     auto sensorValue = valueInterface->value();
     int64_t scale = 0;
@@ -444,7 +455,22 @@ void MainLoop::read()
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess->path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
-#ifndef REMOVE_ON_FAIL
+
+                // Always log sysfs file failure.
+                using namespace sdbusplus::xyz::openbmc_project::Sensor::
+                    Device::Error;
+                report<ReadFailure>(
+                    xyz::openbmc_project::Sensor::Device::ReadFailure::
+                        CALLOUT_ERRNO(e.code().value()),
+                    xyz::openbmc_project::Sensor::Device::ReadFailure::
+                        CALLOUT_DEVICE_PATH(_devPath.c_str()));
+
+                log<level::INFO>("Logging failing sysfs file",
+                                 entry("FILE=%s", file.c_str()));
+
+#ifdef REMOVE_ON_FAIL
+                _rmSensors[i.first] = std::get<0>(i.second);
+#else
                 // Check sensorAdjusts for sensor removal RCs
                 auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
                 if (sAdjusts.rmRCs.count(e.code().value()) > 0)
@@ -463,22 +489,8 @@ void MainLoop::read()
                     continue;
                 }
 #endif
-                using namespace sdbusplus::xyz::openbmc_project::Sensor::
-                    Device::Error;
-                report<ReadFailure>(
-                    xyz::openbmc_project::Sensor::Device::ReadFailure::
-                        CALLOUT_ERRNO(e.code().value()),
-                    xyz::openbmc_project::Sensor::Device::ReadFailure::
-                        CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-                log<level::INFO>("Logging failing sysfs file",
-                                 entry("FILE=%s", file.c_str()));
-
-#ifdef REMOVE_ON_FAIL
-                _rmSensors[i.first] = std::get<0>(i.second);
-#else
                 exit(EXIT_FAILURE);
-#endif
             }
         }
     }
