@@ -428,18 +428,16 @@ void MainLoop::read()
 
                 for (auto& iface : obj)
                 {
-                    auto valueIface = std::shared_ptr<ValueObject>();
-                    auto warnIface = std::shared_ptr<WarningObject>();
-                    auto critIface = std::shared_ptr<CriticalObject>();
-
                     switch (iface.first)
                     {
                         case InterfaceType::VALUE:
-                            valueIface =
-                                std::any_cast<std::shared_ptr<ValueObject>>(
+                        {
+                            auto& valueIface =
+                                std::any_cast<std::shared_ptr<ValueObject>&>(
                                     iface.second);
                             valueIface->value(value);
-                            break;
+                        }
+                        break;
                         case InterfaceType::WARN:
                             checkThresholds<WarningObject>(iface.second, value);
                             break;
