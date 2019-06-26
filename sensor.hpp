@@ -102,7 +102,7 @@ class Sensor
      *
      * @return - Shared pointer to the status object
      */
-    std::shared_ptr<StatusObject> addStatus(ObjectInfo& info);
+    std::shared_ptr<StatusObject> addStatus(ObjectInfo& info) noexcept;
 
     /**
      * @brief Get the scale from the sensor.

@@ -187,7 +187,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     return iface;
 }
 
-std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
+std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info) noexcept
 {
     namespace fs = std::filesystem;
 
