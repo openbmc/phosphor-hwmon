@@ -172,10 +172,12 @@ std::optional<ObjectStateData>
         std::get<size_t>(retryIO) = 0;
     }
     auto valueInterface = static_cast<std::shared_ptr<ValueObject>>(nullptr);
+
+    // Add status interface based on _fault file being present.
+    // addStatus will not except and will always create a status interface.
+    sensorObj->addStatus(info);
     try
     {
-        // Add status interface based on _fault file being present
-        sensorObj->addStatus(info);
         valueInterface = sensorObj->addValue(retryIO, info);
     }
     catch (const std::system_error& e)
