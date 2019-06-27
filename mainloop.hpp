@@ -147,3 +147,8 @@ class MainLoop
     std::optional<ObjectStateData>
         getObject(SensorSet::container_t::const_reference sensor);
 };
+
+/** @brief Given a value and map of interfaces, update values and check
+ * thresholds.
+ */
+void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value);
