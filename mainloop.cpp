@@ -208,7 +208,7 @@ std::optional<ObjectStateData>
         auto file =
             sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
                                    sensor.first.second, hwmon::entry::cinput);
-#ifndef REMOVE_ON_FAIL
+
         // Check sensorAdjusts for sensor removal RCs
         auto& sAdjusts = sensorObj->getAdjusts();
         if (sAdjusts.rmRCs.count(e.code().value()) > 0)
@@ -224,7 +224,7 @@ std::optional<ObjectStateData>
             }
             return {};
         }
-#endif
+
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::ReadFailure::CALLOUT_ERRNO(
@@ -234,11 +234,7 @@ std::optional<ObjectStateData>
 
         log<level::INFO>("Logging failing sysfs file",
                          entry("FILE=%s", file.c_str()));
-#ifdef REMOVE_ON_FAIL
-        return {}; /* skip adding this sensor for now. */
-#else
         exit(EXIT_FAILURE);
-#endif
     }
     auto sensorValue = valueInterface->value();
     int64_t scale = 0;
@@ -445,7 +441,7 @@ void MainLoop::read()
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess->path(), i.first.first, i.first.second,
                     hwmon::entry::cinput);
-#ifndef REMOVE_ON_FAIL
+
                 // Check sensorAdjusts for sensor removal RCs
                 auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
                 if (sAdjusts.rmRCs.count(e.code().value()) > 0)
@@ -463,7 +459,7 @@ void MainLoop::read()
                     }
                     continue;
                 }
-#endif
+
                 using namespace sdbusplus::xyz::openbmc_project::Sensor::
                     Device::Error;
                 report<ReadFailure>(
@@ -475,20 +471,14 @@ void MainLoop::read()
                 log<level::INFO>("Logging failing sysfs file",
                                  entry("FILE=%s", file.c_str()));
 
-#ifdef REMOVE_ON_FAIL
-                _rmSensors[i.first] = std::get<0>(i.second);
-#else
                 exit(EXIT_FAILURE);
-#endif
             }
         }
     }
 
     removeSensors();
 
-#ifndef REMOVE_ON_FAIL
     addDroppedSensors();
-#endif
 }
 
 void MainLoop::removeSensors()
