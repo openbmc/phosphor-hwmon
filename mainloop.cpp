@@ -73,6 +73,31 @@ decltype(
     Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
 
+void updateInterfaces(InterfaceMap& ifaces, int64_t value)
+{
+    for (auto& iface : ifaces)
+    {
+        switch (iface.first)
+        {
+            case InterfaceType::VALUE:
+            {
+                auto& valueIface =
+                    std::any_cast<std::shared_ptr<ValueObject>&>(iface.second);
+                valueIface->value(value);
+            }
+            break;
+            case InterfaceType::WARN:
+                checkThresholds<WarningObject>(iface.second, value);
+                break;
+            case InterfaceType::CRIT:
+                checkThresholds<CriticalObject>(iface.second, value);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 std::string MainLoop::getID(SensorSet::container_t::const_reference sensor)
 {
     std::string id;
@@ -416,29 +441,7 @@ void MainLoop::read()
                     value = sensor->adjustValue(value);
                 }
 
-                for (auto& iface : obj)
-                {
-                    switch (iface.first)
-                    {
-                        case InterfaceType::VALUE:
-                        {
-                            auto& valueIface =
-                                std::any_cast<std::shared_ptr<ValueObject>&>(
-                                    iface.second);
-                            valueIface->value(value);
-                        }
-                        break;
-                        case InterfaceType::WARN:
-                            checkThresholds<WarningObject>(iface.second, value);
-                            break;
-                        case InterfaceType::CRIT:
-                            checkThresholds<CriticalObject>(iface.second,
-                                                            value);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                updateInterfaces(obj, value);
             }
             catch (const std::system_error& e)
             {
