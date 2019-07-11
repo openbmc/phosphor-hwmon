@@ -153,12 +153,12 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
             // RAII object for GPIO unlock / lock
             GpioLock gpioLock(getGpio());
 
+            std::string input = hwmon::getValueType(_sensor);
             // Retry for up to a second if device is busy
             // or has a transient error.
-            val =
-                _ioAccess->read(_sensor.first, _sensor.second,
-                                hwmon::entry::cinput, std::get<size_t>(retryIO),
-                                std::get<std::chrono::milliseconds>(retryIO));
+            val = _ioAccess->read(_sensor.first, _sensor.second, input,
+                                  std::get<size_t>(retryIO),
+                                  std::get<std::chrono::milliseconds>(retryIO));
 
             val = adjustValue(val);
         }

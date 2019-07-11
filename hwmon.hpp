@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interface.hpp"
+#include "sensorset.hpp"
 
 #include <string>
 #include <tuple>
@@ -14,12 +15,14 @@ static constexpr auto clabel = "label";
 static constexpr auto ctarget = "target";
 static constexpr auto cenable = "enable";
 static constexpr auto cfault = "fault";
+static constexpr auto caverage = "average";
 
 static const std::string input = cinput;
 static const std::string label = clabel;
 static const std::string target = ctarget;
 static const std::string enable = cenable;
 static const std::string fault = cfault;
+static const std::string average = caverage;
 } // namespace entry
 
 namespace type
@@ -93,6 +96,15 @@ using Attributes =
  */
 bool getAttributes(const std::string& type, Attributes& attributes);
 
+/** @brief Get Value type
+ *
+ *  If power, there are two types of value, input or average
+ *  Which is used depends on the env set in hwmon config
+ *
+ *  @param[in] A sensor
+ *  @param[out] A string of type
+ */
+std::string getValueType(const SensorSet::key_type& sensor);
 } //  namespace hwmon
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

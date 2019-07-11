@@ -25,7 +25,9 @@ check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_
 TESTS = $(check_PROGRAMS)
 
 hwmon_unittest_SOURCES = hwmon_unittest.cpp
-hwmon_unittest_LDADD = $(top_builddir)/hwmon.o
+hwmon_unittest_LDADD = \
+	$(top_builddir)/hwmon.o \
+	env.o
 
 fanpwm_unittest_SOURCES = fanpwm_unittest.cpp
 fanpwm_unittest_LDADD = $(PHOSPHOR_LOGGING_LIBS) $(top_builddir)/fan_pwm.o

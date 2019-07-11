@@ -205,10 +205,9 @@ std::optional<ObjectStateData>
     }
     catch (const std::system_error& e)
     {
-        auto file =
-            sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
-                                   sensor.first.second, hwmon::entry::cinput);
-
+        std::string input = hwmon::getValueType(sensor.first);
+        auto file = sysfs::make_sysfs_path(
+            _ioAccess->path(), sensor.first.first, sensor.first.second, input);
         // Check sensorAdjusts for sensor removal RCs
         auto& sAdjusts = sensorObj->getAdjusts();
         if (sAdjusts.rmRCs.count(e.code().value()) > 0)
@@ -387,7 +386,7 @@ void MainLoop::read()
         if (attrs.find(hwmon::entry::input) != attrs.end())
         {
             // Read value from sensor.
-            std::string input = hwmon::entry::cinput;
+            std::string input = hwmon::getValueType(i.first);
             if (i.first.first == "pwm")
             {
                 input = "";
@@ -446,9 +445,7 @@ void MainLoop::read()
                 statusIface->functional(false);
 #endif
                 auto file = sysfs::make_sysfs_path(
-                    _ioAccess->path(), i.first.first, i.first.second,
-                    hwmon::entry::cinput);
-
+                    _ioAccess->path(), i.first.first, i.first.second, input);
                 // Check sensorAdjusts for sensor removal RCs
                 auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
                 if (sAdjusts.rmRCs.count(e.code().value()) > 0)
@@ -531,10 +528,11 @@ void MainLoop::addDroppedSensors()
 
                 _state[std::move(ssValueType.first)] = std::move(value);
 
+                std::string input = hwmon::getValueType(it->first);
                 // Sensor object added, erase entry from removal list
-                auto file = sysfs::make_sysfs_path(
-                    _ioAccess->path(), it->first.first, it->first.second,
-                    hwmon::entry::cinput);
+                auto file =
+                    sysfs::make_sysfs_path(_ioAccess->path(), it->first.first,
+                                           it->first.second, input);
 
                 log<level::INFO>("Added sensor to dbus after successful read",
                                  entry("FILE=%s", file.c_str()));
