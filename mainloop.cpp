@@ -205,10 +205,10 @@ std::optional<ObjectStateData>
     }
     catch (const std::system_error& e)
     {
+        std::string input = hwmon::getValueType(sensor.first);
         auto file =
             sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
-                                   sensor.first.second, hwmon::entry::cinput);
-
+                                   sensor.first.second, input);
         // Check sensorAdjusts for sensor removal RCs
         auto& sAdjusts = sensorObj->getAdjusts();
         if (sAdjusts.rmRCs.count(e.code().value()) > 0)
@@ -387,7 +387,7 @@ void MainLoop::read()
         if (attrs.find(hwmon::entry::input) != attrs.end())
         {
             // Read value from sensor.
-            std::string input = hwmon::entry::cinput;
+            std::string input = hwmon::getValueType(i.first);
             if (i.first.first == "pwm")
             {
                 input = "";
@@ -440,8 +440,7 @@ void MainLoop::read()
             {
                 auto file = sysfs::make_sysfs_path(
                     _ioAccess->path(), i.first.first, i.first.second,
-                    hwmon::entry::cinput);
-
+                    input);
                 // Check sensorAdjusts for sensor removal RCs
                 auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
                 if (sAdjusts.rmRCs.count(e.code().value()) > 0)

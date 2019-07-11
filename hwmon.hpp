@@ -4,6 +4,7 @@
 
 #include <string>
 #include <tuple>
+#include "env.hpp"
 
 namespace hwmon
 {
@@ -14,6 +15,7 @@ static constexpr auto clabel = "label";
 static constexpr auto ctarget = "target";
 static constexpr auto cenable = "enable";
 static constexpr auto cfault = "fault";
+static constexpr auto caverage = "average";
 
 static const std::string input = cinput;
 static const std::string label = clabel;
@@ -92,7 +94,9 @@ using Attributes =
  *  @param[in,out] A pointer to the Attribute tuple
  */
 bool getAttributes(const std::string& type, Attributes& attributes);
-
+/* If power, there are two types of value, input or average */
+/* Which is used depends on the config in occ-hwmon.*.conf  */
+std::string getValueType(const SensorSet::key_type& sensor);
 } //  namespace hwmon
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
