@@ -25,4 +25,18 @@ bool getAttributes(const std::string& type, Attributes& attributes)
     return true;
 }
 
+std::string getValueType(const SensorSet::key_type& sensor)
+{
+    std::string type = hwmon::entry::cinput; /*Default type is input*/
+    if (sensor.first == "power")
+    {
+        auto average = env::getEnv("AVERAGE", sensor.first, sensor.second);
+        if ("true" == average)
+        {
+            type = hwmon::entry::caverage;
+        }
+    }
+    return type;
+}
+
 } //  namespace hwmon
