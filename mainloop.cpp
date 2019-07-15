@@ -173,9 +173,12 @@ std::optional<ObjectStateData>
         return {};
     }
 
+    const auto& [sensorSetKey, sensorAttrs] = sensor;
+    const auto& [sensorSysfsType, sensorSysfsNum] = sensorSetKey;
+
     /* Note: The sensor objects all share the same ioAccess object. */
     auto sensorObj =
-        std::make_unique<sensor::Sensor>(sensor.first, _ioAccess, _devPath);
+        std::make_unique<sensor::Sensor>(sensorSetKey, _ioAccess, _devPath);
 
     // Get list of return codes for removing sensors on device
     auto devRmRCs = env::getEnv("REMOVERCS");
@@ -190,7 +193,7 @@ std::optional<ObjectStateData>
 
     ObjectInfo info(&_bus, std::move(objectPath), InterfaceMap());
     RetryIO retryIO(hwmonio::retries, hwmonio::delay);
-    if (_rmSensors.find(sensor.first) != _rmSensors.end())
+    if (_rmSensors.find(sensorSetKey) != _rmSensors.end())
     {
         // When adding a sensor that was purposely removed,
         // don't retry on errors when reading its value
@@ -206,21 +209,21 @@ std::optional<ObjectStateData>
     catch (const std::system_error& e)
     {
         auto file =
-            sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
-                                   sensor.first.second, hwmon::entry::cinput);
+            sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
+                                   sensorSysfsNum, hwmon::entry::cinput);
 
         // Check sensorAdjusts for sensor removal RCs
         auto& sAdjusts = sensorObj->getAdjusts();
         if (sAdjusts.rmRCs.count(e.code().value()) > 0)
         {
             // Return code found in sensor return code removal list
-            if (_rmSensors.find(sensor.first) == _rmSensors.end())
+            if (_rmSensors.find(sensorSetKey) == _rmSensors.end())
             {
                 // Trace for sensor not already removed from dbus
                 log<level::INFO>("Sensor not added to dbus for read fail",
                                  entry("FILE=%s", file.c_str()),
                                  entry("RC=%d", e.code().value()));
-                _rmSensors[std::move(sensor.first)] = std::move(sensor.second);
+                _rmSensors[std::move(sensorSetKey)] = std::move(sensorAttrs);
             }
             return {};
         }
@@ -243,27 +246,26 @@ std::optional<ObjectStateData>
     {
         scale = sensorObj->getScale();
     }
-    addThreshold<WarningObject>(sensor.first.first,
-                                std::get<sensorID>(properties), sensorValue,
-                                info, scale);
-    addThreshold<CriticalObject>(sensor.first.first,
+    addThreshold<WarningObject>(sensorSysfsType, std::get<sensorID>(properties),
+                                sensorValue, info, scale);
+    addThreshold<CriticalObject>(sensorSysfsType,
                                  std::get<sensorID>(properties), sensorValue,
                                  info, scale);
 
     auto target =
-        addTarget<hwmon::FanSpeed>(sensor.first, _ioAccess, _devPath, info);
+        addTarget<hwmon::FanSpeed>(sensorSetKey, _ioAccess, _devPath, info);
     if (target)
     {
         target->enable();
     }
-    addTarget<hwmon::FanPwm>(sensor.first, _ioAccess, _devPath, info);
+    addTarget<hwmon::FanPwm>(sensorSetKey, _ioAccess, _devPath, info);
 
     // All the interfaces have been created.  Go ahead
     // and emit InterfacesAdded.
     valueInterface->emit_object_added();
 
     // Save sensor object specifications
-    _sensorObjects[sensor.first] = std::move(sensorObj);
+    _sensorObjects[sensorSetKey] = std::move(sensorObj);
 
     return std::make_pair(std::move(std::get<sensorLabel>(properties)),
                           std::move(info));
@@ -381,24 +383,26 @@ void MainLoop::read()
     //       ensure the objects all exist?
 
     // Iterate through all the sensors.
-    for (auto& i : _state)
+    for (auto& [sensorSetKey, sensorStateTuple] : _state)
     {
-        auto& attrs = std::get<0>(i.second);
+        const auto& [sensorSysfsType, sensorSysfsNum] = sensorSetKey;
+        auto& [attrs, unused, objInfo] = sensorStateTuple;
+
         if (attrs.find(hwmon::entry::input) == attrs.end())
         {
             continue;
         }
+
         // Read value from sensor.
         std::string input = hwmon::entry::cinput;
-        if (i.first.first == "pwm")
+        if (sensorSysfsType == "pwm")
         {
             input = "";
         }
 
         int64_t value;
-        auto& objInfo = std::get<ObjectInfo>(i.second);
         auto& obj = std::get<InterfaceMap>(objInfo);
-        std::unique_ptr<sensor::Sensor>& sensor = _sensorObjects[i.first];
+        std::unique_ptr<sensor::Sensor>& sensor = _sensorObjects[sensorSetKey];
 
         auto& statusIface = std::any_cast<std::shared_ptr<StatusObject>&>(
             obj[InterfaceType::STATUS]);
@@ -410,7 +414,7 @@ void MainLoop::read()
         {
             if (sensor->hasFaultFile())
             {
-                auto fault = _ioAccess->read(i.first.first, i.first.second,
+                auto fault = _ioAccess->read(sensorSysfsType, sensorSysfsNum,
                                              hwmon::entry::fault,
                                              hwmonio::retries, hwmonio::delay);
                 // Skip reading from a sensor with a valid fault file
@@ -427,7 +431,7 @@ void MainLoop::read()
 
                 // Retry for up to a second if device is busy
                 // or has a transient error.
-                value = _ioAccess->read(i.first.first, i.first.second, input,
+                value = _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
                                         hwmonio::retries, hwmonio::delay);
                 // Set functional property to true if we could read sensor
                 statusIface->functional(true);
@@ -447,22 +451,22 @@ void MainLoop::read()
             statusIface->functional(false);
 #endif
             auto file =
-                sysfs::make_sysfs_path(_ioAccess->path(), i.first.first,
-                                       i.first.second, hwmon::entry::cinput);
+                sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
+                                       sensorSysfsNum, hwmon::entry::cinput);
 
             // Check sensorAdjusts for sensor removal RCs
-            auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
+            auto& sAdjusts = _sensorObjects[sensorSetKey]->getAdjusts();
             if (sAdjusts.rmRCs.count(e.code().value()) > 0)
             {
                 // Return code found in sensor return code removal list
-                if (_rmSensors.find(i.first) == _rmSensors.end())
+                if (_rmSensors.find(sensorSetKey) == _rmSensors.end())
                 {
                     // Trace for sensor not already removed from dbus
                     log<level::INFO>("Remove sensor from dbus for read fail",
                                      entry("FILE=%s", file.c_str()),
                                      entry("RC=%d", e.code().value()));
                     // Mark this sensor to be removed from dbus
-                    _rmSensors[i.first] = std::get<0>(i.second);
+                    _rmSensors[sensorSetKey] = attrs;
                 }
                 continue;
             }
