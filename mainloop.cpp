@@ -214,27 +214,17 @@ std::optional<ObjectStateData>
         auto file =
             sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
                                    sensorSysfsNum, hwmon::entry::cinput);
-
-        // Check sensorAdjusts for sensor removal RCs
-        auto& sAdjusts = sensorObj->getAdjusts();
-        if (sAdjusts.rmRCs.count(e.code().value()) > 0)
+        int rc = e.code().value();
+        if (stageSensorForRemoval(sensorObj.get(), rc, sensorSetKey,
+                                  sensorAttrs, file))
         {
-            // Return code found in sensor return code removal list
-            if (_rmSensors.find(sensorSetKey) == _rmSensors.end())
-            {
-                // Trace for sensor not already removed from dbus
-                log<level::INFO>("Sensor not added to dbus for read fail",
-                                 entry("FILE=%s", file.c_str()),
-                                 entry("RC=%d", e.code().value()));
-                _rmSensors[std::move(sensorSetKey)] = std::move(sensorAttrs);
-            }
             return {};
         }
 
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::ReadFailure::CALLOUT_ERRNO(
-                e.code().value()),
+                rc),
             xyz::openbmc_project::Sensor::Device::ReadFailure::
                 CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
@@ -505,20 +495,10 @@ void MainLoop::read()
             auto file = sysfs::make_sysfs_path(
                 _ioAccess->path(), sensorSysfsType, sensorSysfsNum, input);
 
-            // Check sensorAdjusts for sensor removal RCs
-            auto& sAdjusts = _sensorObjects[sensorSetKey]->getAdjusts();
-            if (sAdjusts.rmRCs.count(e.code().value()) > 0)
+            int rc = e.code().value();
+            if (stageSensorForRemoval(_sensorObjects[sensorSetKey].get(), rc,
+                                      sensorSetKey, attrs, file))
             {
-                // Return code found in sensor return code removal list
-                if (_rmSensors.find(sensorSetKey) == _rmSensors.end())
-                {
-                    // Trace for sensor not already removed from dbus
-                    log<level::INFO>("Remove sensor from dbus for read fail",
-                                     entry("FILE=%s", file.c_str()),
-                                     entry("RC=%d", e.code().value()));
-                    // Mark this sensor to be removed from dbus
-                    _rmSensors[sensorSetKey] = attrs;
-                }
                 continue;
             }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
@@ -529,7 +509,7 @@ void MainLoop::read()
                 Error;
             report<ReadFailure>(
                 xyz::openbmc_project::Sensor::Device::ReadFailure::
-                    CALLOUT_ERRNO(e.code().value()),
+                    CALLOUT_ERRNO(rc),
                 xyz::openbmc_project::Sensor::Device::ReadFailure::
                     CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
@@ -543,6 +523,30 @@ void MainLoop::read()
     removeSensors();
 
     addDroppedSensors();
+}
+
+bool MainLoop::stageSensorForRemoval(const sensor::Sensor* sensorObj, int rc,
+                                     const SensorSet::key_type& sensorKey,
+                                     const SensorSet::mapped_type& sensorAttrs,
+                                     const std::string& file)
+{
+    // Check sensorAdjusts for sensor removal RCs
+    const auto& sAdjusts = sensorObj->getAdjusts();
+    if (sAdjusts.rmRCs.count(rc) > 0)
+    {
+        // Return code found in sensor return code removal list
+        if (_rmSensors.find(sensorKey) == _rmSensors.end())
+        {
+            // Trace for sensor not already removed from dbus
+            log<level::INFO>("Sensor not added to dbus for read fail",
+                             entry("FILE=%s", file.c_str()),
+                             entry("RC=%d", rc));
+            _rmSensors[sensorKey] = sensorAttrs;
+        }
+        return true;
+    }
+
+    return false;
 }
 
 void MainLoop::removeSensors()
