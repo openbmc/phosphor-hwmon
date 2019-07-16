@@ -80,6 +80,13 @@ class MainLoop
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
     using SensorState = std::map<SensorSet::key_type, mapped_type>;
 
+    /** @brief Return true if rc in in the RmRcs list to check for this sensor.
+     *  in which case the sensor is added to the removal list to be processed */
+    bool stageSensorForRemoval(const sensor::Sensor* sensorObj, int rc,
+                               const SensorSet::key_type& sensorKey,
+                               const SensorSet::mapped_type& sensorAttrs,
+                               const std::string& file);
+
     /** @brief Read hwmon sysfs entries */
     void read();
 
