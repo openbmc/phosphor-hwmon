@@ -79,7 +79,8 @@ void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value)
     {
         switch (iface.first)
         {
-            case InterfaceType::VALUE: {
+            case InterfaceType::VALUE:
+            {
                 auto& valueIface =
                     std::any_cast<std::shared_ptr<ValueObject>&>(iface.second);
                 valueIface->value(value);
@@ -204,35 +205,20 @@ std::optional<ObjectStateData>
     }
     catch (const std::system_error& e)
     {
-        auto file =
-            sysfs::make_sysfs_path(_ioAccess->path(), sensor.first.first,
-                                   sensor.first.second, hwmon::entry::cinput);
-
-        // Check sensorAdjusts for sensor removal RCs
-        auto& sAdjusts = sensorObj->getAdjusts();
-        if (sAdjusts.rmRCs.count(e.code().value()) > 0)
+        int rc = e.code().value();
+        if (stageSensorForRemoval(sensorObj.get(), rc, sensor.first,
+                                  sensor.second))
         {
-            // Return code found in sensor return code removal list
-            if (_rmSensors.find(sensor.first) == _rmSensors.end())
-            {
-                // Trace for sensor not already removed from dbus
-                log<level::INFO>("Sensor not added to dbus for read fail",
-                                 entry("FILE=%s", file.c_str()),
-                                 entry("RC=%d", e.code().value()));
-                _rmSensors[std::move(sensor.first)] = std::move(sensor.second);
-            }
             return {};
         }
 
         using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::Error;
         report<ReadFailure>(
             xyz::openbmc_project::Sensor::Device::ReadFailure::CALLOUT_ERRNO(
-                e.code().value()),
+                rc),
             xyz::openbmc_project::Sensor::Device::ReadFailure::
                 CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-        log<level::INFO>("Logging failing sysfs file",
-                         entry("FILE=%s", file.c_str()));
         exit(EXIT_FAILURE);
     }
     auto sensorValue = valueInterface->value();
@@ -445,24 +431,10 @@ void MainLoop::read()
             // as the code may exit before reaching it.
             statusIface->functional(false);
 #endif
-            auto file =
-                sysfs::make_sysfs_path(_ioAccess->path(), i.first.first,
-                                       i.first.second, hwmon::entry::cinput);
-
-            // Check sensorAdjusts for sensor removal RCs
-            auto& sAdjusts = _sensorObjects[i.first]->getAdjusts();
-            if (sAdjusts.rmRCs.count(e.code().value()) > 0)
+            int rc = e.code().value();
+            if (stageSensorForRemoval(_sensorObjects[i.first].get(), rc,
+                                      i.first, std::get<0>(i.second)))
             {
-                // Return code found in sensor return code removal list
-                if (_rmSensors.find(i.first) == _rmSensors.end())
-                {
-                    // Trace for sensor not already removed from dbus
-                    log<level::INFO>("Remove sensor from dbus for read fail",
-                                     entry("FILE=%s", file.c_str()),
-                                     entry("RC=%d", e.code().value()));
-                    // Mark this sensor to be removed from dbus
-                    _rmSensors[i.first] = std::get<0>(i.second);
-                }
                 continue;
             }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
@@ -473,12 +445,9 @@ void MainLoop::read()
                 Error;
             report<ReadFailure>(
                 xyz::openbmc_project::Sensor::Device::ReadFailure::
-                    CALLOUT_ERRNO(e.code().value()),
+                    CALLOUT_ERRNO(rc),
                 xyz::openbmc_project::Sensor::Device::ReadFailure::
                     CALLOUT_DEVICE_PATH(_devPath.c_str()));
-
-            log<level::INFO>("Logging failing sysfs file",
-                             entry("FILE=%s", file.c_str()));
 
             exit(EXIT_FAILURE);
         }
@@ -487,6 +456,35 @@ void MainLoop::read()
     removeSensors();
 
     addDroppedSensors();
+}
+
+bool MainLoop::stageSensorForRemoval(const sensor::Sensor* sensorObj, int rc,
+                                     const SensorSet::key_type& sensorKey,
+                                     const SensorSet::mapped_type& sensorAttrs)
+{
+    const auto& [sensorSysfsType, sensorSysfsNum] = sensorKey;
+    auto file = sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
+                                       sensorSysfsNum, hwmon::entry::cinput);
+
+    // Check sensorAdjusts for sensor removal RCs
+    const auto& sAdjusts = sensorObj->getAdjusts();
+    if (sAdjusts.rmRCs.count(rc) > 0)
+    {
+        // Return code found in sensor return code removal list
+        if (_rmSensors.find(sensorKey) == _rmSensors.end())
+        {
+            // Trace for sensor not already removed from dbus
+            log<level::INFO>("Sensor not added to dbus for read fail",
+                             entry("FILE=%s", file.c_str()),
+                             entry("RC=%d", rc));
+            _rmSensors[sensorKey] = sensorAttrs;
+        }
+        return true;
+    }
+
+    log<level::INFO>("Logging failing sysfs file",
+                     entry("FILE=%s", file.c_str()));
+    return false;
 }
 
 void MainLoop::removeSensors()
