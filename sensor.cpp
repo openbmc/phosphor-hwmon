@@ -146,32 +146,16 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     // Only read the input value if the status is functional
     if (statusIface->functional())
     {
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
-        try
-#endif
-        {
-            // RAII object for GPIO unlock / lock
-            GpioLock gpioLock(getGpio());
+        // RAII object for GPIO unlock / lock
+        GpioLock gpioLock(getGpio());
 
-            // Retry for up to a second if device is busy
-            // or has a transient error.
-            val =
-                _ioAccess->read(_sensor.first, _sensor.second,
-                                hwmon::entry::cinput, std::get<size_t>(retryIO),
-                                std::get<std::chrono::milliseconds>(retryIO));
+        // Retry for up to a second if device is busy
+        // or has a transient error.
+        val = _ioAccess->read(_sensor.first, _sensor.second,
+                              hwmon::entry::cinput, std::get<size_t>(retryIO),
+                              std::get<std::chrono::milliseconds>(retryIO));
 
-            val = adjustValue(val);
-        }
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
-        catch (const std::system_error& e)
-        {
-            // Catch the exception here and update the functional property.
-            // By catching the exception, it will not propagate it up the stack
-            // and thus the code will skip the "Remove RCs" check in
-            // MainLoop::getObject and will not exit on failure.
-            statusIface->functional(false);
-        }
-#endif
+        val = adjustValue(val);
     }
 
     auto iface =

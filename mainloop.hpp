@@ -84,7 +84,8 @@ class MainLoop
      *  in which case the sensor is added to the removal list to be processed */
     bool stageSensorForRemoval(const sensor::Sensor* sensorObj, int rc,
                                const SensorSet::key_type& sensorKey,
-                               const SensorSet::mapped_type& sensorAttrs);
+                               const SensorSet::mapped_type& sensorAttrs,
+                               std::shared_ptr<StatusObject> statusIface);
 
     /** @brief Read hwmon sysfs entries */
     void read();

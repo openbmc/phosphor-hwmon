@@ -210,7 +210,7 @@ std::optional<ObjectStateData>
     {
         int rc = e.code().value();
         if (stageSensorForRemoval(sensorObj.get(), rc, sensorSetKey,
-                                  sensorAttrs))
+                                  sensorAttrs, nullptr))
         {
             return {};
         }
@@ -428,23 +428,13 @@ void MainLoop::read()
         }
         catch (const std::system_error& e)
         {
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
-            // If UPDATE_FUNCTIONAL_ON_FAIL is defined and an exception was
-            // thrown, set the functional property to false.
-            // We cannot set this with the 'continue' in the lower block
-            // as the code may exit before reaching it.
-            statusIface->functional(false);
-#endif
             int rc = e.code().value();
             if (stageSensorForRemoval(_sensorObjects[sensorSetKey].get(), rc,
-                                      sensorSetKey, attrs))
+                                      sensorSetKey, attrs, statusIface))
             {
                 continue;
             }
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
-            // Do not exit with failure if UPDATE_FUNCTIONAL_ON_FAIL is set
-            continue;
-#endif
+
             using namespace sdbusplus::xyz::openbmc_project::Sensor::Device::
                 Error;
             report<ReadFailure>(
@@ -464,11 +454,25 @@ void MainLoop::read()
 
 bool MainLoop::stageSensorForRemoval(const sensor::Sensor* sensorObj, int rc,
                                      const SensorSet::key_type& sensorKey,
-                                     const SensorSet::mapped_type& sensorAttrs)
+                                     const SensorSet::mapped_type& sensorAttrs,
+                                     std::shared_ptr<StatusObject> statusIface)
 {
     const auto& [sensorSysfsType, sensorSysfsNum] = sensorKey;
     auto file = sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
                                        sensorSysfsNum, hwmon::entry::cinput);
+    bool ret = false;
+
+#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+    // If UPDATE_FUNCTIONAL_ON_FAIL is defined and an exception was
+    // thrown, set the functional property to false.
+    if (statusIface)
+    {
+        statusIface->functional(false);
+    }
+
+    // Force return true to note we don't want to exit.
+    ret = true;
+#endif
 
     // Check sensorAdjusts for sensor removal RCs
     const auto& sAdjusts = sensorObj->getAdjusts();
@@ -488,7 +492,7 @@ bool MainLoop::stageSensorForRemoval(const sensor::Sensor* sensorObj, int rc,
 
     log<level::INFO>("Logging failing sysfs file",
                      entry("FILE=%s", file.c_str()));
-    return false;
+    return retval;
 }
 
 void MainLoop::removeSensors()
