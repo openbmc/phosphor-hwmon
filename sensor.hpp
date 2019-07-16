@@ -60,7 +60,7 @@ class Sensor
      *
      * @return - Sensor adjustment struct
      */
-    inline const valueAdjust& getAdjusts()
+    inline const valueAdjust& getAdjusts() const
     {
         return _sensorAdjusts;
     }
@@ -109,7 +109,7 @@ class Sensor
      *
      * @return - Scale value
      */
-    inline int64_t getScale(void)
+    inline int64_t getScale(void) const
     {
         return _scale;
     }
@@ -119,7 +119,7 @@ class Sensor
      *
      * @return - Pointer to the GPIO handle interface, can be nullptr.
      */
-    inline const gpioplus::HandleInterface* getGpio(void)
+    inline const gpioplus::HandleInterface* getGpio(void) const
     {
         return _handle.get();
     }
@@ -129,7 +129,7 @@ class Sensor
      *
      * @return - Boolean on whether the sensor has a fault file
      */
-    inline const bool hasFaultFile(void)
+    inline bool hasFaultFile(void) const
     {
         return _hasFaultFile;
     }
