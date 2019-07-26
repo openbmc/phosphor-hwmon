@@ -61,6 +61,7 @@ libhwmon_la_SOURCES = \
 	mainloop.cpp \
 	sysfs.cpp \
 	env.cpp \
+	sensorconfig.cpp \
 	fan_speed.cpp \
 	fan_pwm.cpp \
 	hwmon.cpp \
