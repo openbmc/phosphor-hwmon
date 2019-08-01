@@ -5,8 +5,7 @@ AM_CPPFLAGS = \
 	$(GTEST_CFLAGS) \
 	$(GMOCK_CFLAGS) \
 	$(SDBUSPLUS_CFLAGS) \
-	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	$(CODE_COVERAGE_CPPFLAGS)
+	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS)
 AM_CFLAGS = \
 	$(CODE_COVERAGE_CFLAGS)
 AM_CXXFLAGS = \
@@ -21,8 +20,14 @@ AM_LDFLAGS = \
 	$(CODE_COVERAGE_LIBS)
 
 # Run all 'check' test programs
-check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_unittest
+check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_unittest env_unittest average_unittest
 TESTS = $(check_PROGRAMS)
+
+env_unittest_SOURCES = env_unittest.cpp
+env_unittest_LDADD = env.o
+
+average_unittest_SOURCES = average_unittest.cpp
+average_unittest_LDADD = $(top_builddir)/average.o
 
 hwmon_unittest_SOURCES = hwmon_unittest.cpp
 hwmon_unittest_LDADD = $(top_builddir)/hwmon.o
