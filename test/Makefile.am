@@ -21,8 +21,12 @@ AM_LDFLAGS = \
 	$(CODE_COVERAGE_LIBS)
 
 # Run all 'check' test programs
-check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_unittest
+check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_unittest env_unittest
 TESTS = $(check_PROGRAMS)
+
+env_unittest_SOURCES = env_unittest.cpp
+env_unittest_LDADD = $(top_builddir)/util.o \
+                     env.o
 
 hwmon_unittest_SOURCES = hwmon_unittest.cpp
 hwmon_unittest_LDADD = $(top_builddir)/hwmon.o
