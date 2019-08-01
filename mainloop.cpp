@@ -27,6 +27,7 @@
 #include "sysfs.hpp"
 #include "targets.hpp"
 #include "thresholds.hpp"
+#include "util.hpp"
 
 #include <cassert>
 #include <cstdlib>
@@ -351,6 +352,13 @@ void MainLoop::init()
 
             _state[std::move(i.first)] = std::move(value);
         }
+
+        // Initialize _averageMap of sensor. e.g. <<power, 1>, <0, 0>>
+        if ((i.first.first == hwmon::type::power) &&
+            (phosphor::utility::isAverageEnvSet(i.first)))
+        {
+            _average.setAverageValue(i.first, std::make_pair(0, 0));
+        }
     }
 
     /* If there are no sensors specified by labels, exit. */
@@ -394,10 +402,17 @@ void MainLoop::read()
         }
 
         // Read value from sensor.
-        std::string input = hwmon::entry::cinput;
-        if (sensorSysfsType == "pwm")
+        std::string input = hwmon::entry::input;
+        if (sensorSysfsType == hwmon::type::pwm)
         {
             input = "";
+        }
+        // If type is power and AVERAGE_power* is true in env, use average
+        // instead of input
+        else if ((sensorSysfsType == hwmon::type::power) &&
+                 (phosphor::utility::isAverageEnvSet(sensorSetKey)))
+        {
+            input = hwmon::entry::average;
         }
 
         int64_t value;
@@ -437,6 +452,42 @@ void MainLoop::read()
                 statusIface->functional(true);
 
                 value = sensor->adjustValue(value);
+
+                if (input == hwmon::entry::average)
+                {
+                    // Calculate the values of averageMap based on current
+                    // average value, current average_interval value, previous
+                    // average value, previous average_interval value
+                    int64_t interval =
+                        _ioAccess->read(sensorSysfsType, sensorSysfsNum,
+                                        hwmon::entry::caverage_interval,
+                                        hwmonio::retries, hwmonio::delay);
+                    auto ret = _average.getAverageValue(sensorSetKey);
+                    assert(ret);
+
+                    const auto& [preAverage, preInterval] = *ret;
+                    // Estimate that the interval will overflow about 292471
+                    // years after it starts counting, so consider it won't
+                    // overflow
+                    int64_t delta = interval - preInterval;
+                    // 0 means the delta interval is too short, the value of
+                    // power*_average_interval is not changed yet, use the
+                    // previous calculated average instead. So skip dbus update.
+                    if (delta == 0)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        // Update previous values in averageMap before the
+                        // variable value is changed next
+                        _average.setAverageValue(
+                            sensorSetKey, std::make_pair(value, interval));
+                        // Calculate new average value
+                        value = _average.calAverage(preAverage, preInterval,
+                                                    value, delta);
+                    }
+                }
             }
 
             updateSensorInterfaces(obj, value);
@@ -450,9 +501,8 @@ void MainLoop::read()
             // as the code may exit before reaching it.
             statusIface->functional(false);
 #endif
-            auto file =
-                sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
-                                       sensorSysfsNum, hwmon::entry::cinput);
+            auto file = sysfs::make_sysfs_path(
+                _ioAccess->path(), sensorSysfsType, sensorSysfsNum, input);
 
             // Check sensorAdjusts for sensor removal RCs
             auto& sAdjusts = _sensorObjects[sensorSetKey]->getAdjusts();
@@ -534,10 +584,18 @@ void MainLoop::addDroppedSensors()
 
                 _state[std::move(ssValueType.first)] = std::move(value);
 
+                std::string input = hwmon::entry::input;
+                // If type is power and AVERAGE_power* is true in env, use
+                // average instead of input
+                if ((it->first.first == hwmon::type::power) &&
+                    (phosphor::utility::isAverageEnvSet(it->first)))
+                {
+                    input = hwmon::entry::average;
+                }
                 // Sensor object added, erase entry from removal list
-                auto file = sysfs::make_sysfs_path(
-                    _ioAccess->path(), it->first.first, it->first.second,
-                    hwmon::entry::cinput);
+                auto file =
+                    sysfs::make_sysfs_path(_ioAccess->path(), it->first.first,
+                                           it->first.second, input);
 
                 log<level::INFO>("Added sensor to dbus after successful read",
                                  entry("FILE=%s", file.c_str()));

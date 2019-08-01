@@ -67,6 +67,8 @@ libhwmon_la_SOURCES = \
 	hwmon.cpp \
 	hwmonio.cpp \
 	sensor.cpp \
-	gpio_handle.cpp
+	gpio_handle.cpp \
+	average.cpp \
+        util.cpp
 
 SUBDIRS = . msl test tools
