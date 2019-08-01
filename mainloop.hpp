@@ -75,6 +75,26 @@ class MainLoop
      */
     void addDroppedSensors();
 
+    /** @brief <sensor_type, sensor_num> */
+    using average_key = std::pair<std::string, std::string>;
+
+    /** @brief <average_value, average_interval_value> */
+    using average_value = std::pair<int64_t, int64_t>;
+
+    /** @brief std::map<std::pair<std::string, std::string>, std::pair<int64_t,
+     * int64_t>> */
+    using average_set = std::map<average_key, average_value>;
+
+    /** @brief Get average_value in average_set based on average_key
+     */
+    std::optional<average_value>
+        getAverageValue(const average_key& sensor_key) const;
+
+    /** @brief Set average_value in average_set based on average_key
+     */
+    void setAverageValue(const average_key& sensor_key,
+                         const average_value& sensor_value);
+
   private:
     using mapped_type =
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
@@ -115,6 +135,8 @@ class MainLoop
     /** @brief Store the specifications of sensor objects */
     std::map<SensorSet::key_type, std::unique_ptr<sensor::Sensor>>
         _sensorObjects;
+    /** @brief Store the average sensor set */
+    average_set _averageSet;
 
     /**
      * @brief Map of removed sensors
