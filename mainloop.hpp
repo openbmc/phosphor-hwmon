@@ -75,6 +75,52 @@ class MainLoop
      */
     void addDroppedSensors();
 
+    /** @brief The key type of average_set */
+    using averageKey = SensorSet::key_type;
+
+    /** @brief <average, average_interval>
+     *  average is the previous value of power*_average.
+     *  average_interval is the previous value of power*_average_interval.
+     */
+    using averageValue = std::pair<int64_t, int64_t>;
+
+    /** @brief Store sensors' type, num and previous average related values */
+    using averageSet = std::map<averageKey, averageValue>;
+
+    /** @brief Get averageValue in averageSet based on averageKey.
+     *  This function will be called only when the env AVERAGE_xxx is set to
+     *  ture.
+     *
+     *  @param[in] sensorKey - Sensor details
+     *
+     *  @return - Optional
+     *      return {}, if sensorKey can not be found in averageSet
+     *      return averageValue, if sensorKey can be found in averageSet
+     */
+    std::optional<averageValue>
+        getAverageValue(const averageKey& sensorKey) const;
+
+    /** @brief Set sensorValue in averageSet based on sensorKey
+     *  This function will be called only when the env AVERAGE_xxx is set to
+     *  ture.
+     *
+     *  @param[in] sensorKey - Sensor details
+     *  @param[in] sensorValue - The related average values of this sensor
+     */
+    void setAverageValue(const averageKey& sensorKey,
+                         const averageValue& sensorValue);
+
+    /** @brief Calculate the average vlaue based on timeslot
+     *
+     *  @param[in] sensorSetKey - Sensor details
+     *  @param[in] curValue - Current average value of power*_average
+     *
+     *  @ return value - New calculated average value
+     */
+    std::optional<int64_t>
+        calAverageBasedOnTimeslot(const averageKey& sensorKey,
+                                  const int64_t& curValue);
+
   private:
     using mapped_type =
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
@@ -115,6 +161,8 @@ class MainLoop
     /** @brief Store the specifications of sensor objects */
     std::map<SensorSet::key_type, std::unique_ptr<sensor::Sensor>>
         _sensorObjects;
+    /** @brief Store the average sensor set */
+    averageSet _averageSet;
 
     /**
      * @brief Map of removed sensors
