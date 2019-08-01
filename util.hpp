@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sensorset.hpp"
+
 #include <cstdlib>
 
 namespace phosphor
@@ -17,6 +19,14 @@ struct Free
         free(ptr);
     }
 };
+
+/** @brief Check if AVERAGE_power* is set to be true in env
+ *
+ *  @param[in] sensor - Sensor details
+ *
+ *  @return bool - true or false
+ */
+bool isAverageEnvSet(const SensorSet::key_type& sensor);
 } // namespace utility
 } // namespace phosphor
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
