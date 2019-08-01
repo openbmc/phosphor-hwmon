@@ -1,5 +1,6 @@
 #pragma once
 
+#include "average.hpp"
 #include "hwmonio.hpp"
 #include "interface.hpp"
 #include "sensor.hpp"
@@ -120,6 +121,10 @@ class MainLoop
      * @brief Map of removed sensors
      */
     std::map<SensorSet::key_type, SensorSet::mapped_type> _rmSensors;
+
+    /** @brief Object of class Average, to handle with average related process
+     */
+    Average _average;
 
     /**
      * @brief Get the ID of the sensor
