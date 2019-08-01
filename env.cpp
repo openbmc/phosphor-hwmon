@@ -74,7 +74,6 @@ std::string getIndirectID(std::string path, const std::string& fileSuffix,
 
     return content;
 }
-
 } // namespace env
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

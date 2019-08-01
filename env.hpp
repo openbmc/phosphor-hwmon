@@ -50,5 +50,4 @@ std::string getEnv(const char* prefix, const std::string& type,
  */
 std::string getIndirectID(std::string path, const std::string& fileSuffix,
                           const SensorSet::key_type& sensor);
-
 } // namespace env
