@@ -134,6 +134,8 @@ class Sensor
         return _hasFaultFile;
     }
 
+    static constexpr std::chrono::seconds _flakyTimeout{1};
+
   private:
     /** @brief Sensor object's identifiers */
     SensorSet::key_type _sensor;

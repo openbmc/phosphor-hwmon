@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
@@ -402,11 +403,37 @@ void MainLoop::read()
                     // RAII object for GPIO unlock / lock
                     sensor::GpioLock gpioLock(sensor->getGpio());
 
-                    // Retry for up to a second if device is busy
-                    // or has a transient error.
-                    value =
-                        _ioAccess->read(i.first.first, i.first.second, input,
-                                        hwmonio::retries, hwmonio::delay);
+                    // For sensors with attribute FLAKY, spawn a thread
+                    // with timeout
+                    auto flaky = env::getEnv("FLAKY", i.first);
+                    if (!flaky.empty())
+                    {
+                        std::future<SensorValueType> future =
+                            std::async(std::launch::async,
+                                       &hwmonio::HwmonIOInterface::read,
+                                       _ioAccess, i.first.first, i.first.second,
+                                       input, hwmonio::retries, hwmonio::delay);
+
+                        std::future_status status =
+                            future.wait_for(sensor::Sensor::_flakyTimeout);
+                        if (status == std::future_status::timeout)
+                        {
+                            log<level::ERR>("Flaky sensor timed out");
+                            throw std::system_error();
+                        }
+
+                        value = future.get();
+                    }
+                    else
+                    {
+                        // Retry for up to a second if device is busy
+                        // or has a transient error.
+                        value =
+                            _ioAccess->read(i.first.first, i.first.second,
+                                            input, hwmonio::retries,
+                                            hwmonio::delay);
+                    }
+
                     // Set functional property to true if we could read sensor
                     statusIface->functional(true);
 
