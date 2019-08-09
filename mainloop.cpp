@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
@@ -204,7 +205,7 @@ std::optional<ObjectStateData>
     {
         // Add status interface based on _fault file being present
         sensorObj->addStatus(info);
-        valueInterface = sensorObj->addValue(retryIO, info);
+        valueInterface = sensorObj->addValue(retryIO, info, _asyncMap);
     }
     catch (const std::system_error& e)
     {
@@ -429,10 +430,66 @@ void MainLoop::read()
                 // RAII object for GPIO unlock / lock
                 auto locker = sensor::gpioUnlock(sensor->getGpio());
 
-                // Retry for up to a second if device is busy
-                // or has a transient error.
-                value = _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
+                // For sensors with attribute ASYNC_READ_TIMEOUT,
+                // spawn a thread with timeout
+                auto asyncRead =
+                    env::getEnv("ASYNC_READ_TIMEOUT", sensorSetKey);
+                if (!asyncRead.empty())
+                {
+                    // Default async read timeout
+                    std::chrono::milliseconds asyncReadTimeout{
+                        std::stoi(asyncRead)};
+                    bool valueIsValid = false;
+
+                    auto asyncIter = _asyncMap.find(sensorSetKey);
+                    if (asyncIter == _asyncMap.end())
+                    {
+                        auto emplacePair = _asyncMap.emplace(
+                            sensorSetKey, std::async(
+                                std::launch::async,
+                                &hwmonio::HwmonIOInterface::read, _ioAccess,
+                                sensorSysfsType, sensorSysfsNum, input,
+                                hwmonio::retries, hwmonio::delay));
+                        asyncIter = emplacePair.first;
+                        valueIsValid = true;
+                    }
+                    else
+                    {
+                        // If we already have the future in the map, it means
+                        // this sensor has already timed out in the previous
+                        // reads. No need to wait on subsequent reads
+                        asyncReadTimeout = std::chrono::seconds(0);
+                    }
+
+                    auto& async = asyncIter->second;
+                    std::future_status status =
+                        async.wait_for(asyncReadTimeout);
+                    switch (status)
+                    {
+                        // Read has finished
+                        case std::future_status::ready:
+                            value = async.get();
+                            _asyncMap.erase(sensorSetKey);
+                            if (valueIsValid)
+                            {
+                                break;
+                            }
+                            // Skip to the default case if the value is invalid
+                            // i.e. Async read timed out previously
+                        default:
+                            log<level::ERR>("Async sensor read timed out");
+                            throw std::system_error();
+                    }
+                }
+                else
+                {
+                    // Retry for up to a second if device is busy
+                    // or has a transient error.
+                    value =
+                        _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
                                         hwmonio::retries, hwmonio::delay);
+                }
+
                 // Set functional property to true if we could read sensor
                 statusIface->functional(true);
 
