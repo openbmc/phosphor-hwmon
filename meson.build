@@ -84,6 +84,7 @@ libhwmon_all = static_library(
         gpioplus,
         phosphor_dbus_interfaces,
         phosphor_logging,
+        threads,
     ],
     link_with: [
         libaverage,

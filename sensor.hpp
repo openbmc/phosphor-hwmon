@@ -4,6 +4,8 @@
 #include "sensorset.hpp"
 #include "types.hpp"
 
+#include <cerrno>
+#include <future>
 #include <gpioplus/handle.hpp>
 #include <memory>
 #include <optional>
@@ -18,6 +20,17 @@ struct valueAdjust
     double gain = 1.0;
     int offset = 0;
     std::unordered_set<int> rmRCs;
+};
+
+/** @brief Custom exception for async sensor reading timeout
+ */
+struct AsyncSensorReadTimeOut : public std::system_error
+{
+    AsyncSensorReadTimeOut() :
+        system_error(std::error_code(ETIMEDOUT, std::system_category()),
+                     "Async sensor read timed out")
+    {
+    }
 };
 
 /** @class Sensor
@@ -87,10 +100,13 @@ class Sensor
      *                      (number of and delay between)
      * @param[in] info - Sensor object information
      *
+     * @param[in] timedoutMap - Map to track timed out threads
+     *
      * @return - Shared pointer to the value object
      */
-    std::shared_ptr<ValueObject> addValue(const RetryIO& retryIO,
-                                          ObjectInfo& info);
+    std::shared_ptr<ValueObject> addValue(
+        const RetryIO& retryIO, ObjectInfo& info,
+        std::map<SensorSet::key_type, std::future<int64_t>>& timedoutMap);
 
     /**
      * @brief Add status interface and functional property for sensor
