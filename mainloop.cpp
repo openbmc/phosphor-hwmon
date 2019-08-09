@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
@@ -429,10 +430,37 @@ void MainLoop::read()
                 // RAII object for GPIO unlock / lock
                 auto locker = sensor::gpioUnlock(sensor->getGpio());
 
-                // Retry for up to a second if device is busy
-                // or has a transient error.
-                value = _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
+                // For sensors with attribute ASYNC_READ_TIMEOUT,
+                // spawn a thread with timeout
+                auto asyncRead = env::getEnv("ASYNC_READ_TIMEOUT", sensorSetKey);
+                if (!asyncRead.empty())
+                {
+                    const std::chrono::milliseconds
+                        asyncReadTimeout{std::stoi(asyncRead)};
+                    std::future<SensorValueType> future = std::async(
+                        std::launch::async, &hwmonio::HwmonIOInterface::read,
+                        _ioAccess, sensorSysfsType, sensorSysfsNum, input,
+                        hwmonio::retries, hwmonio::delay);
+
+                    std::future_status status =
+                        future.wait_for(asyncReadTimeout);
+                    if (status == std::future_status::timeout)
+                    {
+                        log<level::ERR>("Async sensor read timed out");
+                        throw std::system_error();
+                    }
+
+                    value = future.get();
+                }
+                else
+                {
+                    // Retry for up to a second if device is busy
+                    // or has a transient error.
+                    value =
+                        _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
                                         hwmonio::retries, hwmonio::delay);
+                }
+
                 // Set functional property to true if we could read sensor
                 statusIface->functional(true);
 
