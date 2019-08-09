@@ -4,6 +4,7 @@
 #include "sensorset.hpp"
 #include "types.hpp"
 
+#include <future>
 #include <gpioplus/handle.hpp>
 #include <memory>
 #include <optional>
@@ -87,10 +88,13 @@ class Sensor
      *                      (number of and delay between)
      * @param[in] info - Sensor object information
      *
+     * @param[in] asyncMap - Map to track async reads
+     *
      * @return - Shared pointer to the value object
      */
-    std::shared_ptr<ValueObject> addValue(const RetryIO& retryIO,
-                                          ObjectInfo& info);
+    std::shared_ptr<ValueObject> addValue(
+        const RetryIO& retryIO, ObjectInfo& info,
+        std::map<SensorSet::key_type, std::future<SensorValueType>>& asyncMap);
 
     /**
      * @brief Add status interface and functional property for sensor
