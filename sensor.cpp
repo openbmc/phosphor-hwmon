@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <future>
 #include <phosphor-logging/elog-errors.hpp>
 #include <thread>
 #include <xyz/openbmc_project/Common/error.hpp>
@@ -126,8 +127,9 @@ SensorValueType Sensor::adjustValue(SensorValueType value)
     return value;
 }
 
-std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
-                                              ObjectInfo& info)
+std::shared_ptr<ValueObject> Sensor::addValue(
+    const RetryIO& retryIO, ObjectInfo& info,
+    std::map<SensorSet::key_type, std::future<SensorValueType>>& asyncMap)
 {
     static constexpr bool deferSignals = true;
 
@@ -154,13 +156,71 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
             // RAII object for GPIO unlock / lock
             auto locker = gpioUnlock(getGpio());
 
-            // Retry for up to a second if device is busy
-            // or has a transient error.
-            val =
-                _ioAccess->read(_sensor.first, _sensor.second,
-                                hwmon::entry::cinput, std::get<size_t>(retryIO),
-                                std::get<std::chrono::milliseconds>(retryIO));
+            // For sensors with attribute ASYNC_READ_TIMEOUT,
+            // spawn a thread with timeout
+            auto asyncRead = env::getEnv("ASYNC_READ_TIMEOUT", _sensor);
+            if (!asyncRead.empty())
+            {
+                // Default async read timeout
+                std::chrono::milliseconds asyncReadTimeout{
+                    std::stoi(asyncRead)};
+                bool valueIsValid = false;
 
+                auto asyncIter = asyncMap.find(_sensor);
+                if (asyncIter == asyncMap.end())
+                {
+                    std::future<SensorValueType> future = std::async(
+                        std::launch::async, &hwmonio::HwmonIOInterface::read,
+                        _ioAccess, _sensor.first, _sensor.second,
+                        hwmon::entry::cinput, std::get<size_t>(retryIO),
+                        std::get<std::chrono::milliseconds>(retryIO));
+                    auto emplacePair = asyncMap.emplace(
+                        _sensor,
+                        std::async(
+                            std::launch::async,
+                            &hwmonio::HwmonIOInterface::read, _ioAccess,
+                            _sensor.first, _sensor.second, hwmon::entry::cinput,
+                            std::get<size_t>(retryIO),
+                            std::get<std::chrono::milliseconds>(retryIO)));
+                    asyncIter = emplacePair.first;
+                    valueIsValid = true;
+                }
+                else
+                {
+                    // If we already have the future in the map, it means
+                    // this sensor has already timed out in the previous
+                    // reads. No need to wait on subsequent reads
+                    asyncReadTimeout = std::chrono::seconds(0);
+                }
+
+                auto& async = asyncIter->second;
+                std::future_status status = async.wait_for(asyncReadTimeout);
+                switch (status)
+                {
+                    // Read has finished
+                    case std::future_status::ready:
+                        val = async.get();
+                        asyncMap.erase(_sensor);
+                        if (valueIsValid)
+                        {
+                            break;
+                        }
+                        // Skip to the default case if the value is invalid
+                        // i.e. Async read timed out previously
+                    default:
+                        log<level::ERR>("Async sensor read timed out");
+                        throw std::system_error();
+                }
+            }
+            else
+            {
+                // Retry for up to a second if device is busy
+                // or has a transient error.
+                val = _ioAccess->read(
+                    _sensor.first, _sensor.second, hwmon::entry::cinput,
+                    std::get<size_t>(retryIO),
+                    std::get<std::chrono::milliseconds>(retryIO));
+            }
             val = adjustValue(val);
         }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
