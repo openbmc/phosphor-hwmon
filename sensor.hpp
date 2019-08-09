@@ -4,7 +4,10 @@
 #include "sensorset.hpp"
 #include "types.hpp"
 
+#include <cerrno>
+#include <future>
 #include <gpioplus/handle.hpp>
+#include <map>
 #include <memory>
 #include <optional>
 #include <stdplus/handle/managed.hpp>
@@ -13,11 +16,24 @@
 namespace sensor
 {
 
+using TimedoutMap = std::map<SensorSet::key_type, std::future<int64_t>>;
+
 struct valueAdjust
 {
     double gain = 1.0;
     int offset = 0;
     std::unordered_set<int> rmRCs;
+};
+
+/** @brief Custom exception for async sensor reading timeout
+ */
+struct AsyncSensorReadTimeOut : public std::system_error
+{
+    AsyncSensorReadTimeOut() :
+        system_error(std::error_code(ETIMEDOUT, std::system_category()),
+                     "Async sensor read timed out")
+    {
+    }
 };
 
 /** @class Sensor
@@ -87,10 +103,13 @@ class Sensor
      *                      (number of and delay between)
      * @param[in] info - Sensor object information
      *
+     * @param[in] timedoutMap - Map to track timed out threads
+     *
      * @return - Shared pointer to the value object
      */
     std::shared_ptr<ValueObject> addValue(const RetryIO& retryIO,
-                                          ObjectInfo& info);
+                                          ObjectInfo& info,
+                                          TimedoutMap& timedoutMap);
 
     /**
      * @brief Add status interface and functional property for sensor
@@ -177,4 +196,29 @@ using GpioLocker =
  */
 std::optional<GpioLocker> gpioUnlock(const gpioplus::HandleInterface* handle);
 
+/**
+ * @brief Asynchronously read a sensor with timeout defined by
+ *        ASYNC_READ_TIMEOUT environment variable
+ *
+ * @param[in] sensorSetKey - Sensor object's identifiers
+ * @param[in] ioAccess - Hwmon sysfs access
+ * @param[in] asyncTimeout - Async read timeout in milliseconds
+ * @param[in] timedoutMap - Map to track timed out threads
+ *
+ * (Params needed for HwmonIO::read)
+ * @param[in] type - The hwmon type (ex. temp).
+ * @param[in] id - The hwmon id (ex. 1).
+ * @param[in] sensor - The hwmon sensor (ex. input).
+ * @param[in] retries - The number of times to retry.
+ * @param[in] delay - The time to sleep between retry attempts.
+ *
+ * @return - SensorValueType read asynchronously, will throw if timed out
+ */
+SensorValueType asyncRead(const SensorSet::key_type& sensorSetKey,
+                          const hwmonio::HwmonIOInterface* ioAccess,
+                          const std::chrono::milliseconds asyncTimeout,
+                          TimedoutMap& timedoutMap, const std::string& type,
+                          const std::string& id, const std::string& sensor,
+                          const size_t retries,
+                          const std::chrono::milliseconds delay);
 } // namespace sensor
