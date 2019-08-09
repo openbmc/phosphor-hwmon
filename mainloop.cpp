@@ -34,6 +34,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
@@ -53,12 +54,10 @@ decltype(Thresholds<WarningObject>::getLo) Thresholds<WarningObject>::getLo =
     &WarningObject::warningLow;
 decltype(Thresholds<WarningObject>::getHi) Thresholds<WarningObject>::getHi =
     &WarningObject::warningHigh;
-decltype(
-    Thresholds<WarningObject>::alarmLo) Thresholds<WarningObject>::alarmLo =
-    &WarningObject::warningAlarmLow;
-decltype(
-    Thresholds<WarningObject>::alarmHi) Thresholds<WarningObject>::alarmHi =
-    &WarningObject::warningAlarmHigh;
+decltype(Thresholds<WarningObject>::alarmLo)
+    Thresholds<WarningObject>::alarmLo = &WarningObject::warningAlarmLow;
+decltype(Thresholds<WarningObject>::alarmHi)
+    Thresholds<WarningObject>::alarmHi = &WarningObject::warningAlarmHigh;
 decltype(Thresholds<WarningObject>::getAlarmLow)
     Thresholds<WarningObject>::getAlarmLow = &WarningObject::warningAlarmLow;
 decltype(Thresholds<WarningObject>::getAlarmHigh)
@@ -85,12 +84,10 @@ decltype(Thresholds<CriticalObject>::getLo) Thresholds<CriticalObject>::getLo =
     &CriticalObject::criticalLow;
 decltype(Thresholds<CriticalObject>::getHi) Thresholds<CriticalObject>::getHi =
     &CriticalObject::criticalHigh;
-decltype(
-    Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmLo =
-    &CriticalObject::criticalAlarmLow;
-decltype(
-    Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
-    &CriticalObject::criticalAlarmHigh;
+decltype(Thresholds<CriticalObject>::alarmLo)
+    Thresholds<CriticalObject>::alarmLo = &CriticalObject::criticalAlarmLow;
+decltype(Thresholds<CriticalObject>::alarmHi)
+    Thresholds<CriticalObject>::alarmHi = &CriticalObject::criticalAlarmHigh;
 decltype(Thresholds<CriticalObject>::getAlarmLow)
     Thresholds<CriticalObject>::getAlarmLow = &CriticalObject::criticalAlarmLow;
 decltype(Thresholds<CriticalObject>::getAlarmHigh)
@@ -242,7 +239,7 @@ std::optional<ObjectStateData>
     {
         // Add status interface based on _fault file being present
         sensorObj->addStatus(info);
-        valueInterface = sensorObj->addValue(retryIO, info);
+        valueInterface = sensorObj->addValue(retryIO, info, _timedoutMap);
     }
     catch (const std::system_error& e)
     {
@@ -478,10 +475,26 @@ void MainLoop::read()
                 // RAII object for GPIO unlock / lock
                 auto locker = sensor::gpioUnlock(sensor->getGpio());
 
-                // Retry for up to a second if device is busy
-                // or has a transient error.
-                value = _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
+                // For sensors with attribute ASYNC_READ_TIMEOUT,
+                // spawn a thread with timeout
+                auto asyncRead =
+                    env::getEnv("ASYNC_READ_TIMEOUT", sensorSetKey);
+                if (!asyncRead.empty())
+                {
+                    value = sensor::asyncRead(
+                        sensorSetKey, _ioAccess, std::stoi(asyncRead),
+                        _timedoutMap, sensorSysfsType, sensorSysfsNum, input,
+                        hwmonio::retries, hwmonio::delay);
+                }
+                else
+                {
+                    // Retry for up to a second if device is busy
+                    // or has a transient error.
+                    value =
+                        _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
                                         hwmonio::retries, hwmonio::delay);
+                }
+
                 // Set functional property to true if we could read sensor
                 statusIface->functional(true);
 
