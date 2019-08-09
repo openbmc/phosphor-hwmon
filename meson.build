@@ -45,6 +45,7 @@ hwmon_deps = [
     dependency('sdbusplus'),
     dependency('sdeventplus'),
     dependency('stdplus'),
+    dependency('threads'),
     sysfs_dep,
 ]
 

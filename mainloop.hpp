@@ -9,6 +9,7 @@
 #include "types.hpp"
 
 #include <any>
+#include <future>
 #include <memory>
 #include <optional>
 #include <sdbusplus/server.hpp>
@@ -120,6 +121,8 @@ class MainLoop
     /** @brief Store the specifications of sensor objects */
     std::map<SensorSet::key_type, std::unique_ptr<sensor::Sensor>>
         _sensorObjects;
+    /** @brief Store the async futures of timed out sensor objects */
+    sensor::TimedoutMap _timedoutMap;
 
     /**
      * @brief Map of removed sensors
