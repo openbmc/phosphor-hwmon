@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0547e63_7681b50a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000100
+      },
+      "writtenOn": "2019-08-12T18:02:49Z",
+      "side": 1,
+      "message": "Please add some motivation -- if a sensor isn\u0027t responding quickly enough, instead of blocking all other sensor reads (and dbus) skip it as a failure.  Not all sensors respond failure quickly enough -- something like that.",
+      "revId": "c9937b08d9baeb5fe2b1792b12df7904c01b71ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
