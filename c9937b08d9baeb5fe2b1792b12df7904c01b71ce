@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f9aa908a_ab35dd14",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2019-08-12T18:38:08Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "0b357575_93992dd4",
+      "revId": "c9937b08d9baeb5fe2b1792b12df7904c01b71ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0547e63_7681b50a",
         "filename": "/COMMIT_MSG",
         "patchSetId": 5
@@ -33,6 +51,24 @@
       "revId": "c9937b08d9baeb5fe2b1792b12df7904c01b71ce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e6be867_2e2e4340",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2019-08-12T18:38:08Z",
+      "side": 1,
+      "message": "Thanks updated.",
+      "parentUuid": "b0547e63_7681b50a",
+      "revId": "c9937b08d9baeb5fe2b1792b12df7904c01b71ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -56,6 +92,30 @@
       "revId": "c9937b08d9baeb5fe2b1792b12df7904c01b71ce",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b892a91_b18f48b6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2019-08-12T18:38:08Z",
+      "side": 1,
+      "message": "I updated the commit message in gerrit, then pushed a change from my local repo which overwrote the commit message. Revamped the commit message according to Patrick\u0027s suggestion.",
+      "parentUuid": "cace576a_def7d90c",
+      "range": {
+        "startLine": 10,
+        "startChar": 53,
+        "endLine": 10,
+        "endChar": 61
+      },
+      "revId": "c9937b08d9baeb5fe2b1792b12df7904c01b71ce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
