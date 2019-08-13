@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b76b05fb_3f722560",
+        "filename": "sensor.hpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2019-08-13T01:13:04Z",
+      "side": 1,
+      "message": "Unfortunately, we have to make sure the same map is used. Since mainloop is the \"longer living\" class, it\u0027ll pass a reference to the map to this function.",
+      "revId": "8640d7a1bb1ee5186c5f489a22ec0ff1a1f0642b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    }
+  ]
+}
