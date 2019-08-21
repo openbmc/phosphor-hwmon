@@ -47,7 +47,6 @@ sensor_unittest_LDADD = \
 	$(STDPLUS_LIBS) \
 	$(top_builddir)/sensor.o \
 	$(top_builddir)/hwmon.o \
-	env.o \
 	gpio.o
 
 hwmonio_default_unittest_SOURCES = hwmonio_default_unittest.cpp

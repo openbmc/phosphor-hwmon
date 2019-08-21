@@ -16,64 +16,18 @@
 
 #include "env.hpp"
 
-#include "hwmon.hpp"
-
 #include <cstdlib>
-#include <fstream>
+#include <string>
 
 namespace env
 {
 
-std::string getEnv(const char* key)
+std::string EnvImpl::get(const char* key) const
 {
-    auto value = std::getenv(key);
-    return (value) ? std::string(value) : std::string();
+    return std::getenv(key);
 }
 
-std::string getEnv(const char* prefix, const SensorSet::key_type& sensor)
-{
-    std::string key;
-
-    key.assign(prefix);
-    key.append(1, '_');
-    key.append(sensor.first);
-    key.append(sensor.second);
-
-    return getEnv(key.c_str());
-}
-
-std::string getEnv(const char* prefix, const std::string& type,
-                   const std::string& id)
-{
-    SensorSet::key_type sensor{type, id};
-    return getEnv(prefix, sensor);
-}
-
-std::string getIndirectID(std::string path, const std::string& fileSuffix,
-                          const SensorSet::key_type& sensor)
-{
-    std::string content;
-
-    path.append(sensor.first);
-    path.append(sensor.second);
-    path.append(1, '_');
-    path.append(fileSuffix);
-
-    std::ifstream handle(path.c_str());
-    if (!handle.fail())
-    {
-        content.assign((std::istreambuf_iterator<char>(handle)),
-                       (std::istreambuf_iterator<char>()));
-
-        if (!content.empty())
-        {
-            // remove the newline
-            content.pop_back();
-        }
-    }
-
-    return content;
-}
+EnvImpl env_impl;
 
 } // namespace env
 
