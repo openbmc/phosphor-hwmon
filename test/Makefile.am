@@ -24,7 +24,6 @@ check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_
 TESTS = $(check_PROGRAMS)
 
 env_unittest_SOURCES = env_unittest.cpp
-env_unittest_LDADD = env.o
 
 average_unittest_SOURCES = average_unittest.cpp
 average_unittest_LDADD = $(top_builddir)/average.o
@@ -47,7 +46,6 @@ sensor_unittest_LDADD = \
 	$(STDPLUS_LIBS) \
 	$(top_builddir)/sensor.o \
 	$(top_builddir)/hwmon.o \
-	env.o \
 	gpio.o
 
 hwmonio_default_unittest_SOURCES = hwmonio_default_unittest.cpp
