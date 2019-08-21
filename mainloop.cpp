@@ -79,6 +79,7 @@ void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value)
     {
         switch (iface.first)
         {
+            // clang-format off
             case InterfaceType::VALUE:
             {
                 auto& valueIface =
@@ -86,6 +87,7 @@ void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value)
                 valueIface->value(value);
             }
             break;
+            // clang-format on
             case InterfaceType::WARN:
                 checkThresholds<WarningObject>(iface.second, value);
                 break;
