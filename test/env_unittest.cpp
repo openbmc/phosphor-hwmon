@@ -7,7 +7,19 @@
 
 using ::testing::Return;
 using ::testing::StrEq;
-using ::testing::StrictMock;
+
+namespace env
+{
+
+// Delegate all calls to getEnv() to the mock
+std::string EnvImpl::get(const char* key) const
+{
+    return mockEnv.get(key);
+}
+
+EnvImpl env_impl;
+
+} // namespace env
 
 TEST(EnvTest, EmptyEnv)
 {
@@ -17,16 +29,13 @@ TEST(EnvTest, EmptyEnv)
 
 TEST(EnvTest, ValidAverageEnv)
 {
-    StrictMock<EnvMock> eMock;
-    envIntf = &eMock;
-
     std::string power = "power";
     std::string one = "1";
     std::string two = "2";
 
-    EXPECT_CALL(eMock, getEnv(StrEq("AVERAGE"), power, one))
+    EXPECT_CALL(env::mockEnv, get(StrEq("AVERAGE_power1")))
         .WillOnce(Return("true"));
-    EXPECT_CALL(eMock, getEnv(StrEq("AVERAGE"), power, two))
+    EXPECT_CALL(env::mockEnv, get(StrEq("AVERAGE_power2")))
         .WillOnce(Return("bar"));
 
     EXPECT_TRUE(phosphor::utility::isAverageEnvSet(std::make_pair(power, one)));
