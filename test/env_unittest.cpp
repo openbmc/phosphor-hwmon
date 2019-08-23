@@ -33,10 +33,11 @@ TEST(EnvTest, ValidAverageEnv)
     std::string one = "1";
     std::string two = "2";
 
-    EXPECT_CALL(env::mockEnv, get(StrEq("AVERAGE_power1")))
-        .WillOnce(Return("true"));
-    EXPECT_CALL(env::mockEnv, get(StrEq("AVERAGE_power2")))
-        .WillOnce(Return("bar"));
+    std::string powerEnv = R"(
+AVERAGE_power1=true
+AVERAGE_power2=bar
+)";
+    env::mockEnv.setFakeEnv(powerEnv);
 
     EXPECT_TRUE(phosphor::utility::isAverageEnvSet(std::make_pair(power, one)));
     EXPECT_FALSE(
