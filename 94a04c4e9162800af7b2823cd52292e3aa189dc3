@@ -1,0 +1,10 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Brandon Kim <brandonkim@google.com>
+Code-Review+1: Matthew Barth <msbarth@linux.ibm.com>
+Code-Review+2: Matt Spinler <spinler@us.ibm.com>
+Submitted-by: Kun Yi <kunyi731@gmail.com>
+Submitted-at: Fri, 06 Sep 2019 14:52:55 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-hwmon/+/24688
+Project: openbmc/phosphor-hwmon
+Branch: refs/heads/master
