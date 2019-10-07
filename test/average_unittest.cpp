@@ -23,7 +23,8 @@ TEST(SensorKeyTest, ValidSensorKey)
     av.setAverageValue(std::make_pair("power", "1"), std::make_pair(2L, 2L));
 
     auto value = av.getAverageValue(std::make_pair("power", "1"));
-    EXPECT_TRUE(value == std::make_pair(2L, 2L));
+    auto expected = Average::averageValue(2, 2);
+    EXPECT_TRUE(value == expected);
 }
 
 TEST(AverageTest, ZeroDelta)
