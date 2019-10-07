@@ -88,7 +88,7 @@ TEST_F(SensorTest, SensorRequiresGpio)
     EXPECT_CALL(env::mockEnv, get(StrEq("GPIO_temp5"))).WillOnce(Return("5"));
 
     EXPECT_CALL(gMock, build(StrEq("chipA"), StrEq("5")))
-        .WillOnce(Invoke([&](const std::string& chip, const std::string& line) {
+        .WillOnce(Invoke([&](const std::string&, const std::string&) {
             return std::move(handleMock);
         }));
 
