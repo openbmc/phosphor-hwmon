@@ -1,0 +1,9 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+2: Patrick Venture <venture@google.com>
+Code-Review+1: William A. Kennington III <wak@google.com>
+Submitted-by: Patrick Venture <venture@google.com>
+Submitted-at: Tue, 08 Oct 2019 16:48:21 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-hwmon/+/25879
+Project: openbmc/phosphor-hwmon
+Branch: refs/heads/master
