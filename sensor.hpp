@@ -135,6 +135,16 @@ class Sensor
         return _hasFaultFile;
     }
 
+    /**
+     * @brief Get whether the sensor only need to be monitored in power on state or not.
+     *
+     * @return - Boolean on whether the sensor only need to be monitored in power on state
+     */
+    inline bool pwrOnMonitor(void) const
+    {
+        return _pwrOnMonitor;
+    }
+
   private:
     /** @brief Sensor object's identifiers */
     SensorSet::key_type _sensor;
@@ -156,6 +166,9 @@ class Sensor
 
     /** @brief Tracks whether the sensor has a fault file or not. */
     bool _hasFaultFile;
+
+    /** @brief Whether the sensor only need to be monitored in power on state or not. */
+    bool _pwrOnMonitor;
 };
 
 /**

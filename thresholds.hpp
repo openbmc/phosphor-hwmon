@@ -101,8 +101,6 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
         auto hi = stod(tHi) * std::pow(10, scale);
         (*iface.*Thresholds<T>::setLo)(lo);
         (*iface.*Thresholds<T>::setHi)(hi);
-        (*iface.*Thresholds<T>::alarmLo)(value <= lo);
-        (*iface.*Thresholds<T>::alarmHi)(value >= hi);
         auto type = Thresholds<T>::type;
         obj[type] = iface;
     }

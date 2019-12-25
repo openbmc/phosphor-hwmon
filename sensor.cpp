@@ -41,7 +41,7 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
     _sensor(sensor),
-    _ioAccess(ioAccess), _devPath(devPath), _scale(0), _hasFaultFile(false)
+    _ioAccess(ioAccess), _devPath(devPath), _scale(0), _hasFaultFile(false), _pwrOnMonitor(false)
 {
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
@@ -70,6 +70,15 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     auto senRmRCs = env::getEnv("REMOVERCS", sensor);
     // Add sensor removal return codes defined per sensor
     addRemoveRCs(senRmRCs);
+
+    auto pwrOnMon = env::getEnv("PWRONMON", sensor);
+    if (!pwrOnMon.empty())
+    {
+        if (pwrOnMon == "ON")
+        {
+            _pwrOnMonitor = true;
+        }
+    }
 }
 
 void Sensor::addRemoveRCs(const std::string& rcList)

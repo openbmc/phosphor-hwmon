@@ -39,6 +39,12 @@
 #include <string>
 #include <unordered_set>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <sdbusplus/asio/connection.hpp>
+#include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/message/types.hpp>
+#include <sdbusplus/timer.hpp>
 
 using namespace phosphor::logging;
 
@@ -74,6 +80,12 @@ decltype(
     Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
 
+static std::unique_ptr<phosphor::Timer> cacheTimer = nullptr;
+static std::unique_ptr<sdbusplus::bus::match::match> powerMatch = nullptr;
+static bool powerStatusOn = false;
+static boost::asio::io_service io;
+static auto conn = std::make_shared<sdbusplus::asio::connection>(io);
+
 void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value)
 {
     for (auto& iface : ifaces)
@@ -99,6 +111,83 @@ void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value)
                 break;
         }
     }
+}
+
+void powerStatusSet()
+{
+    powerStatusOn = true;
+    return;
+}
+
+void createTimer()
+{
+    if (cacheTimer == nullptr)
+    {
+        cacheTimer = std::make_unique<phosphor::Timer>(powerStatusSet);
+    }
+}
+
+bool isPowerOn(void)
+{
+    if (!powerMatch)
+    {
+        throw std::runtime_error("Power Match Not Created");
+    }
+    return powerStatusOn;
+}
+
+void setupPowerMatch(sdbusplus::bus::bus& bus)
+{
+    if (powerMatch)
+    {
+        return;
+    }
+
+    powerMatch = std::make_unique<sdbusplus::bus::match::match>(
+        bus,
+        "type='signal',interface='org.freedesktop.DBus.Properties',path='/xyz/"
+        "openbmc_project/state/"
+        "host0',arg0='xyz.openbmc_project.State.Host'",
+       [](sdbusplus::message::message& message) {
+            std::string objectName;
+            boost::container::flat_map<std::string, std::variant<std::string>>
+                values;
+           message.read(objectName, values);
+           auto findState = values.find("CurrentHostState");
+           if (findState != values.end())
+           {
+               bool on = boost::ends_with(
+                    std::get<std::string>(findState->second), "Running");
+               if (!on)
+                {
+                   cacheTimer->stop();
+                    powerStatusOn = false;
+                    return;
+                }
+               cacheTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
+                    std::chrono::seconds(10)));
+           }
+           else {
+               powerStatusOn = false;
+            }
+       });
+
+    conn->async_method_call(
+        [](boost::system::error_code ec,
+           const std::variant<std::string>& state) {
+            if (ec)
+            {
+                return;
+            }
+            powerStatusOn =
+                boost::ends_with(std::get<std::string>(state), "Running");
+        },
+        "xyz.openbmc_project.State.Host",
+       "/xyz/openbmc_project/state/host0",
+       "org.freedesktop.DBus.Properties", "Get",
+        "xyz.openbmc_project.State.Host", "CurrentHostState");
+
+    createTimer();
 }
 
 std::string MainLoop::getID(SensorSet::container_t::const_reference sensor)
@@ -385,6 +474,7 @@ void MainLoop::init()
             _interval = std::strtoull(interval.c_str(), NULL, 10);
         }
     }
+    setupPowerMatch(_bus);
 }
 
 void MainLoop::read()
@@ -429,6 +519,12 @@ void MainLoop::read()
 
         try
         {
+            if(sensor->pwrOnMonitor() && !isPowerOn())
+            {
+                statusIface->functional(false);
+                continue;
+            }
+
             if (sensor->hasFaultFile())
             {
                 auto fault = _ioAccess->read(sensorSysfsType, sensorSysfsNum,
@@ -491,6 +587,11 @@ void MainLoop::read()
                 }
             }
 
+            if(sensor->pwrOnMonitor() && !isPowerOn())
+            {
+                statusIface->functional(false);
+                continue;
+            }
             updateSensorInterfaces(obj, value);
         }
         catch (const std::system_error& e)
