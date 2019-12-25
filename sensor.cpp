@@ -10,6 +10,7 @@
 
 #include <fmt/format.h>
 
+#include <boost/algorithm/string.hpp>
 #include <cassert>
 #include <chrono>
 #include <cmath>
@@ -31,7 +32,8 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
     _sensor(sensor),
-    _ioAccess(ioAccess), _devPath(devPath), _scale(0), _hasFaultFile(false)
+    _ioAccess(ioAccess), _devPath(devPath), _scale(0), _hasFaultFile(false),
+    _powerOnMonitor(false)
 {
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
@@ -60,6 +62,15 @@ Sensor::Sensor(const SensorSet::key_type& sensor,
     auto senRmRCs = env::getEnv("REMOVERCS", sensor);
     // Add sensor removal return codes defined per sensor
     addRemoveRCs(senRmRCs);
+
+    auto powerOnMon = env::getEnv("PWRONMON", sensor);
+    if (!powerOnMon.empty())
+    {
+        if (boost::iequals(powerOnMon, "ON"))
+        {
+            _powerOnMonitor = true;
+        }
+    }
 }
 
 void Sensor::addRemoveRCs(const std::string& rcList)

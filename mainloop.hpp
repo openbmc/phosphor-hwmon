@@ -76,6 +76,18 @@ class MainLoop
      */
     void addDroppedSensors();
 
+    /** @brief Get current power state.
+     *
+     *  @return - Boolean on whether the power state is on/off.
+     */
+    bool isPowerOn();
+
+    /** @brief Check power state while power state property changes.
+     *
+     *  @param[in] bus - sdbusplus bus client connection.
+     */
+    void setupPowerMatch(sdbusplus::bus::bus& bus);
+
   private:
     using mapped_type =
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
