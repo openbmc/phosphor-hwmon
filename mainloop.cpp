@@ -136,6 +136,94 @@ void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value)
     }
 }
 
+bool MainLoop::isPowerOn(void)
+{
+    if (!powerMatch)
+    {
+        throw std::runtime_error("Power Match Not Created");
+    }
+    return powerStatusOn;
+}
+
+void MainLoop::powerStatusSet()
+{
+    powerStatusOn = true;
+}
+
+void MainLoop::createTimer()
+{
+    if (cacheTimer == nullptr)
+    {
+        cacheTimer =
+            std::make_unique<phosphor::Timer>([this] { powerStatusSet(); });
+    }
+}
+
+void MainLoop::setupPowerMatch(sdbusplus::bus::bus& bus)
+{
+    powerMatch = std::make_unique<sdbusplus::bus::match::match>(
+        bus,
+        "type='signal',interface='org.freedesktop.DBus.Properties',"
+        "member='PropertiesChanged',arg0namespace='xyz.openbmc_project."
+        "State.Chassis'",
+        [this](sdbusplus::message::message& message) {
+            std::string intfName;
+            std::map<std::string, std::variant<std::string>> properties;
+            try
+            {
+                message.read(intfName, properties);
+            }
+            catch (const std::exception& e)
+            {
+                log<level::ERR>("Unable to read power state",
+                                entry("ERROR=%s", e.what()));
+                return;
+            }
+            auto findState = properties.find("CurrentPowerState");
+            if (findState != properties.end())
+            {
+                bool on = boost::ends_with(
+                    std::get<std::string>(findState->second), "On");
+                if (!on)
+                {
+                    cacheTimer->stop();
+                    powerStatusOn = false;
+                }
+                else
+                {
+                    // Need to wait some time to let sensors back to normal
+                    // once power status changes to on
+                    cacheTimer->start(
+                        std::chrono::duration_cast<std::chrono::microseconds>(
+                            std::chrono::seconds(10)));
+                }
+            }
+            else
+            {
+                // We only want to check for CurrentPowerState
+                return;
+            }
+        });
+
+    conn = std::make_shared<sdbusplus::asio::connection>(io);
+    conn->async_method_call(
+        [this](boost::system::error_code ec,
+               const std::variant<std::string>& state) {
+            if (ec)
+            {
+                return;
+            }
+            powerStatusOn =
+                boost::ends_with(std::get<std::string>(state), "On");
+        },
+        "xyz.openbmc_project.State.Chassis",
+        "/xyz/openbmc_project/state/chassis0",
+        "org.freedesktop.DBus.Properties", "Get",
+        "xyz.openbmc_project.State.Chassis", "CurrentPowerState");
+
+    createTimer();
+}
+
 std::string MainLoop::getID(SensorSet::container_t::const_reference sensor)
 {
     std::string id;
@@ -278,14 +366,12 @@ std::optional<ObjectStateData>
                              .c_str());
         exit(EXIT_FAILURE);
     }
-    auto sensorValue = valueInterface->value();
     int64_t scale = sensorObj->getScale();
 
     addThreshold<WarningObject>(sensorSysfsType, std::get<sensorID>(properties),
-                                sensorValue, info, scale);
+                                info, scale);
     addThreshold<CriticalObject>(sensorSysfsType,
-                                 std::get<sensorID>(properties), sensorValue,
-                                 info, scale);
+                                 std::get<sensorID>(properties), info, scale);
 
     auto target =
         addTarget<hwmon::FanSpeed>(sensorSetKey, _ioAccess, _devPath, info);
@@ -417,6 +503,7 @@ void MainLoop::init()
             _interval = std::strtoull(interval.c_str(), NULL, 10);
         }
     }
+    setupPowerMatch(_bus);
 }
 
 void MainLoop::read()
@@ -461,6 +548,12 @@ void MainLoop::read()
 
         try
         {
+            if (sensor->powerOnMonitor() && !isPowerOn())
+            {
+                statusIface->functional(false);
+                continue;
+            }
+
             if (sensor->hasFaultFile())
             {
                 auto fault = _ioAccess->read(sensorSysfsType, sensorSysfsNum,
@@ -523,6 +616,11 @@ void MainLoop::read()
                 }
             }
 
+            if (sensor->powerOnMonitor() && !isPowerOn())
+            {
+                statusIface->functional(false);
+                continue;
+            }
             updateSensorInterfaces(obj, value);
         }
         catch (const std::system_error& e)

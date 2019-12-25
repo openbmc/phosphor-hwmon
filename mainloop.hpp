@@ -9,9 +9,16 @@
 #include "types.hpp"
 
 #include <any>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/container/flat_map.hpp>
 #include <memory>
 #include <optional>
+#include <sdbusplus/asio/connection.hpp>
+#include <sdbusplus/asio/object_server.hpp>
+#include <sdbusplus/message/types.hpp>
 #include <sdbusplus/server.hpp>
+#include <sdbusplus/timer.hpp>
 #include <sdeventplus/clock.hpp>
 #include <sdeventplus/event.hpp>
 #include <sdeventplus/utility/timer.hpp>
@@ -76,6 +83,26 @@ class MainLoop
      */
     void addDroppedSensors();
 
+    /** @brief Get current power state.
+     *
+     *  @return - Boolean on whether the power state is on/off.
+     */
+    bool isPowerOn();
+
+    /** @brief Timer expirations call back function.
+     */
+    void powerStatusSet();
+
+    /** @brief Create sdbusplus timer.
+     */
+    void createTimer();
+
+    /** @brief Check power state while power state property changes.
+     *
+     *  @param[in] bus - sdbusplus bus client connection.
+     */
+    void setupPowerMatch(sdbusplus::bus::bus& bus);
+
   private:
     using mapped_type =
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
@@ -116,6 +143,16 @@ class MainLoop
     /** @brief Store the specifications of sensor objects */
     std::map<SensorSet::key_type, std::unique_ptr<sensor::Sensor>>
         _sensorObjects;
+    /** @brief Monitor power state match */
+    std::unique_ptr<sdbusplus::bus::match::match> powerMatch = nullptr;
+    /** @brief Current power state */
+    bool powerStatusOn = false;
+    /** @brief Boost IO object */
+    boost::asio::io_service io;
+    /** @brief Connection to system bus */
+    std::shared_ptr<sdbusplus::asio::connection> conn;
+    /** @brief Wait sensors back to normal timer */
+    std::unique_ptr<phosphor::Timer> cacheTimer = nullptr;
 
     /**
      * @brief Map of removed sensors
