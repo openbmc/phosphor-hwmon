@@ -119,7 +119,7 @@ void checkThresholds(std::any& iface, SensorValueType value)
  */
 template <typename T>
 auto addThreshold(const std::string& sensorType, const std::string& sensorID,
-                  SensorValueType value, ObjectInfo& info, int64_t scale)
+                  ObjectInfo& info, int64_t scale)
 {
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<InterfaceMap>(info);
@@ -137,32 +137,6 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
         auto hi = stod(tHi) * std::pow(10, scale);
         (*iface.*Thresholds<T>::setLo)(lo);
         (*iface.*Thresholds<T>::setHi)(hi);
-        auto alarmLowState = (*iface.*Thresholds<T>::getAlarmLow)();
-        auto alarmHighState = (*iface.*Thresholds<T>::getAlarmHigh)();
-        (*iface.*Thresholds<T>::alarmLo)(value <= lo);
-        (*iface.*Thresholds<T>::alarmHi)(value >= hi);
-        if (alarmLowState != (value <= lo))
-        {
-            if (value <= lo)
-            {
-                (*iface.*Thresholds<T>::assertLowSignal)(value);
-            }
-            else
-            {
-                (*iface.*Thresholds<T>::deassertLowSignal)(value);
-            }
-        }
-        if (alarmHighState != (value >= hi))
-        {
-            if (value >= hi)
-            {
-                (*iface.*Thresholds<T>::assertHighSignal)(value);
-            }
-            else
-            {
-                (*iface.*Thresholds<T>::deassertHighSignal)(value);
-            }
-        }
         auto type = Thresholds<T>::type;
         obj[type] = iface;
     }
