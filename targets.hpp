@@ -84,6 +84,18 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
     const std::string pwm = "pwm"s;
     const std::string empty = ""s;
 
+    if (InterfaceType::FAN_SPEED == type)
+    {
+        // If RPM_TARGET is set, use the specified pwm id
+        auto id = env::getEnv("RPM_TARGET", sensor);
+        if (!id.empty())
+        {
+            targetName = pwm;
+            targetId = id;
+        }
+        entry = empty;
+    }
+
     if (InterfaceType::FAN_PWM == type)
     {
         targetName = pwm;
