@@ -19,9 +19,18 @@ uint64_t FanSpeed::target(uint64_t value)
     auto directPWM = false;
     auto curValue = FanSpeedObject::target();
     auto enable = env::getEnv("ENABLE", _type, _id);
+    auto rawpwm = env::getEnv("RAWPWM", _type, _id);
     if (!enable.empty())
     {
         auto val = std::stoul(enable);
+        if (val == 1)
+        {
+            directPWM = true;
+        }
+    }
+    if (!rawpwm.empty())
+    {
+        auto val = std::stoul(rawpwm);
         if (val == 1)
         {
             directPWM = true;
