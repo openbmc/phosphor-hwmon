@@ -37,6 +37,7 @@ static constexpr auto ccurr = "curr";
 static constexpr auto cenergy = "energy";
 static constexpr auto cpower = "power";
 static constexpr auto cpwm = "pwm";
+static constexpr auto cfreq = "freq";
 
 static const std::string fan = cfan;
 static const std::string temp = ctemp;
@@ -45,6 +46,7 @@ static const std::string curr = ccurr;
 static const std::string energy = cenergy;
 static const std::string power = cpower;
 static const std::string pwm = cpwm;
+static const std::string freq = cfreq;
 } // namespace type
 
 static constexpr auto typeAttrMap = {
@@ -64,6 +66,8 @@ static constexpr auto typeAttrMap = {
                     "energy"),
     std::make_tuple(hwmon::type::cpower, ValueInterface::Unit::Watts, -6,
                     "power"),
+    std::make_tuple(hwmon::type::cfreq, ValueInterface::Unit::MHz, 0,
+                    "frequency"),
 };
 
 inline auto getHwmonType(decltype(typeAttrMap)::const_reference attrs)
