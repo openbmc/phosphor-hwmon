@@ -14,6 +14,7 @@ static constexpr auto clabel = "label";
 static constexpr auto ctarget = "target";
 static constexpr auto cenable = "enable";
 static constexpr auto cfault = "fault";
+static constexpr auto crawpwm = "";
 static constexpr auto caverage = "average";
 static constexpr auto caverage_interval = "average_interval";
 
@@ -22,6 +23,7 @@ static const std::string label = clabel;
 static const std::string target = ctarget;
 static const std::string enable = cenable;
 static const std::string fault = cfault;
+static const std::string rawpwm = crawpwm;
 static const std::string average = caverage;
 static const std::string average_interval = caverage_interval;
 } // namespace entry

@@ -16,15 +16,44 @@ namespace hwmon
 
 uint64_t FanSpeed::target(uint64_t value)
 {
+    auto directPWM = false;
     auto curValue = FanSpeedObject::target();
+    auto enable = env::getEnv("ENABLE", _type, _id);
+    if (!enable.empty())
+    {
+        auto val = std::stoul(enable);
+        if (val == 1)
+        {
+            directPWM = true;
+        }
+    }
 
     if (curValue != value)
     {
         // Write target out to sysfs
         try
         {
-            _ioAccess->write(value, _type, _id, entry::target, hwmonio::retries,
-                             hwmonio::delay);
+            if (directPWM)
+            {
+                _ioAccess->write(
+                        (value * 255) / 100,
+                        type::pwm,
+                        _id,
+                        entry::rawpwm,
+                        hwmonio::retries,
+                        hwmonio::delay);
+            }
+            else
+            {
+                _ioAccess->write(
+                        value,
+                        _type,
+                        _id,
+                        entry::target,
+                        hwmonio::retries,
+                        hwmonio::delay);
+            }
+
         }
         catch (const std::system_error& e)
         {
