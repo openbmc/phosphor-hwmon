@@ -36,7 +36,7 @@ uint64_t FanSpeed::target(uint64_t value)
             if (directPWM)
             {
                 _ioAccess->write(
-                        (value * 255) / 100,
+                        (value * 255) / 1000,
                         type::pwm,
                         _id,
                         entry::rawpwm,
