@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0a1f26d_3c778832",
+        "filename": "mainloop.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2020-06-16T09:41:50Z",
+      "side": 1,
+      "message": "Better to move this part of code into a separated function, so that it looks a bit clearer, and then better to add some test case for this function.\nAnd I guess it could be shared with the code in sensor.cpp?",
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52c6a102_7d685971",
+        "filename": "mainloop.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2020-06-16T09:41:50Z",
+      "side": 1,
+      "message": "This still blocks the main thread for the asyncReadTimeout.\nI\u0027m OK with this, but eventually it could be better to schedule the async read and register a callback to update the sensor value, then it does not block at all.",
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82f893fa_838da02b",
+        "filename": "mainloop.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2020-06-16T09:41:50Z",
+      "side": 1,
+      "message": "Why do you throw on s good (but timedout) reading?",
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19114beb_04e723f3",
+        "filename": "sensor.hpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2020-06-16T09:41:50Z",
+      "side": 1,
+      "message": "Better to `using xxx \u003d` this type so that the code reads better.",
+      "range": {
+        "startLine": 109,
+        "startChar": 17,
+        "endLine": 109,
+        "endChar": 76
+      },
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
