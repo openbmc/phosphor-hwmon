@@ -8,6 +8,8 @@
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 
+#include <fmt/format.h>
+
 #include <cassert>
 #include <chrono>
 #include <cmath>
@@ -243,8 +245,7 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
                 metadata::CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
             log<level::INFO>(
-                "Logging failing sysfs file",
-                phosphor::logging::entry("FILE=%s", sysfsFullPath.c_str()));
+                fmt::format("Failing sysfs file: {}", sysfsFullPath).c_str());
         }
     }
 

@@ -28,6 +28,7 @@ fanpwm_unittest = executable(
         gmock,
         gtest,
         phosphor_logging,
+        fmt,
     ],
     include_directories: '..',
     link_with: [
@@ -41,6 +42,7 @@ hwmon_unittest = executable(
     dependencies: [
         gmock,
         gtest,
+        fmt,
     ],
     include_directories: '..',
     link_with: [
@@ -54,6 +56,7 @@ hwmonio_default_unittest = executable(
     dependencies: [
         gtest,
         gmock,
+        fmt,
     ],
     include_directories: '..',
     link_with: [
@@ -68,6 +71,7 @@ sensor_unittest = executable(
     dependencies: [
         gtest,
         gmock,
+        fmt,
     ],
     include_directories: '..',
     link_with: [

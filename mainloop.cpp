@@ -29,6 +29,8 @@
 #include "thresholds.hpp"
 #include "util.hpp"
 
+#include <fmt/format.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <functional>
@@ -238,8 +240,7 @@ std::optional<ObjectStateData>
             xyz::openbmc_project::Sensor::Device::ReadFailure::
                 CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-        log<level::INFO>("Logging failing sysfs file",
-                         entry("FILE=%s", file.c_str()));
+        log<level::INFO>(fmt::format("Failing sysfs file: {}", file).c_str());
         exit(EXIT_FAILURE);
     }
     auto sensorValue = valueInterface->value();
@@ -533,8 +534,8 @@ void MainLoop::read()
                 xyz::openbmc_project::Sensor::Device::ReadFailure::
                     CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            log<level::INFO>("Logging failing sysfs file",
-                             entry("FILE=%s", file.c_str()));
+            log<level::INFO>(
+                fmt::format("Failing sysfs file: {}", file).c_str());
 
             exit(EXIT_FAILURE);
         }

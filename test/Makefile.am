@@ -17,7 +17,8 @@ AM_LDFLAGS = \
 	$(OESDK_TESTCASE_FLAGS) \
 	$(SDBUSPLUS_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
-	$(CODE_COVERAGE_LIBS)
+	$(CODE_COVERAGE_LIBS) \
+	$(FMT_LIBS)
 
 # Run all 'check' test programs
 check_PROGRAMS = hwmon_unittest fanpwm_unittest sensor_unittest hwmonio_default_unittest env_unittest average_unittest

@@ -6,6 +6,8 @@
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 
+#include <fmt/format.h>
+
 #include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include <string>
@@ -39,8 +41,7 @@ uint64_t FanPwm::target(uint64_t value)
         auto file =
             sysfs::make_sysfs_path(_ioAccess->path(), _type, _id, empty);
 
-        log<level::INFO>("Logging failing sysfs file",
-                         phosphor::logging::entry("FILE=%s", file.c_str()));
+        log<level::INFO>(fmt::format("Failing sysfs file: {}", file).c_str());
 
         exit(EXIT_FAILURE);
     }

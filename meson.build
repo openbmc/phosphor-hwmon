@@ -20,6 +20,7 @@ phosphor_logging = dependency('phosphor-logging')
 sdbusplus = dependency('sdbusplus')
 sdeventplus = dependency('sdeventplus')
 stdplus = dependency('stdplus')
+fmt = dependency('fmt')
 threads = dependency('threads')
 
 conf = configuration_data()
@@ -79,6 +80,7 @@ libhwmon_all = static_library(
     'mainloop.cpp',
     'sensorset.cpp',
     dependencies: [
+        fmt,
         gpioplus,
         phosphor_dbus_interfaces,
         phosphor_logging,

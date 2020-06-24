@@ -6,6 +6,8 @@
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 
+#include <fmt/format.h>
+
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Control/Device/error.hpp>
 
@@ -39,8 +41,8 @@ uint64_t FanSpeed::target(uint64_t value)
             auto file = sysfs::make_sysfs_path(_ioAccess->path(), _type, _id,
                                                entry::target);
 
-            log<level::INFO>("Logging failing sysfs file",
-                             phosphor::logging::entry("FILE=%s", file.c_str()));
+            log<level::INFO>(
+                fmt::format("Failing sysfs file: {}", file).c_str());
 
             exit(EXIT_FAILURE);
         }
@@ -75,8 +77,7 @@ void FanSpeed::enable()
                                                    _id, entry::enable);
 
             log<level::INFO>(
-                "Logging failing sysfs file",
-                phosphor::logging::entry("FILE=%s", fullPath.c_str()));
+                fmt::format("Failing sysfs file: {}", fullPath).c_str());
 
             exit(EXIT_FAILURE);
         }

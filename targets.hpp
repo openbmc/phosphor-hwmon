@@ -5,6 +5,8 @@
 #include "fan_speed.hpp"
 #include "hwmonio.hpp"
 
+#include <fmt/format.h>
+
 #include <filesystem>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
@@ -153,8 +155,8 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                     metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
                 log<level::INFO>(
-                    "Logging failing sysfs file",
-                    phosphor::logging::entry("FILE=%s", sysfsFullPath.c_str()));
+                    fmt::format("Failing sysfs file: {}", sysfsFullPath)
+                        .c_str());
             }
 
             static constexpr bool deferSignals = true;
