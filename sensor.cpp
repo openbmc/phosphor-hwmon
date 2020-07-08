@@ -12,7 +12,6 @@
 
 #include <cassert>
 #include <chrono>
-#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
@@ -25,18 +24,6 @@ namespace sensor
 
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
-
-// todo: this can be deleted once we move to double
-// helper class to set the scale on the value iface only when it's available
-template <typename T>
-void setScale(T& iface, int64_t value, double)
-{
-}
-template <typename T>
-void setScale(T& iface, int64_t value, int64_t)
-{
-    iface->scale(value);
-}
 
 // todo: this can be simplified once we move to the double interface
 Sensor::Sensor(const SensorSet::key_type& sensor,
@@ -103,7 +90,7 @@ void Sensor::addRemoveRCs(const std::string& rcList)
     }
 }
 
-SensorValueType Sensor::adjustValue(SensorValueType value)
+double Sensor::adjustValue(double value)
 {
 // Because read doesn't have an out pointer to store errors.
 // let's assume negative values are errors if they have this
@@ -116,14 +103,8 @@ SensorValueType Sensor::adjustValue(SensorValueType value)
 #endif
 
     // Adjust based on gain and offset
-    value = static_cast<decltype(value)>(static_cast<double>(value) *
-                                             _sensorAdjusts.gain +
-                                         _sensorAdjusts.offset);
-
-    if constexpr (std::is_same<SensorValueType, double>::value)
-    {
-        value *= std::pow(10, _scale);
-    }
+    value = value * _sensorAdjusts.gain + _sensorAdjusts.offset;
+    value *= std::pow(10, _scale);
 
     return value;
 }
@@ -138,7 +119,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     auto& obj = std::get<InterfaceMap>(info);
     auto& objPath = std::get<std::string>(info);
 
-    SensorValueType val = 0;
+    double val = 0;
 
     auto& statusIface = std::any_cast<std::shared_ptr<StatusObject>&>(
         obj[InterfaceType::STATUS]);
@@ -185,8 +166,6 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     if (hwmon::getAttributes(_sensor.first, attrs))
     {
         iface->unit(hwmon::getUnit(attrs));
-
-        setScale(iface, hwmon::getScale(attrs), val);
 
         _scale = hwmon::getScale(attrs);
     }
