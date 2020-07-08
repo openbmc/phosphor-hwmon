@@ -154,9 +154,9 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                     metadata::CALLOUT_ERRNO(e.code().value()),
                     metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
-                log<level::INFO>(
-                    fmt::format("Failing sysfs file: {}", sysfsFullPath)
-                        .c_str());
+                log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}",
+                                             sysfsFullPath, e.code().value())
+                                     .c_str());
             }
 
             static constexpr bool deferSignals = true;
