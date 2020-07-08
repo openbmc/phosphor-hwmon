@@ -240,7 +240,9 @@ std::optional<ObjectStateData>
             xyz::openbmc_project::Sensor::Device::ReadFailure::
                 CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-        log<level::INFO>(fmt::format("Failing sysfs file: {}", file).c_str());
+        log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}", file,
+                                     e.code().value())
+                             .c_str());
         exit(EXIT_FAILURE);
     }
     auto sensorValue = valueInterface->value();
@@ -534,8 +536,9 @@ void MainLoop::read()
                 xyz::openbmc_project::Sensor::Device::ReadFailure::
                     CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            log<level::INFO>(
-                fmt::format("Failing sysfs file: {}", file).c_str());
+            log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}",
+                                         file, e.code().value())
+                                 .c_str());
 
             exit(EXIT_FAILURE);
         }
