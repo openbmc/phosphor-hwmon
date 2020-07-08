@@ -76,7 +76,7 @@ decltype(
     Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
 
-void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value)
+void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value)
 {
     for (auto& iface : ifaces)
     {
@@ -245,11 +245,8 @@ std::optional<ObjectStateData>
     }
     auto sensorValue = valueInterface->value();
     int64_t scale = 0;
-    // scale the thresholds only if we're using doubles
-    if constexpr (std::is_same<SensorValueType, double>::value)
-    {
-        scale = sensorObj->getScale();
-    }
+    scale = sensorObj->getScale();
+
     addThreshold<WarningObject>(sensorSysfsType, std::get<sensorID>(properties),
                                 sensorValue, info, scale);
     addThreshold<CriticalObject>(sensorSysfsType,
@@ -418,7 +415,7 @@ void MainLoop::read()
             input = hwmon::entry::average;
         }
 
-        int64_t value;
+        SensorValueType value;
         auto& obj = std::get<InterfaceMap>(objInfo);
         std::unique_ptr<sensor::Sensor>& sensor = _sensorObjects[sensorSetKey];
 

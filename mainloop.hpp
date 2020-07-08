@@ -156,4 +156,4 @@ class MainLoop
 /** @brief Given a value and map of interfaces, update values and check
  * thresholds.
  */
-void updateSensorInterfaces(InterfaceMap& ifaces, int64_t value);
+void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value);

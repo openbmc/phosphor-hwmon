@@ -26,18 +26,6 @@ namespace sensor
 using namespace phosphor::logging;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
-// todo: this can be deleted once we move to double
-// helper class to set the scale on the value iface only when it's available
-template <typename T>
-void setScale(T& iface, int64_t value, double)
-{
-}
-template <typename T>
-void setScale(T& iface, int64_t value, int64_t)
-{
-    iface->scale(value);
-}
-
 // todo: this can be simplified once we move to the double interface
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
@@ -185,8 +173,6 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     if (hwmon::getAttributes(_sensor.first, attrs))
     {
         iface->unit(hwmon::getUnit(attrs));
-
-        setScale(iface, hwmon::getScale(attrs), val);
 
         _scale = hwmon::getScale(attrs);
     }
