@@ -41,8 +41,9 @@ uint64_t FanSpeed::target(uint64_t value)
             auto file = sysfs::make_sysfs_path(_ioAccess->path(), _type, _id,
                                                entry::target);
 
-            log<level::INFO>(
-                fmt::format("Failing sysfs file: {}", file).c_str());
+            log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}",
+                                         file, e.code().value())
+                                 .c_str());
 
             exit(EXIT_FAILURE);
         }
@@ -76,8 +77,9 @@ void FanSpeed::enable()
             auto fullPath = sysfs::make_sysfs_path(_ioAccess->path(), type::pwm,
                                                    _id, entry::enable);
 
-            log<level::INFO>(
-                fmt::format("Failing sysfs file: {}", fullPath).c_str());
+            log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}",
+                                         fullPath, e.code().value())
+                                 .c_str());
 
             exit(EXIT_FAILURE);
         }

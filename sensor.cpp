@@ -230,8 +230,9 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
                 metadata::CALLOUT_ERRNO(e.code().value()),
                 metadata::CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            log<level::INFO>(
-                fmt::format("Failing sysfs file: {}", sysfsFullPath).c_str());
+            log<level::INFO>(fmt::format("Failing sysfs file: {} errno {}",
+                                         sysfsFullPath, e.code().value())
+                                 .c_str());
         }
     }
 
