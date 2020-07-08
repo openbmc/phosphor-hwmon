@@ -75,7 +75,7 @@ class Sensor
      *
      * @return - Adjusted sensor value
      */
-    SensorValueType adjustValue(SensorValueType value);
+    double adjustValue(double value);
 
     /**
      * @brief Add value interface and value property for sensor
@@ -178,3 +178,4 @@ using GpioLocker =
 std::optional<GpioLocker> gpioUnlock(const gpioplus::HandleInterface* handle);
 
 } // namespace sensor
+
