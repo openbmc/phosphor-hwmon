@@ -151,7 +151,6 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
                                 hwmon::entry::cinput, std::get<size_t>(retryIO),
                                 std::get<std::chrono::milliseconds>(retryIO));
 
-            val = adjustValue(val);
         }
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
         catch (const std::system_error& e)
@@ -167,7 +166,6 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 
     auto iface =
         std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
-    iface->value(val);
 
     hwmon::Attributes attrs;
     if (hwmon::getAttributes(_sensor.first, attrs))
@@ -176,6 +174,9 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 
         _scale = hwmon::getScale(attrs);
     }
+
+    val = adjustValue(val);
+    iface->value(val);
 
     auto maxValue = env::getEnv("MAXVALUE", _sensor);
     if (!maxValue.empty())
