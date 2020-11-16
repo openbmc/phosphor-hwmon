@@ -212,6 +212,13 @@ AS_IF([test "x$enable_negative_errno_on_fail" == "xyes"], [
     ])
 ])
 
+# By default, do not include MSL(minimum ship level) applications since these
+# would be specific to the machine using BMC hwmon. Each MSL application should
+# have its own enable argument to be built/installed.
+AC_ARG_ENABLE([max31785-msl],
+  AS_HELP_STRING([--enable-max31785-msl], [Include building and installing the MAX31785 chip's minimum ship level checking application.]))
+AM_CONDITIONAL([WANT_MAX31785_MSL], [test "x$enable_max31785_msl" == "xyes"])
+
 AC_ARG_VAR(BUSNAME_PREFIX, [The DBus busname prefix.])
 AC_ARG_VAR(SENSOR_ROOT, [The DBus sensors namespace root.])
 AS_IF(
