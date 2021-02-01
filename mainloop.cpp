@@ -276,11 +276,13 @@ std::optional<ObjectStateData>
 MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
                    const std::string& path, const std::string& devPath,
                    const char* prefix, const char* root,
+                   const std::string& instanceId,
                    const hwmonio::HwmonIOInterface* ioIntf) :
     _bus(std::move(bus)),
     _manager(_bus, root), _pathParam(param), _hwmonRoot(), _instance(),
     _devPath(devPath), _prefix(prefix), _root(root), _state(),
-    _ioAccess(ioIntf), _event(sdeventplus::Event::get_default()),
+    _instanceId(instanceId), _ioAccess(ioIntf),
+    _event(sdeventplus::Event::get_default()),
     _timer(_event, std::bind(&MainLoop::read, this))
 {
     // Strip off any trailing slashes.
@@ -370,9 +372,13 @@ void MainLoop::init()
 
     {
         std::stringstream ss;
-        ss << _prefix << "-"
-           << std::to_string(std::hash<std::string>{}(_devPath + _pathParam))
-           << ".Hwmon1";
+        std::string id = _instanceId;
+        if (id == "")
+        {
+          id =
+              std::to_string(std::hash<std::string>{}(_devPath + _pathParam));
+        }
+        ss << _prefix << "-" << id << ".Hwmon1";
 
         _bus.request_name(ss.str().c_str());
     }

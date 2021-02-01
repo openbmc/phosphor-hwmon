@@ -45,6 +45,7 @@ class MainLoop
      *  @param[in] devPath - physical device sysfs path.
      *  @param[in] prefix - DBus busname prefix.
      *  @param[in] root - DBus sensors namespace root.
+     *  @param[in] instanceId - pregenerated hash to identify instance on d-bus.
      *
      *  Any DBus objects are created relative to the DBus
      *  sensors namespace root.
@@ -55,6 +56,7 @@ class MainLoop
     MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
              const std::string& path, const std::string& devPath,
              const char* prefix, const char* root,
+             const std::string& instanceId,
              const hwmonio::HwmonIOInterface* ioIntf);
 
     /** @brief Setup polling timer in a sd event loop and attach to D-Bus
@@ -105,6 +107,8 @@ class MainLoop
     const char* _root;
     /** @brief DBus object state. */
     SensorState _state;
+    /** @brief DBus instance id (hash) specified by command line. */
+    std::string _instanceId;
     /** @brief Sleep interval in microseconds. */
     uint64_t _interval = default_interval;
     /** @brief Hwmon sysfs access. */
