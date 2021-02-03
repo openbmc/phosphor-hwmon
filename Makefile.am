@@ -72,6 +72,9 @@ libhwmon_la_SOURCES = \
 	gpio_handle.cpp \
 	average.cpp
 
+busconfdir = $(sysconfdir)/dbus-1/system.d
+busconf_DATA = phosphor-hwmon.conf
+
 servicedir = $(libdir)/systemd/system
 service_DATA = xyz.openbmc_project.Hwmon@.service
 
