@@ -1,4 +1,9 @@
 option(
+    'udevrulesdir',
+    description: 'The path to udev rules.',
+    type: 'string',
+    value: '/lib/udev/rules.d')
+option(
     'busname-prefix',
     description: 'The DBus busname prefix.',
     type: 'string',
