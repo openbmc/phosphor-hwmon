@@ -6,4 +6,9 @@ configure_file(
     install_dir: get_option('bindir'),
     output: 'max31785-msl',
 )
+
+install_data(
+    'phosphor-max31785-msl@.service',
+    install_dir: get_option('datadir') / 'dbus-1/system.d'
+)
 endif
