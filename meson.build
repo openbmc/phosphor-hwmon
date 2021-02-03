@@ -107,6 +107,24 @@ executable(
     ],
 )
 
+systemd_system_unit_dir = dependency('systemd').get_pkgconfig_variable(
+    'systemdsystemunitdir',
+    define_variable: ['prefix', get_option('prefix')])
+install_data(
+    'xyz.openbmc_project.Hwmon@.service',
+    install_dir: systemd_system_unit_dir
+)
+
+install_data(
+    'phosphor-hwmon.conf',
+    install_dir: get_option('sysconfdir') / 'dbus-1/system.d'
+)
+
+install_data(
+    ['70-hwmon.rules', '70-iio.rules'],
+    install_dir: get_option('libdir') / 'udev/rules.d'
+)
+
 subdir('msl')
 subdir('test')
 subdir('tools')
