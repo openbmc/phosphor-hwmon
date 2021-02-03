@@ -34,10 +34,12 @@ int main(int argc, char** argv)
     // Read arguments.
     std::string syspath = "";
     std::string devpath = "";
+    std::string sensor_id = "";
 
     CLI::App app{"OpenBMC Hwmon Daemon"};
     app.add_option("-p,--path", syspath, "sysfs location to monitor");
     app.add_option("-o,--dev-path", devpath, "device path to monitor");
+    app.add_option("-i,--sensor-id", sensor_id, "dbus sensor instance id");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -80,7 +82,7 @@ int main(int argc, char** argv)
 
     hwmonio::HwmonIO io(path);
     MainLoop loop(sdbusplus::bus::new_default(), param, path, calloutPath,
-                  BUSNAME_PREFIX, SENSOR_ROOT, &io);
+                  BUSNAME_PREFIX, SENSOR_ROOT, sensor_id, &io);
     loop.run();
 
     return 0;
