@@ -33,6 +33,7 @@ else
 endif
 
 bin_PROGRAMS = phosphor-hwmon-readd
+bin_SCRIPTS = start_hwmon.sh
 
 phosphor_hwmon_readd_SOURCES = readd.cpp
 phosphor_hwmon_readd_LDADD = $(SDBUSPLUS_LIBS) $(CODE_COVERAGE_LIBS) libhwmon.la
@@ -70,5 +71,11 @@ libhwmon_la_SOURCES = \
 	sensor.cpp \
 	gpio_handle.cpp \
 	average.cpp
+
+servicedir = $(libdir)/systemd/system
+service_DATA = xyz.openbmc_project.Hwmon@.service
+
+udevdir = $(libdir)/udev/rules.d
+udev_DATA = 70-hwmon.rules 70-iio.rules
 
 SUBDIRS = . msl test tools
