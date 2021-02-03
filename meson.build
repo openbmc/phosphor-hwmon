@@ -92,6 +92,34 @@ executable(
     ],
     install: true)
 
+systemd_system_unit_dir = dependency('systemd').get_pkgconfig_variable(
+    'systemdsystemunitdir',
+    define_variable: ['prefix', get_option('prefix')])
+udev_dir = dependency('udev').get_pkgconfig_variable(
+    'udev_dir',
+    define_variable: ['prefix', get_option('prefix')])
+
+install_data(
+    'xyz.openbmc_project.Hwmon@.service',
+    install_dir: systemd_system_unit_dir
+)
+
+install_data(
+    'phosphor-hwmon.conf',
+    install_dir: get_option('sysconfdir') / 'dbus-1/system.d'
+)
+
+install_data(
+    ['70-hwmon.rules', '70-iio.rules'],
+    install_dir: udev_dir / 'rules.d'
+)
+
+install_data(
+    'start_hwmon.sh',
+    install_dir: get_option('bindir'),
+    install_mode: 'rwxr-xr-x'
+)
+
 subdir('msl')
 if not get_option('tests').disabled()
   subdir('test')
