@@ -24,6 +24,7 @@ This requires an algorithm for selecting a stable, well-known D-Bus busname.
 
 The algorithm is <PREFIX>-<ID>.Hwmon<N> where PREFIX is an autoconf
 configurable prefix (BUSNAME_PREFIX, xyz.openbmc_project by default),
-ID is a std::hash of the /sys/devices path backing the hwmon class
-instance, and N is the implemented phosphor-hwmon D-Bus API version.
+ID is either a std::hash of the /sys/devices path backing the hwmon class
+instance or provided suffix value from the command line, and N is
+the implemented phosphor-hwmon D-Bus API version.
 ```
