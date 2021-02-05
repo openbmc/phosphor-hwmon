@@ -103,6 +103,30 @@
       "revId": "d4fb92ef4c73c33ca006537b9d1a9b5afb43a6e1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61e3b50e_e3442015",
+        "filename": "xyz.openbmc_project.Hwmon@.service",
+        "patchSetId": 7
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000064
+      },
+      "writtenOn": "2021-02-05T20:57:53Z",
+      "side": 1,
+      "message": "There is unsubmitted change to openbmc/openbmc repo that generates HW_SENSOR_ID variable and append it to the /etc/default/obmc/hwmon/* stuff if it is not already set over there.",
+      "parentUuid": "a96fdd7e_789d7540",
+      "range": {
+        "startLine": 8,
+        "startChar": 44,
+        "endLine": 8,
+        "endChar": 62
+      },
+      "revId": "d4fb92ef4c73c33ca006537b9d1a9b5afb43a6e1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
