@@ -79,6 +79,30 @@
       "revId": "d4fb92ef4c73c33ca006537b9d1a9b5afb43a6e1",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a96fdd7e_789d7540",
+        "filename": "xyz.openbmc_project.Hwmon@.service",
+        "patchSetId": 7
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-02-05T20:32:15Z",
+      "side": 1,
+      "message": "that\u0027s a good point.  Was the intent instead to put it into the config file, in which case it should be read by the code with a getenv?",
+      "parentUuid": "a7161be0_9683a05e",
+      "range": {
+        "startLine": 8,
+        "startChar": 44,
+        "endLine": 8,
+        "endChar": 62
+      },
+      "revId": "d4fb92ef4c73c33ca006537b9d1a9b5afb43a6e1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
