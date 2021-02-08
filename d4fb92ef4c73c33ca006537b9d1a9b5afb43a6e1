@@ -119,6 +119,23 @@
     },
     {
       "key": {
+        "uuid": "0748298a_6cd8ac4e",
+        "filename": "readd.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-02-08T14:19:38Z",
+      "side": 1,
+      "message": "Since you\u0027re going to put this in the environment file, there isn\u0027t any need to pass it in.  The code can just directly call getEnv like it does all of the other env vars in that file.",
+      "revId": "d4fb92ef4c73c33ca006537b9d1a9b5afb43a6e1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a7161be0_9683a05e",
         "filename": "xyz.openbmc_project.Hwmon@.service",
         "patchSetId": 7
