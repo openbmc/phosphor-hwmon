@@ -136,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "50bc39bd_7c9e4c0a",
+        "filename": "readd.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000064
+      },
+      "writtenOn": "2021-02-08T14:45:54Z",
+      "side": 1,
+      "message": "I\u0027m not passion about magic environment variables. This override argument is optional. If not specified, then the sensor id will be generated as a std::hash as it works now.\nI would prefer explicit argument that will be clearly state sensor id in \"ps\" output.",
+      "parentUuid": "0748298a_6cd8ac4e",
+      "revId": "d4fb92ef4c73c33ca006537b9d1a9b5afb43a6e1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a7161be0_9683a05e",
         "filename": "xyz.openbmc_project.Hwmon@.service",
         "patchSetId": 7
