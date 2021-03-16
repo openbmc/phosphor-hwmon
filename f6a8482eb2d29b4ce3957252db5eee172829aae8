@@ -46,6 +46,30 @@
       "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eadeb2aa_daa47d08",
+        "filename": "xyz.openbmc_project.Hwmon@.service",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-03-16T05:15:45Z",
+      "side": 1,
+      "message": "In that case, it seems like an environment would be more appropriate, no?  Otherwise this code doesn\u0027t do the sane thing without a co-req\u0027d change over in the recipe.",
+      "parentUuid": "c2a5b1ee_796ec828",
+      "range": {
+        "startLine": 8,
+        "startChar": 47,
+        "endLine": 8,
+        "endChar": 62
+      },
+      "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
