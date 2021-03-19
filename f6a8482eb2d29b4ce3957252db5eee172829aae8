@@ -118,6 +118,30 @@
       "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b9e97e6_20c726b6",
+        "filename": "xyz.openbmc_project.Hwmon@.service",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000064
+      },
+      "writtenOn": "2021-03-19T13:12:07Z",
+      "side": 1,
+      "message": "I have another changes to other repo that are incompatible with current recipe. It\u0027s almost impossible to make changes to the individual repo that will still work with current recipes (or requires a significant effort to do so). IMO, it\u0027s better to prioritize changes to openbmc meta to such changes. As long as we don\u0027t bump version in openbmc meta, individual repo\u0027s code will still work.\n\n\u003e If the variable is empty you will still have the \u0027-i\u0027, right?  And then CLI11 will fail parsing the argument. \n\nAs per strace output, the invoked command will have \"-i\" and empty string as params that are legal. I just wondering if CLI11 (in contrast with getopt()) do not allow empty values for the arguments.",
+      "parentUuid": "854383ff_8a1c964b",
+      "range": {
+        "startLine": 8,
+        "startChar": 47,
+        "endLine": 8,
+        "endChar": 62
+      },
+      "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
