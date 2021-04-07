@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "846bd783_b759e75b",
+        "filename": "phosphor-hwmon.conf",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-04-07T02:41:26Z",
+      "side": 1,
+      "message": "I see that this is new, what is this for?",
+      "revId": "b31fea0353b6f5567df31f51091022a544e1fe0c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14bac076_0749add7",
+        "filename": "start_hwmon.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-04-07T02:41:26Z",
+      "side": 1,
+      "message": "nit: \"\" around all variables here and below: https://google.github.io/styleguide/shellguide.html#quoting\n\nSeeing as how this seems to be a copy of the original script though (https://github.com/openbmc/openbmc/blob/master/meta-phosphor/recipes-phosphor/sensors/phosphor-hwmon/start_hwmon.sh) perhaps you could do this in a subsequent commit.",
+      "range": {
+        "startLine": 3,
+        "startChar": 7,
+        "endLine": 3,
+        "endChar": 9
+      },
+      "revId": "b31fea0353b6f5567df31f51091022a544e1fe0c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
