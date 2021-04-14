@@ -32,6 +32,12 @@ struct Thresholds<WarningObject>
     static SensorValueType (WarningObject::*const getHi)() const;
     static bool (WarningObject::*const alarmLo)(bool);
     static bool (WarningObject::*const alarmHi)(bool);
+    static bool (WarningObject::*const getAlarmLow)() const;
+    static bool (WarningObject::*const getAlarmHigh)() const;
+    static void (WarningObject::*const assertLowSignal)(SensorValueType);
+    static void (WarningObject::*const assertHighSignal)(SensorValueType);
+    static void (WarningObject::*const deassertLowSignal)(SensorValueType);
+    static void (WarningObject::*const deassertHighSignal)(SensorValueType);
 };
 
 /**@brief Thresholds specialization for critical thresholds. */
@@ -47,6 +53,12 @@ struct Thresholds<CriticalObject>
     static SensorValueType (CriticalObject::*const getHi)() const;
     static bool (CriticalObject::*const alarmLo)(bool);
     static bool (CriticalObject::*const alarmHi)(bool);
+    static bool (CriticalObject::*const getAlarmLow)() const;
+    static bool (CriticalObject::*const getAlarmHigh)() const;
+    static void (CriticalObject::*const assertLowSignal)(SensorValueType);
+    static void (CriticalObject::*const assertHighSignal)(SensorValueType);
+    static void (CriticalObject::*const deassertLowSignal)(SensorValueType);
+    static void (CriticalObject::*const deassertHighSignal)(SensorValueType);
 };
 
 /** @brief checkThresholds
@@ -65,8 +77,32 @@ void checkThresholds(std::any& iface, SensorValueType value)
     auto realIface = std::any_cast<std::shared_ptr<T>>(iface);
     auto lo = (*realIface.*Thresholds<T>::getLo)();
     auto hi = (*realIface.*Thresholds<T>::getHi)();
+    auto alarmLowState = (*realIface.*Thresholds<T>::getAlarmLow)();
+    auto alarmHighState = (*realIface.*Thresholds<T>::getAlarmHigh)();
     (*realIface.*Thresholds<T>::alarmLo)(value <= lo);
     (*realIface.*Thresholds<T>::alarmHi)(value >= hi);
+    if (alarmLowState != (value <= lo))
+    {
+        if (value <= lo)
+        {
+            (*realIface.*Thresholds<T>::assertLowSignal)(value);
+        }
+        else
+        {
+            (*realIface.*Thresholds<T>::deassertLowSignal)(value);
+        }
+    }
+    if (alarmHighState != (value >= hi))
+    {
+        if (value >= hi)
+        {
+            (*realIface.*Thresholds<T>::assertHighSignal)(value);
+        }
+        else
+        {
+            (*realIface.*Thresholds<T>::deassertHighSignal)(value);
+        }
+    }
 }
 
 /** @brief addThreshold
@@ -83,7 +119,7 @@ void checkThresholds(std::any& iface, SensorValueType value)
  */
 template <typename T>
 auto addThreshold(const std::string& sensorType, const std::string& sensorID,
-                  int64_t value, ObjectInfo& info, int64_t scale)
+                  SensorValueType value, ObjectInfo& info, int64_t scale)
 {
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<InterfaceMap>(info);
@@ -101,8 +137,32 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
         auto hi = stod(tHi) * std::pow(10, scale);
         (*iface.*Thresholds<T>::setLo)(lo);
         (*iface.*Thresholds<T>::setHi)(hi);
+        auto alarmLowState = (*iface.*Thresholds<T>::getAlarmLow)();
+        auto alarmHighState = (*iface.*Thresholds<T>::getAlarmHigh)();
         (*iface.*Thresholds<T>::alarmLo)(value <= lo);
         (*iface.*Thresholds<T>::alarmHi)(value >= hi);
+        if (alarmLowState != (value <= lo))
+        {
+            if (value <= lo)
+            {
+                (*iface.*Thresholds<T>::assertLowSignal)(value);
+            }
+            else
+            {
+                (*iface.*Thresholds<T>::deassertLowSignal)(value);
+            }
+        }
+        if (alarmHighState != (value >= hi))
+        {
+            if (value >= hi)
+            {
+                (*iface.*Thresholds<T>::assertHighSignal)(value);
+            }
+            else
+            {
+                (*iface.*Thresholds<T>::deassertHighSignal)(value);
+            }
+        }
         auto type = Thresholds<T>::type;
         obj[type] = iface;
     }
