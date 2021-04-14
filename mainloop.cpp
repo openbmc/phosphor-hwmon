@@ -59,6 +59,18 @@ decltype(
 decltype(
     Thresholds<WarningObject>::alarmHi) Thresholds<WarningObject>::alarmHi =
     &WarningObject::warningAlarmHigh;
+decltype(Thresholds<WarningObject>::getalarmLo) 
+    Thresholds<WarningObject>::getalarmLo = &WarningObject::warningAlarmLow;
+decltype(Thresholds<WarningObject>::getalarmHi) 
+    Thresholds<WarningObject>::getalarmHi = &WarningObject::warningAlarmHigh;
+decltype(Thresholds<WarningObject>::assertLosignal) 
+    Thresholds<WarningObject>::assertLosignal = &WarningObject::warningLowAlarmAsserted;
+decltype(Thresholds<WarningObject>::assertHisignal) 
+    Thresholds<WarningObject>::assertHisignal = &WarningObject::warningHighAlarmAsserted;
+decltype(Thresholds<WarningObject>::deassertLosignal) 
+    Thresholds<WarningObject>::deassertLosignal = &WarningObject::warningLowAlarmDeasserted;
+decltype(Thresholds<WarningObject>::deassertHisignal) 
+    Thresholds<WarningObject>::deassertHisignal = &WarningObject::warningHighAlarmDeasserted;
 
 // Initialization for Critical Objects
 decltype(Thresholds<CriticalObject>::setLo) Thresholds<CriticalObject>::setLo =
@@ -75,6 +87,18 @@ decltype(
 decltype(
     Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
     &CriticalObject::criticalAlarmHigh;
+decltype(Thresholds<CriticalObject>::getalarmLo) 
+    Thresholds<CriticalObject>::getalarmLo = &CriticalObject::criticalAlarmLow;
+decltype(Thresholds<CriticalObject>::getalarmHi) 
+    Thresholds<CriticalObject>::getalarmHi = &CriticalObject::criticalAlarmHigh;
+decltype(Thresholds<CriticalObject>::assertLosignal) 
+    Thresholds<CriticalObject>::assertLosignal = &CriticalObject::criticalLowAlarmAsserted;
+decltype(Thresholds<CriticalObject>::assertHisignal) 
+    Thresholds<CriticalObject>::assertHisignal = &CriticalObject::criticalHighAlarmAsserted;
+decltype(Thresholds<CriticalObject>::deassertLosignal) 
+    Thresholds<CriticalObject>::deassertLosignal = &CriticalObject::criticalLowAlarmDeasserted;
+decltype(Thresholds<CriticalObject>::deassertHisignal) 
+    Thresholds<CriticalObject>::deassertHisignal = &CriticalObject::criticalHighAlarmDeasserted;
 
 void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value)
 {

@@ -32,6 +32,12 @@ struct Thresholds<WarningObject>
     static SensorValueType (WarningObject::*const getHi)() const;
     static bool (WarningObject::*const alarmLo)(bool);
     static bool (WarningObject::*const alarmHi)(bool);
+    static bool (WarningObject::*const getalarmLo)() const;
+    static bool (WarningObject::*const getalarmHi)() const;
+    static void (WarningObject::*const assertLosignal)(SensorValueType);
+    static void (WarningObject::*const assertHisignal)(SensorValueType);
+    static void (WarningObject::*const deassertLosignal)(SensorValueType);
+    static void (WarningObject::*const deassertHisignal)(SensorValueType);
 };
 
 /**@brief Thresholds specialization for critical thresholds. */
@@ -47,6 +53,12 @@ struct Thresholds<CriticalObject>
     static SensorValueType (CriticalObject::*const getHi)() const;
     static bool (CriticalObject::*const alarmLo)(bool);
     static bool (CriticalObject::*const alarmHi)(bool);
+    static bool (CriticalObject::*const getalarmLo)() const;
+    static bool (CriticalObject::*const getalarmHi)() const;
+    static void (CriticalObject::*const assertLosignal)(SensorValueType);
+    static void (CriticalObject::*const assertHisignal)(SensorValueType);
+    static void (CriticalObject::*const deassertLosignal)(SensorValueType);
+    static void (CriticalObject::*const deassertHisignal)(SensorValueType);
 };
 
 /** @brief checkThresholds
@@ -65,8 +77,24 @@ void checkThresholds(std::any& iface, SensorValueType value)
     auto realIface = std::any_cast<std::shared_ptr<T>>(iface);
     auto lo = (*realIface.*Thresholds<T>::getLo)();
     auto hi = (*realIface.*Thresholds<T>::getHi)();
+    auto alarmlostate = (*realIface.*Thresholds<T>::getalarmLo)();
+    auto alarmhistate = (*realIface.*Thresholds<T>::getalarmHi)();
     (*realIface.*Thresholds<T>::alarmLo)(value <= lo);
     (*realIface.*Thresholds<T>::alarmHi)(value >= hi);
+    if (alarmlostate != (value <= lo))
+    {
+        if (value <= lo)
+            (*realIface.*Thresholds<T>::assertLosignal)(value);
+        else
+            (*realIface.*Thresholds<T>::deassertLosignal)(value);
+    }
+    if (alarmhistate != (value >= hi))
+    {
+        if (value >= hi)
+            (*realIface.*Thresholds<T>::assertHisignal)(value);
+        else
+            (*realIface.*Thresholds<T>::deassertHisignal)(value);
+    }
 }
 
 /** @brief addThreshold
@@ -83,7 +111,7 @@ void checkThresholds(std::any& iface, SensorValueType value)
  */
 template <typename T>
 auto addThreshold(const std::string& sensorType, const std::string& sensorID,
-                  int64_t value, ObjectInfo& info, int64_t scale)
+                  SensorValueType value, ObjectInfo& info, int64_t scale)
 {
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<InterfaceMap>(info);
@@ -101,8 +129,24 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
         auto hi = stod(tHi) * std::pow(10, scale);
         (*iface.*Thresholds<T>::setLo)(lo);
         (*iface.*Thresholds<T>::setHi)(hi);
+        auto alarmlostate = (*realIface.*Thresholds<T>::getalarmLo)();
+        auto alarmhistate = (*realIface.*Thresholds<T>::getalarmHi)();
         (*iface.*Thresholds<T>::alarmLo)(value <= lo);
         (*iface.*Thresholds<T>::alarmHi)(value >= hi);
+        if (alarmlostate != (value <= lo))
+        {
+            if (value <= lo)
+                (*realIface.*Thresholds<T>::assertLosignal)(value);
+            else
+                (*realIface.*Thresholds<T>::deassertLosignal)(value);
+        }
+        if (alarmhistate != (value >= hi))
+        {
+            if (value >= hi)
+                (*realIface.*Thresholds<T>::assertHisignal)(value);
+            else
+                (*realIface.*Thresholds<T>::deassertHisignal)(value);
+        }
         auto type = Thresholds<T>::type;
         obj[type] = iface;
     }
