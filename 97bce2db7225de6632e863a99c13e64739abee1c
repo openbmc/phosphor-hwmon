@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba24839b_ba7c1ae2",
+        "filename": "mainloop.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-15T18:49:18Z",
+      "side": 1,
+      "message": "all of these with \u0027signal\u0027 in them aren\u0027t quite camelCase.  How about assertHiSignal? (or just assertHighSignal ignoring the other misspellings in this file)",
+      "range": {
+        "startLine": 66,
+        "startChar": 36,
+        "endLine": 66,
+        "endChar": 50
+      },
+      "revId": "97bce2db7225de6632e863a99c13e64739abee1c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be9323bc_159b5751",
+        "filename": "thresholds.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-15T18:49:18Z",
+      "side": 1,
+      "message": "camelCase here too would be more consistent.",
+      "range": {
+        "startLine": 80,
+        "startChar": 9,
+        "endLine": 80,
+        "endChar": 22
+      },
+      "revId": "97bce2db7225de6632e863a99c13e64739abee1c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a59f93fb_2aac7265",
+        "filename": "thresholds.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-15T18:49:18Z",
+      "side": 1,
+      "message": "the guidelines call for { } used with if/else statements, even when single line.",
+      "revId": "97bce2db7225de6632e863a99c13e64739abee1c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
