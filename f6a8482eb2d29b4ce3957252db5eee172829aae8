@@ -142,6 +142,30 @@
       "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9dc96154_d0b0dd18",
+        "filename": "xyz.openbmc_project.Hwmon@.service",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-04-23T11:37:07Z",
+      "side": 1,
+      "message": "I think you\u0027re saying that strace shows the parameters should be:\n    -i \u0027\u0027\nAnd not just:\n    -i\n\nRight?\n\nIf there is no parameter for -i then CLI11 gets upset.\n\n$ ./a.out -i   \n-i: 1 required TEXT missing\nRun with --help for more information.\n\nSee https://gist.github.com/ef8ebfcc41d6ae84ad8ec9f52fff50ab for sample.",
+      "parentUuid": "7b9e97e6_20c726b6",
+      "range": {
+        "startLine": 8,
+        "startChar": 47,
+        "endLine": 8,
+        "endChar": 62
+      },
+      "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
