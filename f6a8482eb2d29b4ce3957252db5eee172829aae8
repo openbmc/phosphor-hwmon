@@ -190,6 +190,30 @@
       "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bf45385a_f2c097ad",
+        "filename": "xyz.openbmc_project.Hwmon@.service",
+        "patchSetId": 10
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000064
+      },
+      "writtenOn": "2021-04-23T12:02:50Z",
+      "side": 1,
+      "message": "Just to highlight it:\n\n\u003e execve(\"/usr/bin/phosphor-hwmon-readd\", [\"phosphor-hwmon-readd\", \"-i\", \"\", \"-o\", \"/ahb/apb/bus@1e78a000/i2c-bus@c0\"...], 0x7ead0dc0 /* 10 vars */) \u003d 0\n\nThis is the execve() straced when service have been started without HW_SENSOR_ID being set in env file.",
+      "parentUuid": "f215d671_d47373b4",
+      "range": {
+        "startLine": 8,
+        "startChar": 47,
+        "endLine": 8,
+        "endChar": 62
+      },
+      "revId": "f6a8482eb2d29b4ce3957252db5eee172829aae8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
