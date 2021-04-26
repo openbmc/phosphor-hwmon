@@ -42,7 +42,7 @@ Description of section entries:
 START OF MAINTAINERS LIST
 -------------------------
 
-M:  Patrick Venture <venture@google.com> <venture!>
 M:  Matt Spinler <spinler@us.ibm.com> <mspinler[m]!>
+M:  Brandon Kim <brandonkim@google.com>
 R:  Matthew Barth <msbarth@linux.ibm.com> <msbarth!>
-R:  Brandon Kim <brandonkim@google.com>
+R:  Patrick Venture <venture@google.com> <venture!>
