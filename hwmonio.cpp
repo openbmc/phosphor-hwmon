@@ -150,7 +150,7 @@ int64_t HwmonIO::read(const std::string& type, const std::string& id,
                 !retries)
             {
                 // Not a retryable error or out of retries.
-#ifdef NEGATIVE_ERRNO_ON_FAIL
+#if NEGATIVE_ERRNO_ON_FAIL
                 return -rc;
 #endif
 

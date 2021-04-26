@@ -96,7 +96,7 @@ SensorValueType Sensor::adjustValue(SensorValueType value)
 // Because read doesn't have an out pointer to store errors.
 // let's assume negative values are errors if they have this
 // set.
-#ifdef NEGATIVE_ERRNO_ON_FAIL
+#if NEGATIVE_ERRNO_ON_FAIL
     if (value < 0)
     {
         return value;
@@ -137,7 +137,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
     // Only read the input value if the status is functional
     if (statusIface->functional())
     {
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+#if UPDATE_FUNCTIONAL_ON_FAIL
         try
 #endif
         {
@@ -151,7 +151,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
                                 hwmon::entry::cinput, std::get<size_t>(retryIO),
                                 std::get<std::chrono::milliseconds>(retryIO));
         }
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+#if UPDATE_FUNCTIONAL_ON_FAIL
         catch (const std::system_error& e)
         {
             // Catch the exception here and update the functional property.
