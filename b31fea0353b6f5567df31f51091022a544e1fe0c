@@ -105,6 +105,30 @@
       "revId": "b31fea0353b6f5567df31f51091022a544e1fe0c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "458cb4d4_d6d982e9",
+        "filename": "start_hwmon.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000064
+      },
+      "writtenOn": "2021-04-26T16:51:18Z",
+      "side": 1,
+      "message": "Nope, it\u0027s a bit out of scope of this change. Let\u0027s make it separate.",
+      "parentUuid": "7397d34d_c1ed9cbb",
+      "range": {
+        "startLine": 3,
+        "startChar": 7,
+        "endLine": 3,
+        "endChar": 9
+      },
+      "revId": "b31fea0353b6f5567df31f51091022a544e1fe0c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
