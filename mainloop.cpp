@@ -527,7 +527,7 @@ void MainLoop::read()
         }
         catch (const std::system_error& e)
         {
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+#if UPDATE_FUNCTIONAL_ON_FAIL
             // If UPDATE_FUNCTIONAL_ON_FAIL is defined and an exception was
             // thrown, set the functional property to false.
             // We cannot set this with the 'continue' in the lower block
@@ -553,7 +553,7 @@ void MainLoop::read()
                 }
                 continue;
             }
-#ifdef UPDATE_FUNCTIONAL_ON_FAIL
+#if UPDATE_FUNCTIONAL_ON_FAIL
             // Do not exit with failure if UPDATE_FUNCTIONAL_ON_FAIL is set
             continue;
 #endif
