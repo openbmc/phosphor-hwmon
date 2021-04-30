@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "878fb76c_c71b784f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "The standard is to keep commit message lines to 72.",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d6e3e7d1_13ef5a18",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -37,6 +54,132 @@
     },
     {
       "key": {
+        "uuid": "0b5902c2_4d63b28b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "Assuming you\u0027re doing this because your sensors are on main power, instead of being provided by a running host processor, yea, ChassisState would be more appropriate.  x86-power-control always matches up chassis state On \u003d\u003d host state Running, but other architectures such as OpenPower have multiple host states besides running where the chassis is still on where sensors on main power should still be able to be read.",
+      "parentUuid": "cfd440b8_fb5d69d5",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82d9b9a9_ab4980c9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "Number 3 would be setting the sensor to not functional when power is off.",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f8303da_15d731cd",
+        "filename": "Makefile.am",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "this repository has since switched to meson, and I\u0027m about to merge the change to remove all the autotools files, so you\u0027ll need to rebase.",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "26e08e4e_04d22045",
+        "filename": "mainloop.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "I think these would be better as part of the MainLoop class.",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0745c354_28e9e459",
+        "filename": "mainloop.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "I don\u0027t understand what a cache has to do with powerState?  I\u0027m a little unsure why you have this timer at all?",
+      "range": {
+        "startLine": 83,
+        "startChar": 40,
+        "endLine": 83,
+        "endChar": 50
+      },
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57a3355e_38312bae",
+        "filename": "mainloop.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "these  also all an be part of the mainloop class.\n\nWhen you add them, please add the doxygen describing what they do.",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a43fa20b_d88b8e35",
+        "filename": "mainloop.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "I don\u0027t see where you are ever setting this back to true?",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "22944191_6cb04999",
         "filename": "sensor.cpp",
         "patchSetId": 1
@@ -48,6 +191,29 @@
       "writtenOn": "2020-01-03T17:03:28Z",
       "side": 1,
       "message": "I\u0027d recommend making this a case-insensitive check.",
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8645d36_c359c8c1",
+        "filename": "sensor.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-04-30T13:55:48Z",
+      "side": 1,
+      "message": "can you just use \u0027power\u0027?",
+      "range": {
+        "startLine": 171,
+        "startChar": 10,
+        "endLine": 171,
+        "endChar": 13
+      },
       "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
