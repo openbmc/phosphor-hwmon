@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07905f3a_5b2c07fc",
+        "filename": "meson.build",
+        "patchSetId": 11
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-04T18:43:59Z",
+      "side": 1,
+      "message": "I think you should use pkgconfig to find \u0027udev.pc\u0027 and get the udev_dir out of it.  If you can\u0027t find that, then I think you can default to:\n\nget_option(\u0027prefix\u0027) / \u0027lib/udev/rules.d\u0027\n\nThe bitbake SDK has udev.pc which has the right information in it.\n\nThe pkgconfig lookup should be very similar to how \u0027systemd_system_unit_dir\u0027 is obtained.",
+      "revId": "b2fb836a3e0435b315e1c29a2bd80aa3721d774b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83dc8cca_b16343cb",
+        "filename": "msl/meson.build",
+        "patchSetId": 11
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2021-05-04T18:43:59Z",
+      "side": 1,
+      "message": "Can you reuse this from parent directory?",
+      "revId": "b2fb836a3e0435b315e1c29a2bd80aa3721d774b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
