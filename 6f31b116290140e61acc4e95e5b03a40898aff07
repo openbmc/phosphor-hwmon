@@ -260,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "7d32cbd0_e7f1b345",
+        "filename": "mainloop.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000357
+      },
+      "writtenOn": "2021-05-04T09:39:44Z",
+      "side": 1,
+      "message": "Sorry for the previous comment and please ignore it. I found it still needs this timer to wait for sensors back to normal, otherwise some sensors still may response the lower value once power status just back to on.",
+      "parentUuid": "d2f8ce02_d1cf90ce",
+      "range": {
+        "startLine": 83,
+        "startChar": 40,
+        "endLine": 83,
+        "endChar": 50
+      },
+      "revId": "6f31b116290140e61acc4e95e5b03a40898aff07",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "57a3355e_38312bae",
         "filename": "mainloop.cpp",
         "patchSetId": 1
