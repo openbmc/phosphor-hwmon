@@ -8,10 +8,11 @@
 
 #include <fmt/format.h>
 
-#include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
-#include <string>
 #include <xyz/openbmc_project/Control/Device/error.hpp>
+
+#include <filesystem>
+#include <string>
 
 using namespace phosphor::logging;
 

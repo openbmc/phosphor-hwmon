@@ -107,8 +107,7 @@ static constexpr auto retryableErrors = {
 
 HwmonIO::HwmonIO(const std::string& path, const FileSystemInterface* intf) :
     _p(path), _intf(intf)
-{
-}
+{}
 
 int64_t HwmonIO::read(const std::string& type, const std::string& id,
                       const std::string& sensor, size_t retries,

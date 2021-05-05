@@ -31,16 +31,17 @@
 
 #include <fmt/format.h>
 
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
+
 #include <cassert>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <memory>
-#include <phosphor-logging/elog-errors.hpp>
 #include <sstream>
 #include <string>
 #include <unordered_set>
-#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 using namespace phosphor::logging;
 

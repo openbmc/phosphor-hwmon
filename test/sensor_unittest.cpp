@@ -4,6 +4,7 @@
 #include "sensor.hpp"
 
 #include <gpioplus/test/handle.hpp>
+
 #include <memory>
 #include <utility>
 

@@ -1,10 +1,11 @@
 #include "gpio_handle.hpp"
 
-#include <cstdlib>
 #include <gpioplus/chip.hpp>
 #include <gpioplus/handle.hpp>
-#include <memory>
 #include <phosphor-logging/log.hpp>
+
+#include <cstdlib>
+#include <memory>
 #include <string>
 
 namespace gpio

@@ -19,8 +19,7 @@ class HwmonIOTest : public ::testing::Test
 {
   protected:
     HwmonIOTest() : _hwmonio(_path, &_mock)
-    {
-    }
+    {}
 
     const int64_t _value = 12;
     const std::string _path = "abcd";

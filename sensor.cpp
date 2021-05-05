@@ -10,15 +10,16 @@
 
 #include <fmt/format.h>
 
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
+
 #include <cassert>
 #include <chrono>
 #include <cmath>
 #include <cstring>
 #include <filesystem>
-#include <phosphor-logging/elog-errors.hpp>
 #include <thread>
-#include <xyz/openbmc_project/Common/error.hpp>
-#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 namespace sensor
 {
