@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91b8444b_8d707edf",
+        "filename": "mainloop.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-05-05T13:24:42Z",
+      "side": 1,
+      "message": "I\u0027m not really sure what to think about mixing asio calls in a repo that doesn\u0027t already use them.  sdeventplus provides a Timer class that doesn\u0027t require any asio objects.  Maybe others could chime in  if it\u0027s a problem.",
+      "revId": "5a1d3d79e58d0941d7bccc9cd9d5081fc39ab2bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3cb0296_8c0b122b",
+        "filename": "mainloop.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 553,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-05-05T13:24:42Z",
+      "side": 1,
+      "message": "Looking at how other applications handle power states with sensors, it looks like they use the Available interface instead of the functional one.  I think phosphor-hwmon should do the same so that there\u0027s consistent behavior.  See https://github.com/openbmc/dbus-sensors/blob/master/include/sensor.hpp#L373.   The Availability interface is in phosphor-dbus-interfaces, so it can be used here.",
+      "revId": "5a1d3d79e58d0941d7bccc9cd9d5081fc39ab2bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cebb4fe2_faedf853",
+        "filename": "mainloop.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-05-05T13:24:42Z",
+      "side": 1,
+      "message": "I still don\u0027t see any code that makes the sensors functional (available) again?  How did this work in your tests?",
+      "revId": "5a1d3d79e58d0941d7bccc9cd9d5081fc39ab2bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e825b5ce_58b7af36",
+        "filename": "thresholds.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-05-05T13:24:42Z",
+      "side": 1,
+      "message": "I thinkk you need to rebase again.  Looks like some recently added function was removed.",
+      "revId": "5a1d3d79e58d0941d7bccc9cd9d5081fc39ab2bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
