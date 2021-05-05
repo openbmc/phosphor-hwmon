@@ -10,11 +10,7 @@ project(
     version: '1.0',
 )
 
-build_tests = get_option('tests')
-
 fmt = dependency('fmt')
-gmock = dependency('gmock')
-gtest = dependency('gtest', main: true)
 
 conf = configuration_data()
 conf.set_quoted('BUSNAME_PREFIX', get_option('busname-prefix'))
@@ -59,7 +55,6 @@ hwmon_lib = static_library(
     'env.cpp',
     'fan_pwm.cpp',
     'fan_speed.cpp',
-    'gpio_handle.cpp',
     'hwmon.cpp',
     'hwmonio.cpp',
     'mainloop.cpp',
@@ -89,6 +84,7 @@ endif
 
 executable(
     'phosphor-hwmon-readd',
+    'gpio_handle.cpp',
     'readd.cpp',
     dependencies: [
         cli11_dep,
@@ -97,5 +93,7 @@ executable(
     install: true)
 
 subdir('msl')
-subdir('test')
+if not get_option('tests').disabled()
+  subdir('test')
+endif
 subdir('tools')

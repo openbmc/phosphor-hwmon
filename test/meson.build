@@ -1,60 +1,41 @@
-average_unittest = executable(
+gtest = dependency('gtest', main: true, disabler: true, required: false)
+gmock = dependency('gmock', disabler: true, required: false)
+if not gtest.found() or not gmock.found()
+  gtest_opts = import('cmake').subproject_options()
+  gtest_opts.add_cmake_defines({'CMAKE_CXX_FLAGS': '-Wno-pedantic'})
+  gtest_proj = import('cmake').subproject(
+    'googletest',
+    options: gtest_opts,
+    required: false)
+  if gtest_proj.found()
+    gtest = declare_dependency(
+      dependencies: [
+        dependency('threads'),
+        gtest_proj.dependency('gtest'),
+        gtest_proj.dependency('gtest_main'),
+      ])
+    gmock = gtest_proj.dependency('gmock')
+  else
+    assert(not build_tests.enabled(), 'Googletest is required')
+  endif
+endif
+
+tests = [
     'average_unittest',
-    'average_unittest.cpp',
-    dependencies: [
-        gmock,
-        gtest,
-        hwmon_dep,
-    ],
-)
-
-env_unittest = executable(
     'env_unittest',
-    'env_unittest.cpp',
-    dependencies: [
-        gmock,
-        gtest,
-        hwmon_dep,
-    ],
-)
-
-fanpwm_unittest = executable(
     'fanpwm_unittest',
-    'fanpwm_unittest.cpp',
-    dependencies: [
-        gmock,
-        gtest,
-        hwmon_dep,
-    ],
-)
-
-hwmon_unittest = executable(
     'hwmon_unittest',
-    'hwmon_unittest.cpp',
-    dependencies: [
-        gmock,
-        gtest,
-        hwmon_dep,
-    ],
-)
-
-hwmonio_default_unittest = executable(
     'hwmonio_default_unittest',
-    'hwmonio_default_unittest.cpp',
-    dependencies: [
-        gtest,
-        gmock,
-        hwmon_dep,
-    ],
-)
-
-sensor_unittest = executable(
     'sensor_unittest',
-    'gpio.cpp',
-    'sensor_unittest.cpp',
-    dependencies: [
-        gtest,
-        gmock,
-        hwmon_dep,
-    ],
-)
+]
+
+foreach t : tests
+    test(
+        t,
+        executable(
+            t.underscorify(),
+            t + '.cpp',
+            'gpio.cpp',
+            implicit_include_directories: false,
+            dependencies: [hwmon_dep, gtest, gmock]))
+endforeach
