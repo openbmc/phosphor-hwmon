@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "config.h"
-
 #include "sysfs.hpp"
+
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <memory>
-#include <phosphor-logging/log.hpp>
-#include <thread>
+#include <string>
 
 using namespace std::string_literals;
 namespace fs = std::filesystem;
@@ -233,9 +231,9 @@ std::string findHwmonFromDevPath(const std::string& devPath)
     }
     catch (const std::exception& e)
     {
-        using namespace phosphor::logging;
-        log<level::ERR>("Unable to find hwmon directory from the dev path",
-                        entry("PATH=%s", devPath.c_str()));
+        fmt::print(stderr,
+                   "Unable to find hwmon directory from the dev path: {}\n",
+                   devPath.c_str());
     }
     return emptyString;
 }

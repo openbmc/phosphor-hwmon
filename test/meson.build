@@ -4,10 +4,7 @@ average_unittest = executable(
     dependencies: [
         gmock,
         gtest,
-    ],
-    include_directories: '..',
-    link_with: [
-        libaverage,
+        hwmon_dep,
     ],
 )
 
@@ -17,8 +14,8 @@ env_unittest = executable(
     dependencies: [
         gmock,
         gtest,
+        hwmon_dep,
     ],
-    include_directories: '..',
 )
 
 fanpwm_unittest = executable(
@@ -27,12 +24,7 @@ fanpwm_unittest = executable(
     dependencies: [
         gmock,
         gtest,
-        phosphor_logging,
-        fmt,
-    ],
-    include_directories: '..',
-    link_with: [
-        libfan_pwm,
+        hwmon_dep,
     ],
 )
 
@@ -42,11 +34,7 @@ hwmon_unittest = executable(
     dependencies: [
         gmock,
         gtest,
-        fmt,
-    ],
-    include_directories: '..',
-    link_with: [
-        libhwmon,
+        hwmon_dep,
     ],
 )
 
@@ -56,11 +44,7 @@ hwmonio_default_unittest = executable(
     dependencies: [
         gtest,
         gmock,
-        fmt,
-    ],
-    include_directories: '..',
-    link_with: [
-        libhwmonio,
+        hwmon_dep,
     ],
 )
 
@@ -71,10 +55,6 @@ sensor_unittest = executable(
     dependencies: [
         gtest,
         gmock,
-        fmt,
-    ],
-    include_directories: '..',
-    link_with: [
-        libsensor,
+        hwmon_dep,
     ],
 )
