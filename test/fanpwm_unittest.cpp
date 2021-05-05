@@ -2,6 +2,7 @@
 #include "hwmonio_mock.hpp"
 
 #include <sdbusplus/test/sdbus_mock.hpp>
+
 #include <string>
 
 #include <gmock/gmock.h>

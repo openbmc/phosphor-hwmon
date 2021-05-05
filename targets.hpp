@@ -7,11 +7,12 @@
 
 #include <fmt/format.h>
 
-#include <filesystem>
-#include <memory>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
+
+#include <filesystem>
+#include <memory>
 
 enum class targetType
 {

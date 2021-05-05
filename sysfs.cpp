@@ -17,13 +17,14 @@
 
 #include "sysfs.hpp"
 
+#include <phosphor-logging/log.hpp>
+
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <memory>
-#include <phosphor-logging/log.hpp>
 #include <thread>
 
 using namespace std::string_literals;

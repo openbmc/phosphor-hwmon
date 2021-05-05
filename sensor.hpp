@@ -5,9 +5,10 @@
 #include "types.hpp"
 
 #include <gpioplus/handle.hpp>
+#include <stdplus/handle/managed.hpp>
+
 #include <memory>
 #include <optional>
-#include <stdplus/handle/managed.hpp>
 #include <unordered_set>
 
 namespace sensor
