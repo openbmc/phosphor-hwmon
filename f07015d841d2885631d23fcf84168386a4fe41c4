@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "31efb907_7bd4321b",
+        "filename": "mainloop.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-05T22:27:35Z",
+      "side": 1,
+      "message": "Yes, I will factor it out to sensor.cpp",
+      "parentUuid": "d0a1f26d_3c778832",
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "52c6a102_7d685971",
         "filename": "mainloop.cpp",
         "patchSetId": 23
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ab5ab3ae_1c96950e",
+        "filename": "mainloop.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-05T22:27:35Z",
+      "side": 1,
+      "message": "Agreed, this is not a true asynchronous read but I believe a step in the right direction as it no longer waits indefinitely - which could bring down IPMI if an I2C sensor is being slow for example.\n\nI will update with a comment noting that this is not true asynchronous read.",
+      "parentUuid": "52c6a102_7d685971",
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82f893fa_838da02b",
         "filename": "mainloop.cpp",
         "patchSetId": 23
@@ -50,6 +86,24 @@
       "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8761f4fe_855fb047",
+        "filename": "mainloop.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-05T22:27:35Z",
+      "side": 1,
+      "message": "I will update the comment with better explanation. This is the case for when `valueIsValid` is false, which if you look above is the case when the sensor was previously already in the timedoutMap. This means that the sensor has already timedout (to be placed in the timedoutMap), and we\u0027re doing a 0 second wait (every 1 second poll) to see if the thread ever finished reading. If it finished reading (but past the timedout period), we will erase it from the timedout map so that we can try again on the next read cycle.\n\nWe throw because the value took too long to read, and is likely a corrupted / invalid value - better to do a \"clean\" read next cycle that doesn\u0027t timeout.",
+      "parentUuid": "82f893fa_838da02b",
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -73,6 +127,30 @@
       "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ee57f02_c8c7146d",
+        "filename": "sensor.hpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-05T22:27:35Z",
+      "side": 1,
+      "message": "Good point, will do that.",
+      "parentUuid": "19114beb_04e723f3",
+      "range": {
+        "startLine": 109,
+        "startChar": 17,
+        "endLine": 109,
+        "endChar": 76
+      },
+      "revId": "f07015d841d2885631d23fcf84168386a4fe41c4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
