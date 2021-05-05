@@ -22,6 +22,30 @@
       "revId": "ffaaef78fc1ea644dc83c1b93734181116974611",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf906e5f_d93995d3",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2021-05-05T22:36:14Z",
+      "side": 0,
+      "message": "If you are using std::future / async you should add dependency(\u0027threads\u0027). I think it was broken when it compiled for arm.",
+      "parentUuid": "a53afa19_cfe5754d",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 31
+      },
+      "revId": "ffaaef78fc1ea644dc83c1b93734181116974611",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
