@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a53afa19_cfe5754d",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-05T22:33:31Z",
+      "side": 0,
+      "message": "Actually, noticed that threads is no longer a dependency in the newer meson.build.\n\nI will be bringing it in soon for https://gerrit.openbmc-project.xyz/c/openbmc/phosphor-hwmon/+/24337/31 so it\u0027s not too big of a deal, but would this be a regression? (I guess CI didn\u0027t fail, so maybe it was included by accident originally?)",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 31
+      },
+      "revId": "ffaaef78fc1ea644dc83c1b93734181116974611",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
