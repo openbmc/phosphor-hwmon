@@ -34,6 +34,24 @@
       "revId": "ecd6a41c185dec88fb46d8a27745568cd9f35c95",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6841a047_86be7e93",
+        "filename": "sensor.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-06T21:53:16Z",
+      "side": 1,
+      "message": "I\u0027ll just leave it as a design choice, since the comments outline that this is what\u0027s happening. It should be a fairly easy fix to change this behavior if we want to change it.",
+      "parentUuid": "720d7929_3d8a6d51",
+      "revId": "ecd6a41c185dec88fb46d8a27745568cd9f35c95",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
