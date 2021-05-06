@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb577394_39bb923b",
+        "filename": "sensor.cpp",
+        "patchSetId": 34
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000044
+      },
+      "writtenOn": "2021-05-06T03:04:55Z",
+      "side": 1,
+      "message": "Use TimedoutMap",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 122,
+        "endChar": 55
+      },
+      "revId": "ba92451cbf0f058fcc438aebdf46d0153ce40f67",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
