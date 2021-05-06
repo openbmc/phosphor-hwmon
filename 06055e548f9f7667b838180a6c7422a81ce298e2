@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "27482792_67b1be77",
+        "filename": "sensor.hpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-06T20:24:41Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "d1c1ad18_dc0430dd",
+      "revId": "06055e548f9f7667b838180a6c7422a81ce298e2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "723b0379_665953e5",
         "filename": "sensor.hpp",
         "patchSetId": 36
@@ -33,6 +51,24 @@
       "revId": "06055e548f9f7667b838180a6c7422a81ce298e2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ec3066e_9436db72",
+        "filename": "sensor.hpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-06T20:24:41Z",
+      "side": 1,
+      "message": "Sure, I can change this (I was just doing the conversion inside the function so that users don\u0027t have to).",
+      "parentUuid": "723b0379_665953e5",
+      "revId": "06055e548f9f7667b838180a6c7422a81ce298e2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }

@@ -16,6 +16,24 @@
       "revId": "ecd6a41c185dec88fb46d8a27745568cd9f35c95",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "720d7929_3d8a6d51",
+        "filename": "sensor.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-05-06T20:24:41Z",
+      "side": 1,
+      "message": "It could be valid yeah, and I don\u0027t quite remember the history of this code but I believe we didn\u0027t want to use the stale data (but maybe stale data is better than no data?) + it taking longer than timeout (timeout was usually set to something generous like 1 second), we assumed that the sensor value may have been corrupted / bad.",
+      "parentUuid": "b26cad77_f33d9eac",
+      "revId": "ecd6a41c185dec88fb46d8a27745568cd9f35c95",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
