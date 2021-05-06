@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d1c1ad18_dc0430dd",
+        "filename": "sensor.hpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2021-05-06T20:09:03Z",
+      "side": 1,
+      "message": "#include \u003cmap\u003e",
+      "revId": "06055e548f9f7667b838180a6c7422a81ce298e2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "723b0379_665953e5",
+        "filename": "sensor.hpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000188
+      },
+      "writtenOn": "2021-05-06T20:09:03Z",
+      "side": 1,
+      "message": "asyncTimeout should be a chrono type like delay",
+      "revId": "06055e548f9f7667b838180a6c7422a81ce298e2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
