@@ -127,20 +127,16 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
 
     auto tLo = env::getEnv(Thresholds<T>::envLo, sensorType, sensorID);
     auto tHi = env::getEnv(Thresholds<T>::envHi, sensorType, sensorID);
-    if (!tLo.empty() && !tHi.empty())
-    {
-        static constexpr bool deferSignals = true;
-        auto& bus = *std::get<sdbusplus::bus::bus*>(info);
+    static constexpr bool deferSignals = true;
+    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
 
-        iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
+    iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
+    if (!tLo.empty())
+    {
         auto lo = stod(tLo) * std::pow(10, scale);
-        auto hi = stod(tHi) * std::pow(10, scale);
         (*iface.*Thresholds<T>::setLo)(lo);
-        (*iface.*Thresholds<T>::setHi)(hi);
         auto alarmLowState = (*iface.*Thresholds<T>::getAlarmLow)();
-        auto alarmHighState = (*iface.*Thresholds<T>::getAlarmHigh)();
         (*iface.*Thresholds<T>::alarmLo)(value <= lo);
-        (*iface.*Thresholds<T>::alarmHi)(value >= hi);
         if (alarmLowState != (value <= lo))
         {
             if (value <= lo)
@@ -152,6 +148,14 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
                 (*iface.*Thresholds<T>::deassertLowSignal)(value);
             }
         }
+    }
+
+    if (!tHi.empty())
+    {
+        auto hi = stod(tHi) * std::pow(10, scale);
+        (*iface.*Thresholds<T>::setHi)(hi);
+        auto alarmHighState = (*iface.*Thresholds<T>::getAlarmHigh)();
+        (*iface.*Thresholds<T>::alarmHi)(value >= hi);
         if (alarmHighState != (value >= hi))
         {
             if (value >= hi)
@@ -163,6 +167,10 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
                 (*iface.*Thresholds<T>::deassertHighSignal)(value);
             }
         }
+    }
+
+    if (!tLo.empty() || !tHi.empty())
+    {
         auto type = Thresholds<T>::type;
         obj[type] = iface;
     }
