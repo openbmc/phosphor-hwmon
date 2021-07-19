@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b78b1ac8_fcd9e146",
+        "filename": "thresholds.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-07-19T14:23:16Z",
+      "side": 1,
+      "message": "If neither tLo or tHi is specified, this d-bus interface object still gets created.  Can you confirm nothing shows up on D-Bus in this case since deferSignals is true?",
+      "revId": "fcc145fc1229e463a440d5adac24dc699489d693",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
