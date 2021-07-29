@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <map>
 #include <set>
 #include <string>
@@ -24,6 +25,7 @@ class SensorSet
         container_t;
     using mapped_type = container_t::mapped_type;
     using key_type = container_t::key_type;
+    using size_type = container_t::size_type;
 
     /**
      * @brief Constructor
@@ -60,6 +62,12 @@ class SensorSet
     {
         return const_cast<const container_t&>(_container).end();
     }
+
+    /**
+     * @brief Returns size of map.
+     * @return size_type
+     */
+    size_type size();
 
   private:
     /**
