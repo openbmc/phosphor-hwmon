@@ -51,4 +51,8 @@ SensorSet::SensorSet(const std::string& path)
     }
 }
 
+size_type SensorSet::size() {
+    return _container.size();
+}
+
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
