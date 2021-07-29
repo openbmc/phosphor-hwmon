@@ -29,10 +29,7 @@ using StatusInterface = sdbusplus::xyz::openbmc_project::State::Decorator::
     server::OperationalStatus;
 using StatusObject = ServerObject<StatusInterface>;
 
-// I understand this seems like magic, but since decltype doesn't evaluate you
-// can call nullptr https://stackoverflow.com/a/5580411/2784885
-using SensorValueType =
-    decltype((static_cast<ValueInterface*>(nullptr))->value());
+using SensorValueType = double;
 
 enum class InterfaceType
 {

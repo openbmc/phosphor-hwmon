@@ -17,6 +17,7 @@ conf.set_quoted('BUSNAME_PREFIX', get_option('busname-prefix'))
 conf.set_quoted('SENSOR_ROOT', get_option('sensor-root'))
 conf.set10('NEGATIVE_ERRNO_ON_FAIL', get_option('negative-errno-on-fail'))
 conf.set10('UPDATE_FUNCTIONAL_ON_FAIL', get_option('update-functional-on-fail'))
+conf.set10('USE_ASYNC_READS', get_option('use-async-reads'))
 
 sysfs_headers = include_directories('.')
 
