@@ -22,6 +22,7 @@
 #include "fan_speed.hpp"
 #include "hwmon.hpp"
 #include "hwmonio.hpp"
+#include "read_cache.hpp"
 #include "sensor.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
@@ -30,8 +31,11 @@
 #include "util.hpp"
 
 #include <fmt/format.h>
+#include <unistd.h>
 
 #include <cassert>
+#include <chrono>
+#include <cstddef>
 #include <cstdlib>
 #include <functional>
 #include <future>
@@ -358,6 +362,9 @@ void MainLoop::run()
         // TODO: Issue#7 - Should probably periodically check the SensorSet
         //       for new entries.
 
+        // For async sensor reads using io_uring.
+        _ioPtr = _readCachePtr->getIo(_event);
+
         _bus.attach_event(_event.get(), SD_EVENT_PRIORITY_IMPORTANT);
         _event.loop();
     }
@@ -374,13 +381,15 @@ void MainLoop::init()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
+    uint32_t sensorCount = 0;
+
     for (const auto& i : *sensors)
     {
         auto object = getObject(i);
         if (object)
         {
             // Construct the SensorSet value
-            // std::tuple<SensorSet::mapped_type,
+            // std::tuple<SensorSet::mapped_type (std::set<std::string>),
             //            std::string(Sensor Label),
             //            ObjectInfo>
             auto value =
@@ -388,6 +397,8 @@ void MainLoop::init()
                                 std::move((*object).second));
 
             _state[std::move(i.first)] = std::move(value);
+
+            sensorCount += i.second.size();
         }
 
         // Initialize _averageMap of sensor. e.g. <<power, 1>, <0, 0>>
@@ -403,6 +414,12 @@ void MainLoop::init()
     {
         exit(0);
     }
+
+    _readCachePtr = std::make_unique<ReadCache>(
+        sensorCount,
+        _ioAccess->path(),
+        hwmonio::retries
+    );
 
     {
         std::stringstream ss;
@@ -428,9 +445,6 @@ void MainLoop::init()
 
 void MainLoop::read()
 {
-    // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
-    //       ensure the objects all exist?
-
     // Iterate through all the sensors.
     for (auto& [sensorSetKey, sensorStateTuple] : _state)
     {
@@ -470,9 +484,11 @@ void MainLoop::read()
         {
             if (sensor->hasFaultFile())
             {
-                auto fault = _ioAccess->read(sensorSysfsType, sensorSysfsNum,
-                                             hwmon::entry::fault,
-                                             hwmonio::retries, hwmonio::delay);
+                int64_t fault = _readCachePtr->getSensorValue(
+                    sensorSysfsType,
+                    sensorSysfsNum,
+                    hwmon::entry::fault
+                );
                 // Skip reading from a sensor with a valid fault file
                 // and set the functional property accordingly
                 if (!statusIface->functional((fault == 0) ? true : false))
@@ -502,9 +518,11 @@ void MainLoop::read()
                 {
                     // Retry for up to a second if device is busy
                     // or has a transient error.
-                    value =
-                        _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
-                                        hwmonio::retries, hwmonio::delay);
+                    value = _readCachePtr->getSensorValue(
+                        sensorSysfsType,
+                        sensorSysfsNum,
+                        input
+                    );
                 }
 
                 // Set functional property to true if we could read sensor
@@ -517,10 +535,11 @@ void MainLoop::read()
                     // Calculate the values of averageMap based on current
                     // average value, current average_interval value, previous
                     // average value, previous average_interval value
-                    int64_t interval =
-                        _ioAccess->read(sensorSysfsType, sensorSysfsNum,
-                                        hwmon::entry::caverage_interval,
-                                        hwmonio::retries, hwmonio::delay);
+                    int64_t interval = _readCachePtr->getSensorValue(
+                        sensorSysfsType,
+                        sensorSysfsNum,
+                        hwmon::entry::caverage_interval
+                    );
                     auto ret = _average.getAverageValue(sensorSetKey);
                     assert(ret);
 
