@@ -3,6 +3,7 @@
 #include "average.hpp"
 #include "hwmonio.hpp"
 #include "interface.hpp"
+#include "read_cache.hpp"
 #include "sensor.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
@@ -15,6 +16,7 @@
 #include <sdbusplus/server.hpp>
 #include <sdeventplus/clock.hpp>
 #include <sdeventplus/event.hpp>
+#include <sdeventplus/source/io.hpp>
 #include <sdeventplus/utility/timer.hpp>
 #include <string>
 #include <vector>
@@ -79,6 +81,9 @@ class MainLoop
      */
     void addDroppedSensors();
 
+    /* Number of read() iterations for profiling. */
+    uint64_t _iterations = 0;
+
   private:
     using mapped_type =
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
@@ -123,6 +128,11 @@ class MainLoop
         _sensorObjects;
     /** @brief Store the async futures of timed out sensor objects */
     sensor::TimedoutMap _timedoutMap;
+
+    /** @brief IO for event loop. */
+    std::unique_ptr<sdeventplus::source::IO> _ioPtr;
+    /** @brief Cache for async sensor reads. */
+    std::unique_ptr<ReadCache> _readCachePtr;
 
     /**
      * @brief Map of removed sensors
