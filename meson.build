@@ -60,6 +60,7 @@ hwmon_lib = static_library(
     'hwmon.cpp',
     'hwmonio.cpp',
     'mainloop.cpp',
+    'read_cache.cpp',
     'sensor.cpp',
     'sensorset.cpp',
     dependencies: hwmon_deps,
