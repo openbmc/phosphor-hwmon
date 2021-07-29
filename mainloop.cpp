@@ -30,12 +30,16 @@
 #include "util.hpp"
 
 #include <fmt/format.h>
+#include <unistd.h>
 
 #include <cassert>
+#include <chrono>
+#include <cstddef>
 #include <cstdlib>
 #include <functional>
 #include <future>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <phosphor-logging/elog-errors.hpp>
 #include <sstream>
@@ -109,6 +113,12 @@ decltype(Thresholds<CriticalObject>::deassertLowSignal)
 decltype(Thresholds<CriticalObject>::deassertHighSignal)
     Thresholds<CriticalObject>::deassertHighSignal =
         &CriticalObject::criticalHighAlarmDeasserted;
+
+// TODO: Delete later; for profiling data.
+std::mutex MainLoop::read_mutex;
+std::uint64_t MainLoop::min_read_value =
+    static_cast<std::uint64_t>(std::numeric_limits<std::uint64_t>::max());
+std::uint64_t MainLoop::max_read_value = 0;
 
 void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value)
 {
@@ -374,13 +384,15 @@ void MainLoop::init()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
+    uint32_t sensorCount = 0;
+
     for (const auto& i : *sensors)
     {
         auto object = getObject(i);
         if (object)
         {
             // Construct the SensorSet value
-            // std::tuple<SensorSet::mapped_type,
+            // std::tuple<SensorSet::mapped_type (std::set<std::string>),
             //            std::string(Sensor Label),
             //            ObjectInfo>
             auto value =
@@ -388,6 +400,8 @@ void MainLoop::init()
                                 std::move((*object).second));
 
             _state[std::move(i.first)] = std::move(value);
+
+            sensorCount += i.second.size();
         }
 
         // Initialize _averageMap of sensor. e.g. <<power, 1>, <0, 0>>
@@ -403,6 +417,13 @@ void MainLoop::init()
     {
         exit(0);
     }
+
+#if USE_ASYNC_READS
+    _sensorCache = std::make_unique<SensorCache>(
+        sensorCount,
+        _ioAccess->path()
+    );
+#endif
 
     {
         std::stringstream ss;
@@ -426,10 +447,37 @@ void MainLoop::init()
     }
 }
 
+namespace {
+    /**
+     *  @brief Utility function for switching between synchronous or
+     *    asynchronous sensor reads.
+     *
+     *  @param[in] type - The hwmon type (ex. temp).
+     *  @param[in] id - The hwmon ID (ex. 1).
+     *  @param[in] sensor - The hwmon sensor (ex. input).
+     *  @param[in] retries - The number of times to retry.
+     *  @param[in] delay - The time to sleep between retry attempts.
+     *
+     *  @return int64_t - The read value.
+     */
+    std::int64_t readUtil(
+        const std::string& type,
+        const std::string& id,
+        const std::string& sensor,
+        std::size_t retries,
+        std::chrono::milliseconds delay
+    ) {
+#if USE_ASYNC_READS
+        return _sensorCache->getSensorValue(type, id, sensor);
+#else
+        return _ioAccess->read(type, id, sensor, retries, delay);
+#endif
+    }
+}
+
 void MainLoop::read()
 {
-    // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
-    //       ensure the objects all exist?
+    auto t0 = std::chrono::system_clock::now();
 
     // Iterate through all the sensors.
     for (auto& [sensorSetKey, sensorStateTuple] : _state)
@@ -470,9 +518,13 @@ void MainLoop::read()
         {
             if (sensor->hasFaultFile())
             {
-                auto fault = _ioAccess->read(sensorSysfsType, sensorSysfsNum,
-                                             hwmon::entry::fault,
-                                             hwmonio::retries, hwmonio::delay);
+                int64_t fault = readUtil(
+                    sensorSysfsType,
+                    sensorSysfsNum,
+                    hwmon::entry::fault,
+                    hwmonio::retries,
+                    hwmonio::delay
+                );
                 // Skip reading from a sensor with a valid fault file
                 // and set the functional property accordingly
                 if (!statusIface->functional((fault == 0) ? true : false))
@@ -485,6 +537,7 @@ void MainLoop::read()
                 // RAII object for GPIO unlock / lock
                 auto locker = sensor::gpioUnlock(sensor->getGpio());
 
+                /*
                 // For sensors with attribute ASYNC_READ_TIMEOUT,
                 // spawn a thread with timeout
                 auto asyncReadTimeout =
@@ -506,6 +559,14 @@ void MainLoop::read()
                         _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
                                         hwmonio::retries, hwmonio::delay);
                 }
+                */
+                value = readUtil(
+                    sensorSysfsType,
+                    sensorSysfsNum,
+                    input,
+                    hwmonio::retries,
+                    hwmonio::delay
+                );
 
                 // Set functional property to true if we could read sensor
                 statusIface->functional(true);
@@ -517,10 +578,13 @@ void MainLoop::read()
                     // Calculate the values of averageMap based on current
                     // average value, current average_interval value, previous
                     // average value, previous average_interval value
-                    int64_t interval =
-                        _ioAccess->read(sensorSysfsType, sensorSysfsNum,
-                                        hwmon::entry::caverage_interval,
-                                        hwmonio::retries, hwmonio::delay);
+                    int64_t interval = readUtil(
+                        sensorSysfsType,
+                        sensorSysfsNum,
+                        hwmon::entry::caverage_interval,
+                        hwmonio::retries,
+                        hwmonio::delay
+                    );
                     auto ret = _average.getAverageValue(sensorSetKey);
                     assert(ret);
 
@@ -601,6 +665,28 @@ void MainLoop::read()
     removeSensors();
 
     addDroppedSensors();
+
+    auto t1 = std::chrono::system_clock::now();
+    std::uint64_t elapsed =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+    
+    read_mutex.lock();
+    if (elapsed > max_read_value) {
+        max_read_value = elapsed;
+    } else if (elapsed < min_read_value) {
+        min_read_value = elapsed;
+    }
+    read_mutex.unlock();
+
+    log<level::INFO>(
+        fmt::format(
+            "pid: {}, duration: {} ns, min: {} ns, max: {} ns",
+            ::getpid(),
+            elapsed,
+            min_read_value,
+            max_read_value
+        ).c_str()
+    );
 }
 
 void MainLoop::removeSensors()

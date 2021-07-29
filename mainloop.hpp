@@ -4,6 +4,9 @@
 #include "hwmonio.hpp"
 #include "interface.hpp"
 #include "sensor.hpp"
+#if USE_ASYNC_READS
+#include "sensor_cache.hpp"
+#endif
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 #include "types.hpp"
@@ -11,6 +14,7 @@
 #include <any>
 #include <future>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <sdbusplus/server.hpp>
 #include <sdeventplus/clock.hpp>
@@ -90,6 +94,11 @@ class MainLoop
     /** @brief Set up D-Bus object state */
     void init();
 
+    // TODO: Delete later; for profiling data.
+    static std::mutex read_mutex;
+    static std::uint64_t min_read_value;
+    static std::uint64_t max_read_value;
+
     /** @brief sdbusplus bus client connection. */
     sdbusplus::bus::bus _bus;
     /** @brief sdbusplus freedesktop.ObjectManager storage. */
@@ -123,6 +132,11 @@ class MainLoop
         _sensorObjects;
     /** @brief Store the async futures of timed out sensor objects */
     sensor::TimedoutMap _timedoutMap;
+
+#if USE_ASYNC_READS
+    /** @brief Cache for async sensor reads. */
+    std::unique_ptr<SensorCache> _sensorCache;
+#endif
 
     /**
      * @brief Map of removed sensors
