@@ -22,6 +22,7 @@
 #include "fan_speed.hpp"
 #include "hwmon.hpp"
 #include "hwmonio.hpp"
+#include "read_cache.hpp"
 #include "sensor.hpp"
 #include "sensorset.hpp"
 #include "sysfs.hpp"
@@ -29,9 +30,15 @@
 #include "thresholds.hpp"
 #include "util.hpp"
 
+#include <fcntl.h>
 #include <fmt/format.h>
+#include <sys/file.h>
+#include <unistd.h>
 
+#include <algorithm>
 #include <cassert>
+#include <chrono>
+#include <cstddef>
 #include <cstdlib>
 #include <functional>
 #include <future>
@@ -358,6 +365,9 @@ void MainLoop::run()
         // TODO: Issue#7 - Should probably periodically check the SensorSet
         //       for new entries.
 
+        // For async sensor reads using io_uring.
+        _ioPtr = _readCachePtr->getIo(_event);
+
         _bus.attach_event(_event.get(), SD_EVENT_PRIORITY_IMPORTANT);
         _event.loop();
     }
@@ -374,13 +384,15 @@ void MainLoop::init()
     // Check sysfs for available sensors.
     auto sensors = std::make_unique<SensorSet>(_hwmonRoot + '/' + _instance);
 
+    uint32_t sensorCount = 0;
+
     for (const auto& i : *sensors)
     {
         auto object = getObject(i);
         if (object)
         {
             // Construct the SensorSet value
-            // std::tuple<SensorSet::mapped_type,
+            // std::tuple<SensorSet::mapped_type (std::set<std::string>),
             //            std::string(Sensor Label),
             //            ObjectInfo>
             auto value =
@@ -388,6 +400,8 @@ void MainLoop::init()
                                 std::move((*object).second));
 
             _state[std::move(i.first)] = std::move(value);
+
+            sensorCount += i.second.size();
         }
 
         // Initialize _averageMap of sensor. e.g. <<power, 1>, <0, 0>>
@@ -403,6 +417,8 @@ void MainLoop::init()
     {
         exit(0);
     }
+
+    _readCachePtr = std::make_unique<ReadCache>(sensorCount, _ioAccess);
 
     {
         std::stringstream ss;
@@ -428,8 +444,10 @@ void MainLoop::init()
 
 void MainLoop::read()
 {
-    // TODO: Issue#3 - Need to make calls to the dbus sensor cache here to
-    //       ensure the objects all exist?
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    uint64_t elapsed = _readCachePtr->_elapsed;
+    _readCachePtr->_elapsed = 0;
 
     // Iterate through all the sensors.
     for (auto& [sensorSetKey, sensorStateTuple] : _state)
@@ -470,9 +488,15 @@ void MainLoop::read()
         {
             if (sensor->hasFaultFile())
             {
-                auto fault = _ioAccess->read(sensorSysfsType, sensorSysfsNum,
-                                             hwmon::entry::fault,
-                                             hwmonio::retries, hwmonio::delay);
+                start = std::chrono::high_resolution_clock::now();
+                int64_t fault = _readCachePtr->getSensorValue(
+                    sensorSysfsType, sensorSysfsNum, hwmon::entry::fault);
+                end = std::chrono::high_resolution_clock::now();
+                elapsed +=
+                    std::chrono::duration_cast<std::chrono::microseconds>(end -
+                                                                          start)
+                        .count();
+
                 // Skip reading from a sensor with a valid fault file
                 // and set the functional property accordingly
                 if (!statusIface->functional((fault == 0) ? true : false))
@@ -500,11 +524,16 @@ void MainLoop::read()
                 }
                 else
                 {
+                    start = std::chrono::high_resolution_clock::now();
                     // Retry for up to a second if device is busy
                     // or has a transient error.
-                    value =
-                        _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
-                                        hwmonio::retries, hwmonio::delay);
+                    value = _readCachePtr->getSensorValue(
+                        sensorSysfsType, sensorSysfsNum, input);
+                    end = std::chrono::high_resolution_clock::now();
+                    elapsed +=
+                        std::chrono::duration_cast<std::chrono::microseconds>(
+                            end - start)
+                            .count();
                 }
 
                 // Set functional property to true if we could read sensor
@@ -514,13 +543,19 @@ void MainLoop::read()
 
                 if (input == hwmon::entry::average)
                 {
+                    start = std::chrono::high_resolution_clock::now();
                     // Calculate the values of averageMap based on current
                     // average value, current average_interval value, previous
                     // average value, previous average_interval value
-                    int64_t interval =
-                        _ioAccess->read(sensorSysfsType, sensorSysfsNum,
-                                        hwmon::entry::caverage_interval,
-                                        hwmonio::retries, hwmonio::delay);
+                    int64_t interval = _readCachePtr->getSensorValue(
+                        sensorSysfsType, sensorSysfsNum,
+                        hwmon::entry::caverage_interval);
+                    end = std::chrono::high_resolution_clock::now();
+                    elapsed +=
+                        std::chrono::duration_cast<std::chrono::microseconds>(
+                            end - start)
+                            .count();
+
                     auto ret = _average.getAverageValue(sensorSetKey);
                     assert(ret);
 
@@ -601,6 +636,31 @@ void MainLoop::read()
     removeSensors();
 
     addDroppedSensors();
+
+    if (_iterations == 10000 || elapsed == 0)
+    {
+        return;
+    }
+
+    int fd = open("placeholder.txt", O_WRONLY | O_APPEND | O_CREAT, 0600);
+    flock(fd, LOCK_EX);
+
+    std::string str = std::to_string(elapsed);
+    int length = str.length();
+    const char* cStr = str.c_str();
+
+    std::vector<char> buffer(length + 1);
+    std::copy(cStr, cStr + length, buffer.data());
+    buffer[length] = '\n';
+
+    int rc = write(fd, buffer.data(), length + 1);
+    if (rc != -1)
+    {
+        _iterations++;
+    }
+
+    flock(fd, LOCK_UN);
+    close(fd);
 }
 
 void MainLoop::removeSensors()
