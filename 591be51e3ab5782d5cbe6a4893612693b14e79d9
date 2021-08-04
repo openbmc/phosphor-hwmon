@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6162869e_328ac9b2",
+        "filename": "read_cache.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-04T18:16:59Z",
+      "side": 1,
+      "message": "Still has extra space here.",
+      "range": {
+        "startLine": 20,
+        "startChar": 61,
+        "endLine": 20,
+        "endChar": 62
+      },
+      "revId": "591be51e3ab5782d5cbe6a4893612693b14e79d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
