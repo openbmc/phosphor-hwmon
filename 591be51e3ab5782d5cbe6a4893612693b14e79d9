@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ace69ea8_3b6c607a",
+        "filename": "read_cache.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-04T23:14:18Z",
+      "side": 1,
+      "message": "nit: Please follow the presubmit result and fix the clang-format issues",
+      "parentUuid": "83116834_d120b603",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 27
+      },
+      "revId": "591be51e3ab5782d5cbe6a4893612693b14e79d9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6162869e_328ac9b2",
         "filename": "read_cache.hpp",
         "patchSetId": 4
