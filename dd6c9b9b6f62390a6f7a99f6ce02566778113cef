@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e765a58_549430b5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-08-06T16:19:34Z",
+      "side": 1,
+      "message": "Can you add a bigger description here of the changes?  How the cache works, etc..",
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfc24d0e_829df117",
+        "filename": "read_cache.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-08-06T16:19:34Z",
+      "side": 1,
+      "message": "According to the comment above, this isn\u0027t an error path.  How about INFO?",
+      "range": {
+        "startLine": 144,
+        "startChar": 19,
+        "endLine": 144,
+        "endChar": 22
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf4028eb_37494529",
+        "filename": "read_cache.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-08-06T16:19:34Z",
+      "side": 1,
+      "message": "could probably make this DEBUG since it\u0027s just part of startup.",
+      "range": {
+        "startLine": 197,
+        "startChar": 4,
+        "endLine": 197,
+        "endChar": 56
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75710ef4_4853ad70",
+        "filename": "read_cache.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-08-06T16:19:34Z",
+      "side": 1,
+      "message": "it looks like up above only handler and retriesRemaining are ever set to non default values, so you could just init the values to their defaults below instead of passing them through.",
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ca26658_0ce44e63",
+        "filename": "read_cache.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-08-06T16:19:34Z",
+      "side": 1,
+      "message": "what does CQE stand for? (I\u0027m not familiar with io_uring)",
+      "range": {
+        "startLine": 53,
+        "startChar": 20,
+        "endLine": 53,
+        "endChar": 23
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02351df1_4bf22145",
+        "filename": "read_cache.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2021-08-06T16:19:34Z",
+      "side": 1,
+      "message": "Maybe I missed it, but is there a reason a unique_ptr is needed here?",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 122,
+        "endChar": 19
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
