@@ -60,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "85cbce34_8dfc32a6",
+        "filename": "read_cache.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-10T07:33:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dfc24d0e_829df117",
+      "range": {
+        "startLine": 144,
+        "startChar": 19,
+        "endLine": 144,
+        "endChar": 22
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf4028eb_37494529",
         "filename": "read_cache.cpp",
         "patchSetId": 8
@@ -83,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "21104507_53bdaaf7",
+        "filename": "read_cache.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-10T07:33:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf4028eb_37494529",
+      "range": {
+        "startLine": 197,
+        "startChar": 4,
+        "endLine": 197,
+        "endChar": 56
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75710ef4_4853ad70",
         "filename": "read_cache.cpp",
         "patchSetId": 8
@@ -97,6 +145,24 @@
       "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31c0784b_262f4e65",
+        "filename": "read_cache.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-10T07:33:05Z",
+      "side": 1,
+      "message": "Changed constructor, only default value is now the return code rc, which I want to explicity set to 0.",
+      "parentUuid": "75710ef4_4853ad70",
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -123,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "a606fa75_bcfbfab4",
+        "filename": "read_cache.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-10T07:33:05Z",
+      "side": 1,
+      "message": "Completion Queue Event. Basically a struct that gets filled out with info regarding the results of the submitted IO task.",
+      "parentUuid": "8ca26658_0ce44e63",
+      "range": {
+        "startLine": 53,
+        "startChar": 20,
+        "endLine": 53,
+        "endChar": 23
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02351df1_4bf22145",
         "filename": "read_cache.hpp",
         "patchSetId": 8
@@ -143,6 +233,30 @@
       "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02577d90_48bd3beb",
+        "filename": "read_cache.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-10T07:33:05Z",
+      "side": 1,
+      "message": "I\u0027ve always wrapped my dynamically allocated objects in smart pointers. Unsure if gBMC or modern C++ practices say differently.",
+      "parentUuid": "02351df1_4bf22145",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 122,
+        "endChar": 19
+      },
+      "revId": "dd6c9b9b6f62390a6f7a99f6ce02566778113cef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
