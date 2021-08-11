@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0c361b6_d3538fce",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "I believe our sensor value types are double https://github.com/openbmc/phosphor-hwmon/blob/master/interface.hpp#L32\n\nBut double should be 64bit anyway so works out to be the same, but we may want to update this.\n\nOr use SensorValueType from interface.hpp\n\nEDIT: I think what\u0027s happening is, we read the values as int64_t from hwmon but we report out to D-Bus in \"double\" hence the cast with \"value\" variable in mainloop. Maybe Matt can comment, as I wasn\u0027t too involved / familiar with that transition.",
+      "range": {
+        "startLine": 63,
+        "startChar": 42,
+        "endLine": 63,
+        "endChar": 49
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53800608_e2d2936e",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "super minor nit: I think it\u0027d be easier to read here (and other doxygen comments) if you indented with a space for every line in the same heading).",
+      "range": {
+        "startLine": 93,
+        "startChar": 3,
+        "endLine": 98,
+        "endChar": 20
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82af4839_e970e631",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "nit: what does e stand for? entry? Prefer descriptive (but concise) name if possible, as e is usually reserved for errors",
+      "range": {
+        "startLine": 139,
+        "startChar": 21,
+        "endLine": 139,
+        "endChar": 22
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56f63b63_2755b18f",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "We may want to bring \"ASYNC\" read (with the #if) here - to avoid synchronous sensor read on a very slow sensor taking down the daemon if we choose to.",
+      "range": {
+        "startLine": 162,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 80
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f49f095_c9a00126",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "same as in the header: I\u0027m not sure we need to dynamically make_unique since we know that it\u0027ll always be a char array of MAX_READ_SIZE",
+      "range": {
+        "startLine": 169,
+        "startChar": 12,
+        "endLine": 169,
+        "endChar": 62
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c951aa3_1be763fd",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "Were you able to observe any error cases? We may want to quickly inject a sensor that emits errors to see if this is being handled correctly.",
+      "range": {
+        "startLine": 212,
+        "startChar": 0,
+        "endLine": 214,
+        "endChar": 73
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d26552ed_3450360a",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "For those not familiar with io_uring, it might be good to have a quick summary of what you\u0027re doing (queuing up a read on the hwmon fd)",
+      "range": {
+        "startLine": 281,
+        "startChar": 0,
+        "endLine": 284,
+        "endChar": 20
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ff59664_95cbefd2",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "nit: I think for \"simple\" constructors like this where it\u0027s just initialization list, I prefer just putting it inline in the header.",
+      "range": {
+        "startLine": 291,
+        "startChar": 0,
+        "endLine": 297,
+        "endChar": 0
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60e70702_9463aee2",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "Just to be clear, you\u0027re -ing the -errno, so making it positive, so that for NEGATIVE_ERRNO_ON_FAIL, we return -errno (by -rc) right? (a bit of a mind twister)",
+      "range": {
+        "startLine": 311,
+        "startChar": 25,
+        "endLine": 311,
+        "endChar": 29
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86ded2af_6d569d17",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "nit: I think for \"simple\" constructors like this where it\u0027s just initialization list, I prefer just putting it inline in the header.",
+      "range": {
+        "startLine": 317,
+        "startChar": 0,
+        "endLine": 326,
+        "endChar": 1
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64a4bc67_49d5b3a5",
+        "filename": "read_cache.hpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "I think this can just be std::array\u003cchar, MAX_READ_SIZE\u003e then you don\u0027t have to deal with smart pointers with std::move and make_unique, etc.",
+      "range": {
+        "startLine": 93,
+        "startChar": 8,
+        "endLine": 93,
+        "endChar": 44
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "347469ca_24f0bef8",
+        "filename": "sensorset.hpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2021-08-11T00:56:41Z",
+      "side": 1,
+      "message": "should this be size_type?",
+      "range": {
+        "startLine": 71,
+        "startChar": 9,
+        "endLine": 71,
+        "endChar": 15
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
