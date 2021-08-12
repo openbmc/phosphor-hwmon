@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "ac9d632a_bc0450cc",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "53800608_e2d2936e",
+      "range": {
+        "startLine": 93,
+        "startChar": 3,
+        "endLine": 98,
+        "endChar": 20
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82af4839_e970e631",
         "filename": "read_cache.cpp",
         "patchSetId": 13
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "5e0c7c53_29f2288a",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Changed from \u0027e\u0027.",
+      "parentUuid": "82af4839_e970e631",
+      "range": {
+        "startLine": 139,
+        "startChar": 21,
+        "endLine": 139,
+        "endChar": 22
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56f63b63_2755b18f",
         "filename": "read_cache.cpp",
         "patchSetId": 13
@@ -82,6 +130,30 @@
       "writtenOn": "2021-08-11T00:56:41Z",
       "side": 1,
       "message": "We may want to bring \"ASYNC\" read (with the #if) here - to avoid synchronous sensor read on a very slow sensor taking down the daemon if we choose to.",
+      "range": {
+        "startLine": 162,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 80
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2dc95cc_d93e05bc",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "What should be the default return value if the first read is async? This function requires I return or throw something.",
+      "parentUuid": "56f63b63_2755b18f",
       "range": {
         "startLine": 162,
         "startChar": 0,
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "7e97538b_fce27a1d",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9f49f095_c9a00126",
+      "range": {
+        "startLine": 169,
+        "startChar": 12,
+        "endLine": 169,
+        "endChar": 62
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c951aa3_1be763fd",
         "filename": "read_cache.cpp",
         "patchSetId": 13
@@ -137,6 +233,30 @@
       "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c575e2e_deb2f0e4",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "No. A Vim search on the journalctl logs yielded nothing io_uring error related.",
+      "parentUuid": "2c951aa3_1be763fd",
+      "range": {
+        "startLine": 212,
+        "startChar": 0,
+        "endLine": 214,
+        "endChar": 73
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "57052880_241172f9",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d26552ed_3450360a",
+      "range": {
+        "startLine": 281,
+        "startChar": 0,
+        "endLine": 284,
+        "endChar": 20
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ff59664_95cbefd2",
         "filename": "read_cache.cpp",
         "patchSetId": 13
@@ -183,6 +327,30 @@
       "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83b3c6bb_1646273d",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ff59664_95cbefd2",
+      "range": {
+        "startLine": 291,
+        "startChar": 0,
+        "endLine": 297,
+        "endChar": 0
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -209,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "8de6cfee_d21481d6",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Yeah, making the errno positive for easier processing above. And if there is an error, returning it back to -errno for error handling.",
+      "parentUuid": "60e70702_9463aee2",
+      "range": {
+        "startLine": 311,
+        "startChar": 25,
+        "endLine": 311,
+        "endChar": 29
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "86ded2af_6d569d17",
         "filename": "read_cache.cpp",
         "patchSetId": 13
@@ -229,6 +421,30 @@
       "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5d59948_5d28920d",
+        "filename": "read_cache.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86ded2af_6d569d17",
+      "range": {
+        "startLine": 317,
+        "startChar": 0,
+        "endLine": 326,
+        "endChar": 1
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -255,6 +471,30 @@
     },
     {
       "key": {
+        "uuid": "1da27607_d151ca63",
+        "filename": "read_cache.hpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Done, but I\u0027ll have to hard code MAX_READ_SIZE (or derive it from constexpr functions only).",
+      "parentUuid": "64a4bc67_49d5b3a5",
+      "range": {
+        "startLine": 93,
+        "startChar": 8,
+        "endLine": 93,
+        "endChar": 44
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "347469ca_24f0bef8",
         "filename": "sensorset.hpp",
         "patchSetId": 13
@@ -275,6 +515,30 @@
       "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ebac622_11e3b6a2",
+        "filename": "sensorset.hpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1001121
+      },
+      "writtenOn": "2021-08-12T21:52:19Z",
+      "side": 1,
+      "message": "Yep. Made the change.",
+      "parentUuid": "347469ca_24f0bef8",
+      "range": {
+        "startLine": 71,
+        "startChar": 9,
+        "endLine": 71,
+        "endChar": 15
+      },
+      "revId": "85d5e3b862b4a7b2f82a02abea3c34315f70ed0b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
