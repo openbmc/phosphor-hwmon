@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cdb7c491_d6c908a2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-16T18:11:39Z",
+      "side": 1,
+      "message": "changes looks fine in general. I am more interested in the result of this change.\n\nAre there some performance result that you can add to the commit message.\n\nMaybe just reading the sensor information from ipmitool is fine and comparing with old implementation? \n\njust an idea.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 0
+      },
+      "revId": "2ce50d8a2c7012142e7ad4e29d35e0a7d7e35a34",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "031422fb_1327ccf2",
+        "filename": "read_cache.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-16T18:11:39Z",
+      "side": 1,
+      "message": "any particular reason why we reserved the space before hand? I am guessing the major reason is performance.\n\nI guess this is saying that we will have at least size elements?\n\nbased on http://www.cplusplus.com/reference/unordered_map/unordered_map/reserve/.",
+      "range": {
+        "startLine": 124,
+        "startChar": 4,
+        "endLine": 125,
+        "endChar": 32
+      },
+      "revId": "2ce50d8a2c7012142e7ad4e29d35e0a7d7e35a34",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78f59e3e_b5936955",
+        "filename": "read_cache.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-08-16T18:11:39Z",
+      "side": 1,
+      "message": "I think we usually want to put the error first.\n\nso if (res \u003c 0)",
+      "range": {
+        "startLine": 288,
+        "startChar": 4,
+        "endLine": 296,
+        "endChar": 5
+      },
+      "revId": "2ce50d8a2c7012142e7ad4e29d35e0a7d7e35a34",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
