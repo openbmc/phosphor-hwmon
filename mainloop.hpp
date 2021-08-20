@@ -81,6 +81,9 @@ class MainLoop
      */
     void addDroppedSensors();
 
+    /* Number of read() iterations for profiling. */
+    uint64_t _iterations = 0;
+
   private:
     using mapped_type =
         std::tuple<SensorSet::mapped_type, std::string, ObjectInfo>;
