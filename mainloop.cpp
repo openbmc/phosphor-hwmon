@@ -30,9 +30,12 @@
 #include "thresholds.hpp"
 #include "util.hpp"
 
+#include <fcntl.h>
 #include <fmt/format.h>
+#include <sys/file.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -441,6 +444,11 @@ void MainLoop::init()
 
 void MainLoop::read()
 {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    uint64_t elapsed = _readCachePtr->_elapsed;
+    _readCachePtr->_elapsed = 0;
+
     // Iterate through all the sensors.
     for (auto& [sensorSetKey, sensorStateTuple] : _state)
     {
@@ -480,8 +488,14 @@ void MainLoop::read()
         {
             if (sensor->hasFaultFile())
             {
+                start = std::chrono::high_resolution_clock::now();
                 int64_t fault = _readCachePtr->getSensorValue(
                     sensorSysfsType, sensorSysfsNum, hwmon::entry::fault);
+                end = std::chrono::high_resolution_clock::now();
+                elapsed +=
+                    std::chrono::duration_cast<std::chrono::microseconds>(
+                        end - start);
+
                 // Skip reading from a sensor with a valid fault file
                 // and set the functional property accordingly
                 if (!statusIface->functional((fault == 0) ? true : false))
@@ -509,10 +523,15 @@ void MainLoop::read()
                 }
                 else
                 {
+                    start = std::chrono::high_resolution_clock::now();
                     // Retry for up to a second if device is busy
                     // or has a transient error.
                     value = _readCachePtr->getSensorValue(
                         sensorSysfsType, sensorSysfsNum, input);
+                    end = std::chrono::high_resolution_clock::now();
+                    elapsed +=
+                        std::chrono::duration_cast<std::chrono::microseconds>(
+                            end - start);
                 }
 
                 // Set functional property to true if we could read sensor
@@ -522,12 +541,18 @@ void MainLoop::read()
 
                 if (input == hwmon::entry::average)
                 {
+                    start = std::chrono::high_resolution_clock::now();
                     // Calculate the values of averageMap based on current
                     // average value, current average_interval value, previous
                     // average value, previous average_interval value
                     int64_t interval = _readCachePtr->getSensorValue(
                         sensorSysfsType, sensorSysfsNum,
                         hwmon::entry::caverage_interval);
+                    end = std::chrono::high_resolution_clock::now();
+                    elapsed +=
+                        std::chrono::duration_cast<std::chrono::microseconds>(
+                            end - start);
+
                     auto ret = _average.getAverageValue(sensorSetKey);
                     assert(ret);
 
@@ -608,6 +633,31 @@ void MainLoop::read()
     removeSensors();
 
     addDroppedSensors();
+
+    if (_iterations == 10000 || elapsed == 0)
+    {
+        return;
+    }
+
+    int fd = open("placeholder.txt", O_WRONLY | O_APPEND | O_CREAT, 0600);
+    flock(fd, LOCK_EX);
+
+    std::string str = std::to_string(elapsed);
+    int length = str.length();
+    const char* cStr = str.c_str();
+
+    std::vector<char> buffer(length + 1);
+    std::copy(cStr, cStr + length, buffer.data());
+    buffer[length] = '\n';
+
+    int rc = write(fd, buffer.data(), length + 1);
+    if (rc != -1)
+    {
+        _iterations++;
+    }
+
+    flock(fd, LOCK_UN);
+    close(fd);
 }
 
 void MainLoop::removeSensors()
