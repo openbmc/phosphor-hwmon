@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
@@ -237,7 +238,12 @@ std::unique_ptr<sdeventplus::source::IO>
     return std::make_unique<sdeventplus::source::IO>(
         event, _ring->getEventFd().get(), EPOLLIN | EPOLLET,
         [this](sdeventplus::source::IO&, int, std::uint32_t) {
+            auto start = std::chrono::high_resolution_clock::now();
             _ring->processEvents();
+            auto end = std::chrono::high_resolution_clock::now();
+            _elapsed += std::chrono::duration_cast<std::chrono::microseconds>(
+                            end - start)
+                            .count();
         });
 }
 
