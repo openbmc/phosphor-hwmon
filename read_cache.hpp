@@ -55,6 +55,9 @@ class ReadCache
      */
     std::unique_ptr<sdeventplus::source::IO> getIo(sdeventplus::Event& event);
 
+    /* Keeps track of elapsed time for profiling io_uring process CQEs. */
+    std::uint64_t _elapsed = 0;
+
   private:
     /**
      *  @class CacheCQEHandler
