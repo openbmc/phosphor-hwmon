@@ -54,12 +54,10 @@ decltype(Thresholds<WarningObject>::getLo) Thresholds<WarningObject>::getLo =
     &WarningObject::warningLow;
 decltype(Thresholds<WarningObject>::getHi) Thresholds<WarningObject>::getHi =
     &WarningObject::warningHigh;
-decltype(
-    Thresholds<WarningObject>::alarmLo) Thresholds<WarningObject>::alarmLo =
-    &WarningObject::warningAlarmLow;
-decltype(
-    Thresholds<WarningObject>::alarmHi) Thresholds<WarningObject>::alarmHi =
-    &WarningObject::warningAlarmHigh;
+decltype(Thresholds<WarningObject>::alarmLo)
+    Thresholds<WarningObject>::alarmLo = &WarningObject::warningAlarmLow;
+decltype(Thresholds<WarningObject>::alarmHi)
+    Thresholds<WarningObject>::alarmHi = &WarningObject::warningAlarmHigh;
 decltype(Thresholds<WarningObject>::getAlarmLow)
     Thresholds<WarningObject>::getAlarmLow = &WarningObject::warningAlarmLow;
 decltype(Thresholds<WarningObject>::getAlarmHigh)
@@ -86,12 +84,10 @@ decltype(Thresholds<CriticalObject>::getLo) Thresholds<CriticalObject>::getLo =
     &CriticalObject::criticalLow;
 decltype(Thresholds<CriticalObject>::getHi) Thresholds<CriticalObject>::getHi =
     &CriticalObject::criticalHigh;
-decltype(
-    Thresholds<CriticalObject>::alarmLo) Thresholds<CriticalObject>::alarmLo =
-    &CriticalObject::criticalAlarmLow;
-decltype(
-    Thresholds<CriticalObject>::alarmHi) Thresholds<CriticalObject>::alarmHi =
-    &CriticalObject::criticalAlarmHigh;
+decltype(Thresholds<CriticalObject>::alarmLo)
+    Thresholds<CriticalObject>::alarmLo = &CriticalObject::criticalAlarmLow;
+decltype(Thresholds<CriticalObject>::alarmHi)
+    Thresholds<CriticalObject>::alarmHi = &CriticalObject::criticalAlarmHigh;
 decltype(Thresholds<CriticalObject>::getAlarmLow)
     Thresholds<CriticalObject>::getAlarmLow = &CriticalObject::criticalAlarmLow;
 decltype(Thresholds<CriticalObject>::getAlarmHigh)
