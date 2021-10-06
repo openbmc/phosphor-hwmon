@@ -4,10 +4,11 @@ project(
     default_options: [
         'warning_level=3',
         'werror=true',
-        'cpp_std=c++17'
+        'cpp_std=c++20'
     ],
     license: 'Apache-2.0',
     version: '1.0',
+    meson_version: '>=0.57.0',
 )
 
 fmt = dependency('fmt')
