@@ -53,6 +53,52 @@
     },
     {
       "key": {
+        "uuid": "2ec24eb2_857b3708",
+        "filename": "mainloop.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1001048
+      },
+      "writtenOn": "2021-10-19T16:26:22Z",
+      "side": 1,
+      "message": "Query : is  empty unique_ptr equivalent to nullptr ..? is explicit nullptr assignment required here ..?",
+      "range": {
+        "startLine": 147,
+        "startChar": 61,
+        "endLine": 147,
+        "endChar": 70
+      },
+      "revId": "5a1d3d79e58d0941d7bccc9cd9d5081fc39ab2bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d803f17_e27aeed1",
+        "filename": "mainloop.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1001048
+      },
+      "writtenOn": "2021-10-19T16:26:22Z",
+      "side": 1,
+      "message": "same as line number 147",
+      "range": {
+        "startLine": 155,
+        "startChar": 48,
+        "endLine": 155,
+        "endChar": 56
+      },
+      "revId": "5a1d3d79e58d0941d7bccc9cd9d5081fc39ab2bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "38acb940_585ac095",
         "filename": "meson.build",
         "patchSetId": 4
