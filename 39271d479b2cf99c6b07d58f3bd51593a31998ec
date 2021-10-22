@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fce76314_0f43600c",
+        "filename": "read_cache.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-10-22T22:47:31Z",
+      "side": 1,
+      "message": "we don\u0027t need this variable since this is not used other than returning it directly.\n\nNo need for this copy. (unless the value will change between here and the return).",
+      "range": {
+        "startLine": 174,
+        "startChar": 17,
+        "endLine": 174,
+        "endChar": 46
+      },
+      "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06b092a9_731ba47b",
+        "filename": "read_cache.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-10-22T22:47:31Z",
+      "side": 1,
+      "message": "just `!ptr-\u003e_fileHandle` is fine. It will be true if it has value and I think is the prefer way.",
+      "range": {
+        "startLine": 249,
+        "startChar": 8,
+        "endLine": 249,
+        "endChar": 37
+      },
+      "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4db5aed_e31057fc",
+        "filename": "read_cache.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-10-22T22:47:31Z",
+      "side": 1,
+      "message": "no need for this variable",
+      "range": {
+        "startLine": 254,
+        "startChar": 12,
+        "endLine": 254,
+        "endChar": 36
+      },
+      "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec6b7d3f_cdb46afb",
+        "filename": "read_cache.hpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2021-10-22T22:47:31Z",
+      "side": 1,
+      "message": "this shouldn\u0027t be phosphor-hwmon specific, right?\n\nIs there significant difference if we want to try it out with dbus-sensors?",
+      "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
