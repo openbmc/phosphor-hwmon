@@ -37,7 +37,6 @@ owners:
 
 reviewers:
 - msbarth@linux.ibm.com
-- venture@google.com
 
 matches:
 
@@ -51,6 +50,3 @@ openbmc:
 - name: Matt Spinler
   email: spinler@us.ibm.com
   discord: mspinler
-- name: Patrick Venture
-  email: venture@google.com
-  discord: Venture
