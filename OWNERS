@@ -36,7 +36,6 @@ owners:
 - spinler@us.ibm.com
 
 reviewers:
-- msbarth@linux.ibm.com
 
 matches:
 
@@ -44,9 +43,6 @@ openbmc:
 - name: Brandon Kim
   email: brandonkim@google.com
   discord: brandonk
-- name: Matthew Barth
-  email: msbarth@linux.ibm.com
-  discord: msbarth
 - name: Matt Spinler
   email: spinler@us.ibm.com
   discord: mspinler
