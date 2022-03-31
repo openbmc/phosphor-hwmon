@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7b534c8c_4498a370",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-03-31T12:27:44Z",
+      "side": 1,
+      "message": "This whole commit will fail CI until I finish a commit in sdbusplus to add the enum.  I\u0027ll resubmit Jenkins when that happens and clean up any additional failures.",
+      "revId": "996dc38b48c018918975490417967befc8dfc263",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9e805975_4e2566b4",
@@ -14,6 +31,30 @@
       "writtenOn": "2022-03-31T03:10:46Z",
       "side": 1,
       "message": "Thanks for the cleanup Patrick! Looks like we can actually clean this bool up as well.",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 50
+      },
+      "revId": "996dc38b48c018918975490417967befc8dfc263",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4e3198b8_03b99f6c",
+        "filename": "thresholds.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-03-31T12:27:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e805975_4e2566b4",
       "range": {
         "startLine": 132,
         "startChar": 0,
