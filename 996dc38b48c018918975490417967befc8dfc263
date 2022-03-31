@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9e805975_4e2566b4",
+        "filename": "thresholds.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-03-31T03:10:46Z",
+      "side": 1,
+      "message": "Thanks for the cleanup Patrick! Looks like we can actually clean this bool up as well.",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 50
+      },
+      "revId": "996dc38b48c018918975490417967befc8dfc263",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
