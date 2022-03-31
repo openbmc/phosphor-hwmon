@@ -32,7 +32,9 @@ class FanPwm : public FanPwmObject
            const std::string& devPath, const std::string& id,
            sdbusplus::bus::bus& bus, const char* objPath, bool defer,
            uint64_t target) :
-        FanPwmObject(bus, objPath, defer),
+        FanPwmObject(bus, objPath,
+                     defer ? FanPwmObject::action::emit_no_signals
+                           : FanPwmObject::action::emit_object_added),
         _id(id), _ioAccess(std::move(io)), _devPath(devPath)
     {
         FanPwmObject::target(target);

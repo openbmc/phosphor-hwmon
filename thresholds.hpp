@@ -129,10 +129,10 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
     auto tHi = env::getEnv(Thresholds<T>::envHi, sensorType, sensorID);
     if (!tLo.empty() || !tHi.empty())
     {
-        static constexpr bool deferSignals = true;
         auto& bus = *std::get<sdbusplus::bus::bus*>(info);
 
-        iface = std::make_shared<T>(bus, objPath.c_str(), deferSignals);
+        iface = std::make_shared<T>(bus, objPath.c_str(),
+                                    T::action::emit_no_signals);
         if (!tLo.empty())
         {
             auto lo = stod(tLo) * std::pow(10, scale);

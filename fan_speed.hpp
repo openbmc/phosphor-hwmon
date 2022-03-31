@@ -33,7 +33,9 @@ class FanSpeed : public FanSpeedObject
              const std::string& devPath, const std::string& id,
              sdbusplus::bus::bus& bus, const char* objPath, bool defer,
              uint64_t target) :
-        FanSpeedObject(bus, objPath, defer),
+        FanSpeedObject(bus, objPath,
+                       defer ? FanSpeedObject::action::emit_no_signals
+                             : FanSpeedObject::action::emit_object_added),
         _id(id), _ioAccess(std::move(io)), _devPath(devPath)
     {
         FanSpeedObject::target(target);
