@@ -121,8 +121,6 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
                                               ObjectInfo& info,
                                               TimedoutMap& timedoutMap)
 {
-    static constexpr bool deferSignals = true;
-
     // Get the initial value for the value interface.
     auto& bus = *std::get<sdbusplus::bus::bus*>(info);
     auto& obj = std::get<InterfaceMap>(info);
@@ -180,8 +178,8 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
 #endif
     }
 
-    auto iface =
-        std::make_shared<ValueObject>(bus, objPath.c_str(), deferSignals);
+    auto iface = std::make_shared<ValueObject>(bus, objPath.c_str(),
+                                               ValueObject::action::defer_emit);
 
     hwmon::Attributes attrs;
     if (hwmon::getAttributes(_sensor.first, attrs))
@@ -253,10 +251,10 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
         }
     }
 
-    static constexpr bool deferSignals = true;
     auto& bus = *std::get<sdbusplus::bus::bus*>(info);
 
-    iface = std::make_shared<StatusObject>(bus, objPath.c_str(), deferSignals);
+    iface = std::make_shared<StatusObject>(
+        bus, objPath.c_str(), StatusObject::action::emit_no_signals);
     // Set functional property
     iface->functional(functional);
 
