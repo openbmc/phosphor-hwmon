@@ -16,6 +16,29 @@
       "message": "Sounds good, I\u0027ll +2 once this passes",
       "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "01eb838f_f2611277",
+        "filename": "fan_pwm.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2022-04-01T18:19:53Z",
+      "side": 1,
+      "message": "Could you straighten me out on why you aren\u0027t using defer_emit here too?",
+      "range": {
+        "startLine": 36,
+        "startChar": 51,
+        "endLine": 36,
+        "endChar": 66
+      },
+      "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
