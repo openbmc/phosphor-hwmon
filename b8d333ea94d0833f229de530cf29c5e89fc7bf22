@@ -63,6 +63,30 @@
       },
       "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e5f008e6_5ae2bfee",
+        "filename": "fan_pwm.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-04-01T19:16:38Z",
+      "side": 1,
+      "message": "Yes, it is purposeful... I\u0027m in the middle of writing a blog post about the rationale and then you\u0027ll be able to re-review, I guess. 😄",
+      "parentUuid": "1e69973b_e3073b48",
+      "range": {
+        "startLine": 36,
+        "startChar": 51,
+        "endLine": 36,
+        "endChar": 66
+      },
+      "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
