@@ -111,6 +111,30 @@
       },
       "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "936a59f2_43aae308",
+        "filename": "fan_pwm.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2022-04-01T19:53:31Z",
+      "side": 1,
+      "message": "How about just something in the commit message that mentions the signals for those are being handled elsewhere",
+      "parentUuid": "a7696fbb_551772ba",
+      "range": {
+        "startLine": 36,
+        "startChar": 51,
+        "endLine": 36,
+        "endChar": 66
+      },
+      "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
