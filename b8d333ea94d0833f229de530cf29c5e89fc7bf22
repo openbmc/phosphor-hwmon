@@ -87,6 +87,30 @@
       },
       "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7696fbb_551772ba",
+        "filename": "fan_pwm.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-04-01T19:33:56Z",
+      "side": 1,
+      "message": "I had to walk through to confirm, but `emit_no_signals` is appropriate for all the classes except Value, which uses `defer_emit`.  The reason is this line of code:\n\nhttps://github.com/openbmc/phosphor-hwmon/blob/b8d333ea94d0833f229de530cf29c5e89fc7bf22/mainloop.cpp#L297\n\nWhat happens is that we create the Value object (with defer) and then we create an optional set of subclasses (thresholds, Fan*, etc).  In the `mainloop` case, we always create these as `bool defer \u003d true`, which makes sense because we want to delay the \"InterfacesAdded\" until the whole set is constructed.\n\nFor the subclasses we want to do `emit_no_signals` because Value handles the `emit_object_added` call on that line 297, which as a side-effect advertises _all_ the interfaces that have been created at that object path.  \n\nThe distinction between `emit_no_signals` and `deferred_emit` is going to mainly be on the destructor path in an upcoming sdbusplus change.  For an object with `deferred_emit` the `emit_object_removed` will be called on the destructor even if `emit_object_added` was never called (this behavior doesn\u0027t happen today).  For an object with `emit_no_signals`, it does exactly that.\n\nIf classes like FanPwm were set to `defer_emit` we\u0027d end up with multiple \"InterfacesRemoved\" signals being sent for the same object path when the object(s) are destructed.\n\nI\u0027m working on a post for it which goes into more details but I think these are the parts that are appropriate for this repository.\n\nI don\u0027t know if there is a better way to \"document\" this in the code change.  I\u0027m open to ideas.",
+      "parentUuid": "e5f008e6_5ae2bfee",
+      "range": {
+        "startLine": 36,
+        "startChar": 51,
+        "endLine": 36,
+        "endChar": 66
+      },
+      "revId": "b8d333ea94d0833f229de530cf29c5e89fc7bf22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
