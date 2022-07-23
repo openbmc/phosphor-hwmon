@@ -30,7 +30,7 @@ class FanPwm : public FanPwmObject
      */
     FanPwm(std::unique_ptr<hwmonio::HwmonIOInterface> io,
            const std::string& devPath, const std::string& id,
-           sdbusplus::bus::bus& bus, const char* objPath, bool defer,
+           sdbusplus::bus_t& bus, const char* objPath, bool defer,
            uint64_t target) :
         FanPwmObject(bus, objPath,
                      defer ? FanPwmObject::action::emit_no_signals

@@ -54,7 +54,7 @@ class MainLoop
      *  At startup, the application will own a busname with
      *  the format <prefix>.hwmon<n>.
      */
-    MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
+    MainLoop(sdbusplus::bus_t&& bus, const std::string& param,
              const std::string& path, const std::string& devPath,
              const char* prefix, const char* root,
              const std::string& instanceId,
@@ -91,9 +91,9 @@ class MainLoop
     void init();
 
     /** @brief sdbusplus bus client connection. */
-    sdbusplus::bus::bus _bus;
+    sdbusplus::bus_t _bus;
     /** @brief sdbusplus freedesktop.ObjectManager storage. */
-    sdbusplus::server::manager::manager _manager;
+    sdbusplus::server::manager_t _manager;
     /** @brief the parameter path used. */
     std::string _pathParam;
     /** @brief hwmon sysfs class path. */

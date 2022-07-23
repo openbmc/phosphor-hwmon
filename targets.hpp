@@ -160,7 +160,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
             }
 
             static constexpr bool deferSignals = true;
-            auto& bus = *std::get<sdbusplus::bus::bus*>(info);
+            auto& bus = *std::get<sdbusplus::bus_t*>(info);
 
             // ioAccess->path() is a path like: /sys/class/hwmon/hwmon1
             // NOTE: When unit-testing, the target won't have an inject-ible

@@ -9,7 +9,7 @@
 #include <xyz/openbmc_project/State/Decorator/OperationalStatus/server.hpp>
 
 template <typename... T>
-using ServerObject = typename sdbusplus::server::object::object<T...>;
+using ServerObject = typename sdbusplus::server::object_t<T...>;
 
 using ValueInterface = sdbusplus::xyz::openbmc_project::Sensor::server::Value;
 using ValueObject = ServerObject<ValueInterface>;

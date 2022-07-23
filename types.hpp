@@ -10,6 +10,6 @@
 #include <utility>
 
 using InterfaceMap = std::map<InterfaceType, std::any>;
-using ObjectInfo = std::tuple<sdbusplus::bus::bus*, std::string, InterfaceMap>;
+using ObjectInfo = std::tuple<sdbusplus::bus_t*, std::string, InterfaceMap>;
 using RetryIO = std::tuple<size_t, std::chrono::milliseconds>;
 using ObjectStateData = std::pair<std::string, ObjectInfo>;

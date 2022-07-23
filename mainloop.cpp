@@ -303,7 +303,7 @@ std::optional<ObjectStateData>
                           std::move(info));
 }
 
-MainLoop::MainLoop(sdbusplus::bus::bus&& bus, const std::string& param,
+MainLoop::MainLoop(sdbusplus::bus_t&& bus, const std::string& param,
                    const std::string& path, const std::string& devPath,
                    const char* prefix, const char* root,
                    const std::string& instanceId,

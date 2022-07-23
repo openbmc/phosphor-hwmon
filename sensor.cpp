@@ -122,7 +122,7 @@ std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
                                               TimedoutMap& timedoutMap)
 {
     // Get the initial value for the value interface.
-    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
+    auto& bus = *std::get<sdbusplus::bus_t*>(info);
     auto& obj = std::get<InterfaceMap>(info);
     auto& objPath = std::get<std::string>(info);
 
@@ -251,7 +251,7 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
         }
     }
 
-    auto& bus = *std::get<sdbusplus::bus::bus*>(info);
+    auto& bus = *std::get<sdbusplus::bus_t*>(info);
 
     iface = std::make_shared<StatusObject>(
         bus, objPath.c_str(), StatusObject::action::emit_no_signals);
