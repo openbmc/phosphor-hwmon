@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2fff63e0_15ff9ae5",
+        "filename": "sensor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2022-10-12T22:02:27Z",
+      "side": 1,
+      "message": "I think maybe I\u0027d prefer not even adding the interface if the env var wasn\u0027t there so the value was an empty string, so that all current users wouldn\u0027t see a new interface showing up on D-Bus that just has NaN.\n\nWould that cause an issue with bmcweb?",
+      "revId": "709a812c96782263195f5d8a6bde2419025f5776",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
