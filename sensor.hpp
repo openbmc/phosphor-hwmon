@@ -125,6 +125,19 @@ class Sensor
     std::shared_ptr<StatusObject> addStatus(ObjectInfo& info);
 
     /**
+     * @brief Add Accuracy interface and accuracy property for sensor
+     * @details Accuracy interface is the accuracy range (+/-) of the sensor
+     * Value as a percentage, with a value between 0 and 100.
+     *
+     * @param[in] info     - Sensor object information
+     * @param[in] accuracy - The accuracy value for sensor readings
+     *
+     * @return - Shared pointer to the accuracy object
+     */
+    std::shared_ptr<AccuracyObject> addAccuracy(ObjectInfo& info,
+                                                const double accuracy);
+
+    /**
      * @brief Get the scale from the sensor.
      *
      * @return - Scale value
