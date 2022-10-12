@@ -174,14 +174,17 @@ SensorIdentifiers
 {
     std::string id = getID(sensor);
     std::string label;
+    std::string accuracy;
 
     if (!id.empty())
     {
         // Ignore inputs without a label.
         label = env::getEnv("LABEL", sensor.first.first, id);
+        accuracy = env::getEnv("ACCURACY", sensor.first.first, id);
     }
 
-    return std::make_tuple(std::move(id), std::move(label));
+    return std::make_tuple(std::move(id), std::move(label),
+                           std::move(accuracy));
 }
 
 /**
@@ -237,6 +240,17 @@ std::optional<ObjectStateData>
     auto valueInterface = static_cast<std::shared_ptr<ValueObject>>(nullptr);
     try
     {
+        // Add accuracy interface
+        auto accuracyStr = std::get<sensorAccuracy>(properties);
+        try
+        {
+            auto accuracy = stod(accuracyStr);
+            sensorObj->addAccuracy(info, accuracy);
+        }
+        catch (const std::invalid_argument&)
+        {
+        }
+
         // Add status interface based on _fault file being present
         sensorObj->addStatus(info);
         valueInterface = sensorObj->addValue(retryIO, info, _timedoutMap);

@@ -3,6 +3,7 @@
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Control/FanPwm/server.hpp>
 #include <xyz/openbmc_project/Control/FanSpeed/server.hpp>
+#include <xyz/openbmc_project/Sensor/Accuracy/server.hpp>
 #include <xyz/openbmc_project/Sensor/Threshold/Critical/server.hpp>
 #include <xyz/openbmc_project/Sensor/Threshold/Warning/server.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
@@ -31,6 +32,10 @@ using StatusObject = ServerObject<StatusInterface>;
 
 using SensorValueType = double;
 
+using AccuracyInterface =
+    sdbusplus::xyz::openbmc_project::Sensor::server::Accuracy;
+using AccuracyObject = ServerObject<AccuracyInterface>;
+
 enum class InterfaceType
 {
     VALUE,
@@ -39,6 +44,7 @@ enum class InterfaceType
     FAN_SPEED,
     FAN_PWM,
     STATUS,
+    ACCURACY,
 };
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

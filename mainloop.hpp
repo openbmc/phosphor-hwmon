@@ -23,7 +23,8 @@ static constexpr auto default_interval = 1000000;
 
 static constexpr auto sensorID = 0;
 static constexpr auto sensorLabel = 1;
-using SensorIdentifiers = std::tuple<std::string, std::string>;
+static constexpr auto sensorAccuracy = 2;
+using SensorIdentifiers = std::tuple<std::string, std::string, std::string>;
 
 /** @class MainLoop
  *  @brief hwmon-readd main application loop.
