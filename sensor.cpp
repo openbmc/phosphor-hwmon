@@ -263,6 +263,22 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     return iface;
 }
 
+std::shared_ptr<AccuracyObject> Sensor::addAccuracy(ObjectInfo& info,
+                                                    double accuracy)
+{
+    auto& objPath = std::get<std::string>(info);
+    auto& obj = std::get<InterfaceMap>(info);
+
+    auto& bus = *std::get<sdbusplus::bus_t*>(info);
+    auto iface = std::make_shared<AccuracyObject>(
+        bus, objPath.c_str(), AccuracyObject::action::emit_no_signals);
+
+    iface->accuracy(accuracy);
+    obj[InterfaceType::ACCURACY] = iface;
+
+    return iface;
+}
+
 void gpioLock(const gpioplus::HandleInterface*&& handle)
 {
     handle->setValues({0});
