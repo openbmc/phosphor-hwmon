@@ -16,6 +16,24 @@
       "message": "I think maybe I\u0027d prefer not even adding the interface if the env var wasn\u0027t there so the value was an empty string, so that all current users wouldn\u0027t see a new interface showing up on D-Bus that just has NaN.\n\nWould that cause an issue with bmcweb?",
       "revId": "709a812c96782263195f5d8a6bde2419025f5776",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cc623a01_c51a2677",
+        "filename": "sensor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2022-10-13T00:20:18Z",
+      "side": 1,
+      "message": "\u003e I think maybe I\u0027d prefer not even adding the interface if the env var wasn\u0027t there so the value was an empty string, so that all current users wouldn\u0027t see a new interface showing up on D-Bus that just has NaN.\n\u003e \n\u003e Would that cause an issue with bmcweb?\n\nNo, If redifsh fails to get this interface, it should not return this property when doGet\nDone",
+      "parentUuid": "2fff63e0_15ff9ae5",
+      "revId": "709a812c96782263195f5d8a6bde2419025f5776",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
