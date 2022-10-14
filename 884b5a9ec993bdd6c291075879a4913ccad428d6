@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1fdcd714_0ec7673b",
+        "filename": "mainloop.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2022-10-14T00:39:21Z",
+      "side": 1,
+      "message": "\u003e I think it would look a little cleaner if you explicitly checked for accuracyStr being empty before trying to convert it.\n\nOkay, I just want clarify:\nIt will still catch if accuracyStr is empty.\n\nDone",
+      "parentUuid": "d1387e61_c7dc1a3a",
+      "revId": "884b5a9ec993bdd6c291075879a4913ccad428d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "08147ba2_4669cc0e",
@@ -31,6 +49,30 @@
       "writtenOn": "2022-10-13T14:08:50Z",
       "side": 1,
       "message": "nit: don\u0027t typically use const when passing by value",
+      "range": {
+        "startLine": 138,
+        "startChar": 48,
+        "endLine": 138,
+        "endChar": 54
+      },
+      "revId": "884b5a9ec993bdd6c291075879a4913ccad428d6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7a73c51a_1b7882c8",
+        "filename": "sensor.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2022-10-14T00:39:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08147ba2_4669cc0e",
       "range": {
         "startLine": 138,
         "startChar": 48,
