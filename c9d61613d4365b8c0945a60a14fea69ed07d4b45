@@ -1,0 +1,8 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+1: Matt Spinler <spinler@us.ibm.com>
+Code-Review+2: Brandon Kim <brandonkim@google.com>
+Submitted-by: George Liu <liuxiwei@inspur.com>
+Submitted-at: Mon, 17 Oct 2022 00:44:20 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-hwmon/+/57839
+Project: openbmc/phosphor-hwmon
+Branch: refs/heads/master
