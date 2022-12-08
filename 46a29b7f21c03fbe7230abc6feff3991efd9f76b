@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c295c4ea_5acb1214",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2022-12-08T17:58:50Z",
+      "side": 1,
+      "message": "Looks like we actually changed the content of the markdown here - is this intended?",
+      "range": {
+        "startLine": 10,
+        "startChar": 2,
+        "endLine": 10,
+        "endChar": 20
+      },
+      "revId": "46a29b7f21c03fbe7230abc6feff3991efd9f76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
