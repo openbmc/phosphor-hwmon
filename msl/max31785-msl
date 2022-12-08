@@ -20,7 +20,7 @@
 
 set -e
 
-main()
+function main()
 {
     usage="Usage: $(basename "$0") -p PATH... -b BUS_NUMBER -r REVISION"
     while getopts p:b:r:h key; do
