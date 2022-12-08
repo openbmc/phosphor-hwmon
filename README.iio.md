@@ -1,4 +1,4 @@
-Phosphor OpenBMC and IIO devices
+# Phosphor OpenBMC and IIO devices
 
 Phosphor OpenBMC currently does not provide an IIO device to DBUS bridge in the
 same way that hwmon devices are bridged by the phosphor-hwmon-readd application.
