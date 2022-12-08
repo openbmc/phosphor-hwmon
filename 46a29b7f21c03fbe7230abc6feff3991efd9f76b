@@ -22,6 +22,30 @@
       },
       "revId": "46a29b7f21c03fbe7230abc6feff3991efd9f76b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0ab421ec_d59e8744",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-12-08T18:07:00Z",
+      "side": 1,
+      "message": "Yeah... it was in this case.  Latest versions of meson complain if you don\u0027t put the \"setup\" there so when I was fixing this otherwise I just went ahead and made the fix now.\n\n```\n$ meson builddir\n...\nWARNING: Running the setup command as `meson [options]` instead of `meson setup [options]` is ambiguous and deprecated.\n$ meson --version                               \n0.64.1\n```",
+      "parentUuid": "c295c4ea_5acb1214",
+      "range": {
+        "startLine": 10,
+        "startChar": 2,
+        "endLine": 10,
+        "endChar": 20
+      },
+      "revId": "46a29b7f21c03fbe7230abc6feff3991efd9f76b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
