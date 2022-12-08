@@ -1,8 +1,8 @@
-Exposes generic hwmon entries as DBus objects.
-More information can be found at
+Exposes generic hwmon entries as DBus objects. More information can be found at
 [Sensor Architecture](https://github.com/openbmc/docs/blob/master/architecture/sensor-architecture.md)
 
 ## To Build
+
 ```
 To build this package, do the following steps:
 
