@@ -8,7 +8,7 @@ project(
     ],
     license: 'Apache-2.0',
     version: '1.0',
-    meson_version: '>=0.57.0',
+    meson_version: '>=0.58.0',
 )
 
 fmt = dependency('fmt')
@@ -94,10 +94,10 @@ executable(
     ],
     install: true)
 
-systemd_system_unit_dir = dependency('systemd').get_pkgconfig_variable(
+systemd_system_unit_dir = dependency('systemd').get_variable(
     'systemdsystemunitdir',
     define_variable: ['prefix', get_option('prefix')])
-udev_dir = dependency('udev').get_pkgconfig_variable(
+udev_dir = dependency('udev').get_variable(
     'udev_dir',
     define_variable: ['prefix', get_option('prefix')])
 
