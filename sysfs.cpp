@@ -219,11 +219,11 @@ std::string findHwmonFromDevPath(const std::string& devPath)
         }
 
         auto dir_iter = fs::directory_iterator(path);
-        auto hwmonInst = std::find_if(
-            dir_iter, end(dir_iter), [](const fs::directory_entry& d) {
-                return (d.path().filename().string().find("hwmon") !=
-                        std::string::npos);
-            });
+        auto hwmonInst = std::find_if(dir_iter, end(dir_iter),
+                                      [](const fs::directory_entry& d) {
+            return (d.path().filename().string().find("hwmon") !=
+                    std::string::npos);
+        });
         if (hwmonInst != end(dir_iter))
         {
             return hwmonInst->path();

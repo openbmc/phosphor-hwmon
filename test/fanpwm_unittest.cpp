@@ -2,6 +2,7 @@
 #include "hwmonio_mock.hpp"
 
 #include <sdbusplus/test/sdbus_mock.hpp>
+
 #include <string>
 
 #include <gmock/gmock.h>
@@ -41,9 +42,9 @@ void SetupDbusObject(sdbusplus::SdBusMock* sdbus_mock, const std::string& path,
                                                         StrEq(intf), NotNull()))
             .WillOnce(Invoke(
                 [=](sd_bus*, const char*, const char*, const char** names) {
-                    EXPECT_STREQ(property.c_str(), names[0]);
-                    return 0;
-                }));
+            EXPECT_STREQ(property.c_str(), names[0]);
+            return 0;
+            }));
     }
 
     return;

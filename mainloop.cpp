@@ -31,17 +31,18 @@
 
 #include <fmt/format.h>
 
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
+
 #include <cassert>
 #include <cstdlib>
 #include <functional>
 #include <future>
 #include <iostream>
 #include <memory>
-#include <phosphor-logging/elog-errors.hpp>
 #include <sstream>
 #include <string>
 #include <unordered_set>
-#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 using namespace phosphor::logging;
 
@@ -215,8 +216,8 @@ std::optional<ObjectStateData>
     const auto& [sensorSysfsType, sensorSysfsNum] = sensorSetKey;
 
     /* Note: The sensor objects all share the same ioAccess object. */
-    auto sensorObj =
-        std::make_unique<sensor::Sensor>(sensorSetKey, _ioAccess, _devPath);
+    auto sensorObj = std::make_unique<sensor::Sensor>(sensorSetKey, _ioAccess,
+                                                      _devPath);
 
     // Get list of return codes for removing sensors on device
     auto devRmRCs = env::getEnv("REMOVERCS");
@@ -251,8 +252,7 @@ std::optional<ObjectStateData>
             }
         }
         catch (const std::invalid_argument&)
-        {
-        }
+        {}
 
         // Add status interface based on _fault file being present
         sensorObj->addStatus(info);
@@ -260,9 +260,9 @@ std::optional<ObjectStateData>
     }
     catch (const std::system_error& e)
     {
-        auto file =
-            sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
-                                   sensorSysfsNum, hwmon::entry::cinput);
+        auto file = sysfs::make_sysfs_path(_ioAccess->path(), sensorSysfsType,
+                                           sensorSysfsNum,
+                                           hwmon::entry::cinput);
 
         // Check sensorAdjusts for sensor removal RCs
         auto& sAdjusts = sensorObj->getAdjusts();
@@ -301,8 +301,8 @@ std::optional<ObjectStateData>
                                  std::get<sensorID>(properties), sensorValue,
                                  info, scale);
 
-    auto target =
-        addTarget<hwmon::FanSpeed>(sensorSetKey, _ioAccess, _devPath, info);
+    auto target = addTarget<hwmon::FanSpeed>(sensorSetKey, _ioAccess, _devPath,
+                                             info);
     if (target)
     {
         target->enable();
@@ -396,9 +396,9 @@ void MainLoop::init()
             // std::tuple<SensorSet::mapped_type,
             //            std::string(Sensor Label),
             //            ObjectInfo>
-            auto value =
-                std::make_tuple(std::move(i.second), std::move((*object).first),
-                                std::move((*object).second));
+            auto value = std::make_tuple(std::move(i.second),
+                                         std::move((*object).first),
+                                         std::move((*object).second));
 
             _state[std::move(i.first)] = std::move(value);
         }
@@ -500,8 +500,8 @@ void MainLoop::read()
 
                 // For sensors with attribute ASYNC_READ_TIMEOUT,
                 // spawn a thread with timeout
-                auto asyncReadTimeout =
-                    env::getEnv("ASYNC_READ_TIMEOUT", sensorSetKey);
+                auto asyncReadTimeout = env::getEnv("ASYNC_READ_TIMEOUT",
+                                                    sensorSetKey);
                 if (!asyncReadTimeout.empty())
                 {
                     std::chrono::milliseconds asyncTimeout{
@@ -515,9 +515,9 @@ void MainLoop::read()
                 {
                     // Retry for up to a second if device is busy
                     // or has a transient error.
-                    value =
-                        _ioAccess->read(sensorSysfsType, sensorSysfsNum, input,
-                                        hwmonio::retries, hwmonio::delay);
+                    value = _ioAccess->read(sensorSysfsType, sensorSysfsNum,
+                                            input, hwmonio::retries,
+                                            hwmonio::delay);
                 }
 
                 // Set functional property to true if we could read sensor
@@ -665,9 +665,9 @@ void MainLoop::addDroppedSensors()
                     input = hwmon::entry::average;
                 }
                 // Sensor object added, erase entry from removal list
-                auto file =
-                    sysfs::make_sysfs_path(_ioAccess->path(), it->first.first,
-                                           it->first.second, input);
+                auto file = sysfs::make_sysfs_path(_ioAccess->path(),
+                                                   it->first.first,
+                                                   it->first.second, input);
 
                 log<level::INFO>("Added sensor to dbus after successful read",
                                  entry("FILE=%s", file.c_str()));

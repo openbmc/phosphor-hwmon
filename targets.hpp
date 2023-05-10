@@ -7,11 +7,12 @@
 
 #include <fmt/format.h>
 
-#include <filesystem>
-#include <memory>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
+
+#include <filesystem>
+#include <memory>
 
 enum class targetType
 {
@@ -98,8 +99,8 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
         entry = empty;
     }
 
-    sysfsFullPath =
-        sysfs::make_sysfs_path(ioAccess->path(), targetName, targetId, entry);
+    sysfsFullPath = sysfs::make_sysfs_path(ioAccess->path(), targetName,
+                                           targetId, entry);
     if (fs::exists(sysfsFullPath))
     {
         auto useTarget = true;

@@ -43,9 +43,9 @@ std::optional<int64_t> Average::calcAverage(int64_t preAverage,
     // (a2*i2-a1*i1)/(i2-i1) =
     // (a2*(i1+delta)-a1*i1)/delta =
     // (a2-a1)(i1/delta)+a2
-    value =
-        (curAverage - preAverage) * (static_cast<double>(preInterval) / delta) +
-        curAverage;
+    value = (curAverage - preAverage) *
+                (static_cast<double>(preInterval) / delta) +
+            curAverage;
 
     return value;
 }

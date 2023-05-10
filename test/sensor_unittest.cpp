@@ -4,6 +4,7 @@
 #include "sensor.hpp"
 
 #include <gpioplus/test/handle.hpp>
+
 #include <memory>
 #include <utility>
 
@@ -61,8 +62,8 @@ TEST_F(SensorTest, BasicConstructorTest)
     EXPECT_CALL(env::mockEnv, get(StrEq("REMOVERCS_temp5")))
         .WillOnce(Return(""));
 
-    auto sensor =
-        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
+    auto sensor = std::make_unique<sensor::Sensor>(sensorKey,
+                                                   hwmonio_mock.get(), path);
     EXPECT_FALSE(sensor == nullptr);
 }
 
@@ -98,8 +99,8 @@ TEST_F(SensorTest, SensorRequiresGpio)
     EXPECT_CALL(env::mockEnv, get(StrEq("REMOVERCS_temp5")))
         .WillOnce(Return(""));
 
-    auto sensor =
-        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
+    auto sensor = std::make_unique<sensor::Sensor>(sensorKey,
+                                                   hwmonio_mock.get(), path);
     EXPECT_FALSE(sensor == nullptr);
 }
 
@@ -125,8 +126,8 @@ TEST_F(SensorTest, SensorHasGainAndOffsetAdjustValue)
     EXPECT_CALL(env::mockEnv, get(StrEq("REMOVERCS_temp5")))
         .WillOnce(Return(""));
 
-    auto sensor =
-        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
+    auto sensor = std::make_unique<sensor::Sensor>(sensorKey,
+                                                   hwmonio_mock.get(), path);
     EXPECT_FALSE(sensor == nullptr);
 
     double startingValue = 1.0;

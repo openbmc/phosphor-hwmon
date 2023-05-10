@@ -10,16 +10,17 @@
 
 #include <fmt/format.h>
 
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Sensor/Device/error.hpp>
+
 #include <cassert>
 #include <chrono>
 #include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <future>
-#include <phosphor-logging/elog-errors.hpp>
 #include <thread>
-#include <xyz/openbmc_project/Common/error.hpp>
-#include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 namespace sensor
 {
@@ -221,8 +222,8 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     std::string entry = hwmon::entry::fault;
 
     bool functional = true;
-    auto sysfsFullPath =
-        sysfs::make_sysfs_path(_ioAccess->path(), faultName, faultID, entry);
+    auto sysfsFullPath = sysfs::make_sysfs_path(_ioAccess->path(), faultName,
+                                                faultID, entry);
     if (fs::exists(sysfsFullPath))
     {
         _hasFaultFile = true;
@@ -313,9 +314,9 @@ SensorValueType asyncRead(const SensorSet::key_type& sensorSetKey,
     if (asyncIter == timedoutMap.end())
     {
         // If sensor not found in timedoutMap, spawn an async thread
-        asyncThread =
-            std::async(std::launch::async, &hwmonio::HwmonIOInterface::read,
-                       ioAccess, type, id, sensor, retries, delay);
+        asyncThread = std::async(std::launch::async,
+                                 &hwmonio::HwmonIOInterface::read, ioAccess,
+                                 type, id, sensor, retries, delay);
         valueIsValid = true;
     }
     else

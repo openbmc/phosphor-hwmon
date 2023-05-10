@@ -8,10 +8,11 @@
 
 #include <fmt/format.h>
 
-#include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
-#include <string>
 #include <xyz/openbmc_project/Control/Device/error.hpp>
+
+#include <filesystem>
+#include <string>
 
 using namespace phosphor::logging;
 
@@ -38,8 +39,8 @@ uint64_t FanPwm::target(uint64_t value)
             xyz::openbmc_project::Control::Device::WriteFailure::
                 CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-        auto file =
-            sysfs::make_sysfs_path(_ioAccess->path(), _type, _id, empty);
+        auto file = sysfs::make_sysfs_path(_ioAccess->path(), _type, _id,
+                                           empty);
 
         log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}", file,
                                      e.code().value())

@@ -4,13 +4,14 @@
 #include "sensorset.hpp"
 #include "types.hpp"
 
+#include <gpioplus/handle.hpp>
+#include <stdplus/handle/managed.hpp>
+
 #include <cerrno>
 #include <future>
-#include <gpioplus/handle.hpp>
 #include <map>
 #include <memory>
 #include <optional>
-#include <stdplus/handle/managed.hpp>
 #include <unordered_set>
 
 namespace sensor
@@ -32,8 +33,7 @@ struct AsyncSensorReadTimeOut : public std::system_error
     AsyncSensorReadTimeOut() :
         system_error(std::error_code(ETIMEDOUT, std::system_category()),
                      "Async sensor read timed out")
-    {
-    }
+    {}
 };
 
 /** @class Sensor
