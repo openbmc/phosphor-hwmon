@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6dc9e6f0_81fae180",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2023-08-08T21:19:29Z",
+      "side": 1,
+      "message": "Just curious, what was the problem exactly?",
+      "range": {
+        "startLine": 10,
+        "startChar": 31,
+        "endLine": 10,
+        "endChar": 58
+      },
+      "revId": "2143edb8bdc0e346a45c1139b1752c958e8d0595",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8a61238f_2fb0eb8c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2023-08-08T21:19:29Z",
+      "side": 1,
+      "message": "Can you provide an example incantation that shows how it would be used?",
+      "revId": "2143edb8bdc0e346a45c1139b1752c958e8d0595",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
