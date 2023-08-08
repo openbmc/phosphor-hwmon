@@ -25,3 +25,10 @@ option(
     value: false,
     description: 'Include building and installing the MAX31785 chip\'s minimum ship level checking application.'
 )
+
+
+option(
+    'override-with-devpath',
+    type: 'array',
+    description: 'Only use the devpath of the device even if OFPath exists'
+)
