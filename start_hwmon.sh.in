@@ -1,0 +1,41 @@
+#!/bin/bash
+
+action=$1
+devpath=$2
+of_fullname=$3
+
+#Use of_fullname if it's there, otherwise use devpath.
+function use_devpath(){
+    path=$devpath
+
+    if [[ "$path" =~ (.*)/hwmon/hwmon[0-9]+$ ]];
+    then
+        path=${BASH_REMATCH[1]}
+    fi
+    echo "${path}"
+}
+
+path=$of_fullname
+if [ -z "${path}" ]
+then
+    path="$(use_devpath)"
+else
+    override_with_devpath=(@OVERRIDE_WITH_DEVPATH@)
+    if [[ "$path" =~ .*/(.*)$ ]];
+    then
+        of_name="${BASH_REMATCH[1]}"
+        for i in ${!override_with_devpath[@]}; do
+            if [[ "${override_with_devpath[$i]}" == "${of_name}" ]];
+            then
+                path="$(use_devpath)"
+                break
+            fi
+        done
+    fi
+fi
+
+# Needed to re-do escaping used to avoid bitbake separator conflicts
+path="${path//:/--}"
+# Needed to escape prior to being used as a unit argument
+path="$(systemd-escape "$path")"
+systemctl --no-block "$action" "xyz.openbmc_project.Hwmon@$path.service"

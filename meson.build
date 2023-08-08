@@ -116,10 +116,13 @@ install_data(
     install_dir: udev_dir / 'rules.d'
 )
 
-install_data(
-    'start_hwmon.sh',
+configure_file(
+    input : 'start_hwmon.sh.in',
+    output : 'start_hwmon.sh',
+    configuration: {'OVERRIDE_WITH_DEVPATH': ' '.join(get_option('override-with-devpath'))},
     install_dir: get_option('bindir'),
-    install_mode: 'rwxr-xr-x'
+    install_mode: 'rwxr-xr-x',
+    install: true,
 )
 
 subdir('msl')
