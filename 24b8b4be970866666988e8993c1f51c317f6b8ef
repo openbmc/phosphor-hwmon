@@ -16,6 +16,24 @@
       "message": "looks good to me, though lets let it sit a bit longer in case others want to review.",
       "revId": "24b8b4be970866666988e8993c1f51c317f6b8ef",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "25ac4014_e3aca692",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2023-08-09T20:59:36Z",
+      "side": 1,
+      "message": "Since it\u0027s default to old behavior and the new behavior is working on our problematic platform - I\u0027m ok with submitting this. Not sure if we should add other reviewers?",
+      "parentUuid": "f8bd6127_a0c302e4",
+      "revId": "24b8b4be970866666988e8993c1f51c317f6b8ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
