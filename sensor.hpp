@@ -138,6 +138,19 @@ class Sensor
                                                 double accuracy);
 
     /**
+     * @brief Add Priority interface and priority property for sensors
+     * @details The Priority interface defines priority levels for sensors.
+     *
+     * @param[in] info     - Sensor object information
+     * @param[in] priority - The priority level for the sensor
+     *
+     * @return - Shared pointer to the priority object
+     */
+
+    std::shared_ptr<PriorityObject> addPriority(ObjectInfo& info,
+                                                size_t priority);
+
+    /**
      * @brief Get the scale from the sensor.
      *
      * @return - Scale value
