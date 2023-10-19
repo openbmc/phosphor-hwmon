@@ -176,16 +176,18 @@ SensorIdentifiers
     std::string id = getID(sensor);
     std::string label;
     std::string accuracy;
+    std::string priority;
 
     if (!id.empty())
     {
         // Ignore inputs without a label.
         label = env::getEnv("LABEL", sensor.first.first, id);
         accuracy = env::getEnv("ACCURACY", sensor.first.first, id);
+        priority = env::getEnv("PRIORITY", sensor.first.first, id);
     }
 
-    return std::make_tuple(std::move(id), std::move(label),
-                           std::move(accuracy));
+    return std::make_tuple(std::move(id), std::move(label), std::move(accuracy),
+                           std::move(priority));
 }
 
 /**
@@ -249,6 +251,19 @@ std::optional<ObjectStateData>
             {
                 auto accuracy = stod(accuracyStr);
                 sensorObj->addAccuracy(info, accuracy);
+            }
+        }
+        catch (const std::invalid_argument&)
+        {}
+
+        // Add priority interface
+        auto priorityStr = std::get<sensorPriority>(properties);
+        try
+        {
+            if (!priorityStr.empty())
+            {
+                auto priority = std::stoul(priorityStr);
+                sensorObj->addPriority(info, priority);
             }
         }
         catch (const std::invalid_argument&)
