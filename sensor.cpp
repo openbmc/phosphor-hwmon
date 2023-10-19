@@ -280,6 +280,22 @@ std::shared_ptr<AccuracyObject> Sensor::addAccuracy(ObjectInfo& info,
     return iface;
 }
 
+std::shared_ptr<PriorityObject> Sensor::addPriority(ObjectInfo& info,
+                                                    size_t priority)
+{
+    auto& objPath = std::get<std::string>(info);
+    auto& obj = std::get<InterfaceMap>(info);
+
+    auto& bus = *std::get<sdbusplus::bus_t*>(info);
+    auto iface = std::make_shared<PriorityObject>(
+        bus, objPath.c_str(), PriorityObject::action::emit_no_signals);
+
+    iface->priority(priority);
+    obj[InterfaceType::PRIORITY] = iface;
+
+    return iface;
+}
+
 void gpioLock(const gpioplus::HandleInterface*&& handle)
 {
     handle->setValues({0});
