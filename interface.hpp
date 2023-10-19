@@ -8,6 +8,7 @@
 #include <xyz/openbmc_project/Sensor/Threshold/Warning/server.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
 #include <xyz/openbmc_project/State/Decorator/OperationalStatus/server.hpp>
+#include <xyz/openbmc_project/Common/Priority/server.hpp>
 
 template <typename... T>
 using ServerObject = typename sdbusplus::server::object_t<T...>;
@@ -29,6 +30,8 @@ using FanPwmObject = ServerObject<FanPwmInterface>;
 using StatusInterface = sdbusplus::xyz::openbmc_project::State::Decorator::
     server::OperationalStatus;
 using StatusObject = ServerObject<StatusInterface>;
+using PriorityInterface = sdbusplus::xyz::openbmc_project::Common::server::Priority;
+using PriorityObject = ServerObject<PriorityInterface>;
 
 using SensorValueType = double;
 
@@ -45,6 +48,7 @@ enum class InterfaceType
     FAN_PWM,
     STATUS,
     ACCURACY,
+    PRIORITY,
 };
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
