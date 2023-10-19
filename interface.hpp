@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sdbusplus/server.hpp>
+#include <xyz/openbmc_project/Common/Priority/server.hpp>
 #include <xyz/openbmc_project/Control/FanPwm/server.hpp>
 #include <xyz/openbmc_project/Control/FanSpeed/server.hpp>
 #include <xyz/openbmc_project/Sensor/Accuracy/server.hpp>
@@ -29,6 +30,9 @@ using FanPwmObject = ServerObject<FanPwmInterface>;
 using StatusInterface = sdbusplus::xyz::openbmc_project::State::Decorator::
     server::OperationalStatus;
 using StatusObject = ServerObject<StatusInterface>;
+using PriorityInterface =
+    sdbusplus::xyz::openbmc_project::Common::server::Priority;
+using PriorityObject = ServerObject<PriorityInterface>;
 
 using SensorValueType = double;
 
@@ -45,6 +49,7 @@ enum class InterfaceType
     FAN_PWM,
     STATUS,
     ACCURACY,
+    PRIORITY,
 };
 
 // vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
