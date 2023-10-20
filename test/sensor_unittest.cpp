@@ -90,8 +90,8 @@ TEST_F(SensorTest, SensorRequiresGpio)
 
     EXPECT_CALL(gMock, build(StrEq("chipA"), StrEq("5")))
         .WillOnce(Invoke([&](const std::string&, const std::string&) {
-            return std::move(handleMock);
-        }));
+        return std::move(handleMock);
+    }));
 
     /* Always calls GAIN and OFFSET, can use ON_CALL instead of EXPECT_CALL */
     EXPECT_CALL(env::mockEnv, get(StrEq("GAIN_temp5"))).WillOnce(Return(""));

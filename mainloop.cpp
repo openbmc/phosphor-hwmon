@@ -113,7 +113,7 @@ void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value)
     {
         switch (iface.first)
         {
-            // clang-format off
+                // clang-format off
             case InterfaceType::VALUE:
             {
                 auto& valueIface =
