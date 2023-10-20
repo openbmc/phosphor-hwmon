@@ -22,6 +22,30 @@
       },
       "revId": "c8e818dda788fdd30909707008be4d4af3f716bf",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b622ff64_877c2f04",
+        "filename": "mainloop.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-10-20T21:33:47Z",
+      "side": 1,
+      "message": "Sorry, I have no idea.  I just ran clang-format-17 across all the repos.\n\nI can\u0027t think of anything that would have explicitly made this change.",
+      "parentUuid": "b3072d78_fe6faf5c",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 35
+      },
+      "revId": "c8e818dda788fdd30909707008be4d4af3f716bf",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
