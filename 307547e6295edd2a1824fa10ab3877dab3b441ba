@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bfd6f510_34117008",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2023-10-25T17:58:53Z",
+      "side": 1,
+      "message": "Looks straightforward, 1:1 copy of an existing interface. Will +1 and leave it open for review for 24 hours for others to give feedback",
+      "revId": "307547e6295edd2a1824fa10ab3877dab3b441ba",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
