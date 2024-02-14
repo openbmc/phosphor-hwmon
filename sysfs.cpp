@@ -15,12 +15,13 @@
  */
 #include "sysfs.hpp"
 
-#include <fmt/format.h>
+#include <stdplus/print.hpp>
 
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 
@@ -231,9 +232,9 @@ std::string findHwmonFromDevPath(const std::string& devPath)
     }
     catch (const std::exception& e)
     {
-        fmt::print(stderr,
-                   "Unable to find hwmon directory from the dev path: {}\n",
-                   devPath.c_str());
+        stdplus::print(stderr,
+                       "Unable to find hwmon directory from the dev path: {}\n",
+                       devPath.c_str());
     }
     return emptyString;
 }

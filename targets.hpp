@@ -5,13 +5,12 @@
 #include "fan_speed.hpp"
 #include "hwmonio.hpp"
 
-#include <fmt/format.h>
-
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 #include <filesystem>
+#include <format>
 #include <memory>
 
 enum class targetType
@@ -155,7 +154,7 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
                     metadata::CALLOUT_ERRNO(e.code().value()),
                     metadata::CALLOUT_DEVICE_PATH(devPath.c_str()));
 
-                log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}",
+                log<level::INFO>(std::format("Failing sysfs file: {} errno: {}",
                                              sysfsFullPath, e.code().value())
                                      .c_str());
             }

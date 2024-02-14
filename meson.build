@@ -11,8 +11,6 @@ project(
     meson_version: '>=1.1.1',
 )
 
-fmt = dependency('fmt')
-
 conf = configuration_data()
 conf.set_quoted('BUSNAME_PREFIX', get_option('busname-prefix'))
 conf.set_quoted('SENSOR_ROOT', get_option('sensor-root'))
@@ -21,15 +19,10 @@ conf.set10('UPDATE_FUNCTIONAL_ON_FAIL', get_option('update-functional-on-fail'))
 
 sysfs_headers = include_directories('.')
 
-sysfs_deps = [
-    fmt,
-]
-
 sysfs_lib = static_library(
     'sysfs',
     'sysfs.cpp',
-    include_directories: sysfs_headers,
-    dependencies: sysfs_deps)
+    include_directories: sysfs_headers)
 
 sysfs_dep = declare_dependency(
     dependencies: sysfs_deps,
@@ -39,7 +32,6 @@ sysfs_dep = declare_dependency(
 hwmon_headers = include_directories('.')
 
 hwmon_deps = [
-    fmt,
     dependency('gpioplus'),
     dependency('phosphor-dbus-interfaces'),
     dependency('phosphor-logging'),
