@@ -8,8 +8,6 @@
 #include "sensorset.hpp"
 #include "sysfs.hpp"
 
-#include <fmt/format.h>
-
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
@@ -19,6 +17,7 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <format>
 #include <future>
 #include <thread>
 
@@ -246,7 +245,7 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
                 metadata::CALLOUT_ERRNO(e.code().value()),
                 metadata::CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            log<level::INFO>(fmt::format("Failing sysfs file: {} errno {}",
+            log<level::INFO>(std::format("Failing sysfs file: {} errno {}",
                                          sysfsFullPath, e.code().value())
                                  .c_str());
         }

@@ -29,13 +29,12 @@
 #include "thresholds.hpp"
 #include "util.hpp"
 
-#include <fmt/format.h>
-
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Sensor/Device/error.hpp>
 
 #include <cassert>
 #include <cstdlib>
+#include <format>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -302,7 +301,7 @@ std::optional<ObjectStateData>
             xyz::openbmc_project::Sensor::Device::ReadFailure::
                 CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-        log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}", file,
+        log<level::INFO>(std::format("Failing sysfs file: {} errno: {}", file,
                                      e.code().value())
                              .c_str());
         exit(EXIT_FAILURE);
@@ -618,7 +617,7 @@ void MainLoop::read()
                 xyz::openbmc_project::Sensor::Device::ReadFailure::
                     CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            log<level::INFO>(fmt::format("Failing sysfs file: {} errno: {}",
+            log<level::INFO>(std::format("Failing sysfs file: {} errno: {}",
                                          file, e.code().value())
                                  .c_str());
 
