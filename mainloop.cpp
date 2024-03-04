@@ -106,6 +106,44 @@ decltype(Thresholds<CriticalObject>::deassertHighSignal)
     Thresholds<CriticalObject>::deassertHighSignal =
         &CriticalObject::criticalHighAlarmDeasserted;
 
+// Initialization for NonRecoverable Objects
+decltype(Thresholds<NonRecoverableObject>::setLo)
+    Thresholds<NonRecoverableObject>::setLo =
+        &NonRecoverableObject::nonRecoverableLow;
+decltype(Thresholds<NonRecoverableObject>::setHi)
+    Thresholds<NonRecoverableObject>::setHi =
+        &NonRecoverableObject::nonRecoverableHigh;
+decltype(Thresholds<NonRecoverableObject>::getLo)
+    Thresholds<NonRecoverableObject>::getLo =
+        &NonRecoverableObject::nonRecoverableLow;
+decltype(Thresholds<NonRecoverableObject>::getHi)
+    Thresholds<NonRecoverableObject>::getHi =
+        &NonRecoverableObject::nonRecoverableHigh;
+decltype(Thresholds<NonRecoverableObject>::alarmLo)
+    Thresholds<NonRecoverableObject>::alarmLo =
+        &NonRecoverableObject::nonRecoverableAlarmLow;
+decltype(Thresholds<NonRecoverableObject>::alarmHi)
+    Thresholds<NonRecoverableObject>::alarmHi =
+        &NonRecoverableObject::nonRecoverableAlarmHigh;
+decltype(Thresholds<NonRecoverableObject>::getAlarmLow)
+    Thresholds<NonRecoverableObject>::getAlarmLow =
+        &NonRecoverableObject::nonRecoverableAlarmLow;
+decltype(Thresholds<NonRecoverableObject>::getAlarmHigh)
+    Thresholds<NonRecoverableObject>::getAlarmHigh =
+        &NonRecoverableObject::nonRecoverableAlarmHigh;
+decltype(Thresholds<NonRecoverableObject>::assertLowSignal)
+    Thresholds<NonRecoverableObject>::assertLowSignal =
+        &NonRecoverableObject::nonRecoverableLowAlarmAsserted;
+decltype(Thresholds<NonRecoverableObject>::assertHighSignal)
+    Thresholds<NonRecoverableObject>::assertHighSignal =
+        &NonRecoverableObject::nonRecoverableHighAlarmDeasserted;
+decltype(Thresholds<NonRecoverableObject>::deassertLowSignal)
+    Thresholds<NonRecoverableObject>::deassertLowSignal =
+        &NonRecoverableObject::nonRecoverableLowAlarmDeasserted;
+decltype(Thresholds<NonRecoverableObject>::deassertHighSignal)
+    Thresholds<NonRecoverableObject>::deassertHighSignal =
+        &NonRecoverableObject::nonRecoverableHighAlarmDeasserted;
+
 void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value)
 {
     for (auto& iface : ifaces)
@@ -126,6 +164,9 @@ void updateSensorInterfaces(InterfaceMap& ifaces, SensorValueType value)
                 break;
             case InterfaceType::CRIT:
                 checkThresholds<CriticalObject>(iface.second, value);
+                break;
+            case InterfaceType::NONR:
+                checkThresholds<NonRecoverableObject>(iface.second, value);
                 break;
             default:
                 break;
@@ -314,6 +355,9 @@ std::optional<ObjectStateData>
     addThreshold<CriticalObject>(sensorSysfsType,
                                  std::get<sensorID>(properties), sensorValue,
                                  info, scale);
+    addThreshold<NonRecoverableObject>(sensorSysfsType,
+                                       std::get<sensorID>(properties),
+                                       sensorValue, info, scale);
 
     auto target = addTarget<hwmon::FanSpeed>(sensorSetKey, _ioAccess, _devPath,
                                              info);

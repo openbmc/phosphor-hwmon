@@ -61,6 +61,32 @@ struct Thresholds<CriticalObject>
     static void (CriticalObject::*const deassertHighSignal)(SensorValueType);
 };
 
+/**@brief Thresholds specialization for NonRecoverable thresholds. */
+template <>
+struct Thresholds<NonRecoverableObject>
+{
+    static constexpr InterfaceType type = InterfaceType::NONR;
+    static constexpr const char* envLo = "NONRLO";
+    static constexpr const char* envHi = "NONRHI";
+    static SensorValueType (NonRecoverableObject::*const setLo)(
+        SensorValueType);
+    static SensorValueType (NonRecoverableObject::*const setHi)(
+        SensorValueType);
+    static SensorValueType (NonRecoverableObject::*const getLo)() const;
+    static SensorValueType (NonRecoverableObject::*const getHi)() const;
+    static bool (NonRecoverableObject::*const alarmLo)(bool);
+    static bool (NonRecoverableObject::*const alarmHi)(bool);
+    static bool (NonRecoverableObject::*const getAlarmLow)() const;
+    static bool (NonRecoverableObject::*const getAlarmHigh)() const;
+    static void (NonRecoverableObject::*const assertLowSignal)(SensorValueType);
+    static void (NonRecoverableObject::*const assertHighSignal)(
+        SensorValueType);
+    static void (NonRecoverableObject::*const deassertLowSignal)(
+        SensorValueType);
+    static void (NonRecoverableObject::*const deassertHighSignal)(
+        SensorValueType);
+};
+
 /** @brief checkThresholds
  *
  *  Compare a sensor reading to threshold values and set the

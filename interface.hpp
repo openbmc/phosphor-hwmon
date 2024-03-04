@@ -6,6 +6,7 @@
 #include <xyz/openbmc_project/Control/FanSpeed/server.hpp>
 #include <xyz/openbmc_project/Sensor/Accuracy/server.hpp>
 #include <xyz/openbmc_project/Sensor/Threshold/Critical/server.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/NonRecoverable/server.hpp>
 #include <xyz/openbmc_project/Sensor/Threshold/Warning/server.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
 #include <xyz/openbmc_project/State/Decorator/OperationalStatus/server.hpp>
@@ -21,6 +22,9 @@ using WarningObject = ServerObject<WarningInterface>;
 using CriticalInterface =
     sdbusplus::xyz::openbmc_project::Sensor::Threshold::server::Critical;
 using CriticalObject = ServerObject<CriticalInterface>;
+using NonRecoverableInterface =
+    sdbusplus::xyz::openbmc_project::Sensor::Threshold::server::NonRecoverable;
+using NonRecoverableObject = ServerObject<NonRecoverableInterface>;
 using FanSpeedInterface =
     sdbusplus::xyz::openbmc_project::Control::server::FanSpeed;
 using FanSpeedObject = ServerObject<FanSpeedInterface>;
@@ -45,6 +49,7 @@ enum class InterfaceType
     VALUE,
     WARN,
     CRIT,
+    NONR,
     FAN_SPEED,
     FAN_PWM,
     STATUS,
