@@ -339,9 +339,8 @@ MainLoop::MainLoop(sdbusplus::bus_t&& bus, const std::string& param,
                    const char* prefix, const char* root,
                    const std::string& instanceId,
                    const hwmonio::HwmonIOInterface* ioIntf) :
-    _bus(std::move(bus)),
-    _manager(_bus, root), _pathParam(param), _hwmonRoot(), _instance(),
-    _devPath(devPath), _prefix(prefix), _root(root), _state(),
+    _bus(std::move(bus)), _manager(_bus, root), _pathParam(param), _hwmonRoot(),
+    _instance(), _devPath(devPath), _prefix(prefix), _root(root), _state(),
     _instanceId(instanceId), _ioAccess(ioIntf),
     _event(sdeventplus::Event::get_default()),
     _timer(_event, std::bind(&MainLoop::read, this))
