@@ -55,7 +55,7 @@ class Sensor
     /**
      * @brief Constructs Sensor object
      *
-     * @param[in] sensor - A pair of sensor indentifiers
+     * @param[in] sensor - A pair of sensor identifiers
      * @param[in] ioAccess - Hwmon sysfs access
      * @param[in] devPath - Device sysfs path
      */
