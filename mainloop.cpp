@@ -191,7 +191,7 @@ SensorIdentifiers
 
 /**
  * Reads the environment parameters of a sensor and creates an object with
- * atleast the `Value` interface, otherwise returns without creating the object.
+ * at least the `Value` interface, otherwise returns without creating the object.
  * If the `Value` interface is successfully created, by reading the sensor's
  * corresponding sysfs file's value, the additional interfaces for the sensor
  * are created and the InterfacesAdded signal is emitted. The object's state
