@@ -32,3 +32,10 @@ option(
     type: 'array',
     description: 'Only use the devpath of the device even if OFPath exists'
 )
+
+option(
+    'always-use-devpath',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Only use the devpath for all devices.'
+)
