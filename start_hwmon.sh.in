@@ -16,7 +16,7 @@ function use_devpath(){
 }
 
 path=$of_fullname
-if [ -z "${path}" ]
+if [ -z "${path}" ]@FORCE_DEVPATH@
 then
     path="$(use_devpath)"
 else
