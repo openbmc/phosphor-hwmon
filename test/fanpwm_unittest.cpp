@@ -23,11 +23,6 @@ static auto FanPwmProp = "Target";
 void SetupDbusObject(sdbusplus::SdBusMock* sdbus_mock, const std::string& path,
                      const std::string& intf, const std::string property = "")
 {
-    EXPECT_CALL(*sdbus_mock,
-                sd_bus_add_object_vtable(IsNull(), NotNull(), StrEq(path),
-                                         StrEq(intf), NotNull(), NotNull()))
-        .WillOnce(Return(0));
-
     if (property.empty())
     {
         EXPECT_CALL(*sdbus_mock,
