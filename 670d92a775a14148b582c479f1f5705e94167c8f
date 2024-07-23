@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e91b2429_199b0397",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2024-07-23T17:06:53Z",
+      "side": 1,
+      "message": "Seems like this is an opt-in feature, so no diff for older platforms.",
+      "revId": "670d92a775a14148b582c479f1f5705e94167c8f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
