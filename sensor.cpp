@@ -31,8 +31,8 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 Sensor::Sensor(const SensorSet::key_type& sensor,
                const hwmonio::HwmonIOInterface* ioAccess,
                const std::string& devPath) :
-    _sensor(sensor),
-    _ioAccess(ioAccess), _devPath(devPath), _scale(0), _hasFaultFile(false)
+    _sensor(sensor), _ioAccess(ioAccess), _devPath(devPath), _scale(0),
+    _hasFaultFile(false)
 {
     auto chip = env::getEnv("GPIOCHIP", sensor);
     auto access = env::getEnv("GPIO", sensor);
@@ -105,9 +105,9 @@ SensorValueType Sensor::adjustValue(SensorValueType value)
 #endif
 
     // Adjust based on gain and offset
-    value = static_cast<decltype(value)>(static_cast<double>(value) *
-                                             _sensorAdjusts.gain +
-                                         _sensorAdjusts.offset);
+    value = static_cast<decltype(value)>(
+        static_cast<double>(value) * _sensorAdjusts.gain +
+        _sensorAdjusts.offset);
 
     if constexpr (std::is_same<SensorValueType, double>::value)
     {
@@ -117,9 +117,8 @@ SensorValueType Sensor::adjustValue(SensorValueType value)
     return value;
 }
 
-std::shared_ptr<ValueObject> Sensor::addValue(const RetryIO& retryIO,
-                                              ObjectInfo& info,
-                                              TimedoutMap& timedoutMap)
+std::shared_ptr<ValueObject> Sensor::addValue(
+    const RetryIO& retryIO, ObjectInfo& info, TimedoutMap& timedoutMap)
 {
     // Get the initial value for the value interface.
     auto& bus = *std::get<sdbusplus::bus_t*>(info);
@@ -221,8 +220,8 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     std::string entry = hwmon::entry::fault;
 
     bool functional = true;
-    auto sysfsFullPath = sysfs::make_sysfs_path(_ioAccess->path(), faultName,
-                                                faultID, entry);
+    auto sysfsFullPath =
+        sysfs::make_sysfs_path(_ioAccess->path(), faultName, faultID, entry);
     if (fs::exists(sysfsFullPath))
     {
         _hasFaultFile = true;
@@ -263,8 +262,8 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     return iface;
 }
 
-std::shared_ptr<AccuracyObject> Sensor::addAccuracy(ObjectInfo& info,
-                                                    double accuracy)
+std::shared_ptr<AccuracyObject>
+    Sensor::addAccuracy(ObjectInfo& info, double accuracy)
 {
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<InterfaceMap>(info);
@@ -279,8 +278,8 @@ std::shared_ptr<AccuracyObject> Sensor::addAccuracy(ObjectInfo& info,
     return iface;
 }
 
-std::shared_ptr<PriorityObject> Sensor::addPriority(ObjectInfo& info,
-                                                    size_t priority)
+std::shared_ptr<PriorityObject>
+    Sensor::addPriority(ObjectInfo& info, size_t priority)
 {
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<InterfaceMap>(info);
@@ -313,13 +312,12 @@ std::optional<GpioLocker> gpioUnlock(const gpioplus::HandleInterface* handle)
     return GpioLocker(std::move(handle));
 }
 
-SensorValueType asyncRead(const SensorSet::key_type& sensorSetKey,
-                          const hwmonio::HwmonIOInterface* ioAccess,
-                          std::chrono::milliseconds asyncTimeout,
-                          TimedoutMap& timedoutMap, const std::string& type,
-                          const std::string& id, const std::string& sensor,
-                          const size_t retries,
-                          const std::chrono::milliseconds delay)
+SensorValueType asyncRead(
+    const SensorSet::key_type& sensorSetKey,
+    const hwmonio::HwmonIOInterface* ioAccess,
+    std::chrono::milliseconds asyncTimeout, TimedoutMap& timedoutMap,
+    const std::string& type, const std::string& id, const std::string& sensor,
+    const size_t retries, const std::chrono::milliseconds delay)
 {
     // Default async read timeout
     bool valueIsValid = false;
@@ -329,9 +327,9 @@ SensorValueType asyncRead(const SensorSet::key_type& sensorSetKey,
     if (asyncIter == timedoutMap.end())
     {
         // If sensor not found in timedoutMap, spawn an async thread
-        asyncThread = std::async(std::launch::async,
-                                 &hwmonio::HwmonIOInterface::read, ioAccess,
-                                 type, id, sensor, retries, delay);
+        asyncThread =
+            std::async(std::launch::async, &hwmonio::HwmonIOInterface::read,
+                       ioAccess, type, id, sensor, retries, delay);
         valueIsValid = true;
     }
     else

@@ -5,10 +5,9 @@
 namespace sysfs
 {
 
-inline std::string make_sysfs_path(const std::string& path,
-                                   const std::string& type,
-                                   const std::string& id,
-                                   const std::string& entry)
+inline std::string
+    make_sysfs_path(const std::string& path, const std::string& type,
+                    const std::string& id, const std::string& entry)
 {
     using namespace std::literals;
 

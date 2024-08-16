@@ -98,8 +98,8 @@ std::shared_ptr<T> addTarget(const SensorSet::key_type& sensor,
         entry = empty;
     }
 
-    sysfsFullPath = sysfs::make_sysfs_path(ioAccess->path(), targetName,
-                                           targetId, entry);
+    sysfsFullPath =
+        sysfs::make_sysfs_path(ioAccess->path(), targetName, targetId, entry);
     if (fs::exists(sysfsFullPath))
     {
         auto useTarget = true;

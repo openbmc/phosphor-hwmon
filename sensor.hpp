@@ -107,9 +107,8 @@ class Sensor
      *
      * @return - Shared pointer to the value object
      */
-    std::shared_ptr<ValueObject> addValue(const RetryIO& retryIO,
-                                          ObjectInfo& info,
-                                          TimedoutMap& timedoutMap);
+    std::shared_ptr<ValueObject> addValue(
+        const RetryIO& retryIO, ObjectInfo& info, TimedoutMap& timedoutMap);
 
     /**
      * @brief Add status interface and functional property for sensor
@@ -134,8 +133,8 @@ class Sensor
      *
      * @return - Shared pointer to the accuracy object
      */
-    std::shared_ptr<AccuracyObject> addAccuracy(ObjectInfo& info,
-                                                double accuracy);
+    std::shared_ptr<AccuracyObject>
+        addAccuracy(ObjectInfo& info, double accuracy);
 
     /**
      * @brief Add Priority interface and priority property for sensors
@@ -147,8 +146,8 @@ class Sensor
      * @return - Shared pointer to the priority object
      */
 
-    std::shared_ptr<PriorityObject> addPriority(ObjectInfo& info,
-                                                size_t priority);
+    std::shared_ptr<PriorityObject>
+        addPriority(ObjectInfo& info, size_t priority);
 
     /**
      * @brief Get the scale from the sensor.
@@ -240,11 +239,10 @@ std::optional<GpioLocker> gpioUnlock(const gpioplus::HandleInterface* handle);
  *
  * @return - SensorValueType read asynchronously, will throw if timed out
  */
-SensorValueType asyncRead(const SensorSet::key_type& sensorSetKey,
-                          const hwmonio::HwmonIOInterface* ioAccess,
-                          std::chrono::milliseconds asyncTimeout,
-                          TimedoutMap& timedoutMap, const std::string& type,
-                          const std::string& id, const std::string& sensor,
-                          const size_t retries,
-                          const std::chrono::milliseconds delay);
+SensorValueType asyncRead(
+    const SensorSet::key_type& sensorSetKey,
+    const hwmonio::HwmonIOInterface* ioAccess,
+    std::chrono::milliseconds asyncTimeout, TimedoutMap& timedoutMap,
+    const std::string& type, const std::string& id, const std::string& sensor,
+    const size_t retries, const std::chrono::milliseconds delay);
 } // namespace sensor

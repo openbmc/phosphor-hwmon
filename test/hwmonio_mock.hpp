@@ -10,7 +10,7 @@ namespace hwmonio
 class HwmonIOMock : public HwmonIOInterface
 {
   public:
-    virtual ~HwmonIOMock(){};
+    virtual ~HwmonIOMock() {};
 
     MOCK_CONST_METHOD5(read, int64_t(const std::string&, const std::string&,
                                      const std::string&, size_t,

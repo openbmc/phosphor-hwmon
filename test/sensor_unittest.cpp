@@ -62,8 +62,8 @@ TEST_F(SensorTest, BasicConstructorTest)
     EXPECT_CALL(env::mockEnv, get(StrEq("REMOVERCS_temp5")))
         .WillOnce(Return(""));
 
-    auto sensor = std::make_unique<sensor::Sensor>(sensorKey,
-                                                   hwmonio_mock.get(), path);
+    auto sensor =
+        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
     EXPECT_FALSE(sensor == nullptr);
 }
 
@@ -90,8 +90,8 @@ TEST_F(SensorTest, SensorRequiresGpio)
 
     EXPECT_CALL(gMock, build(StrEq("chipA"), StrEq("5")))
         .WillOnce(Invoke([&](const std::string&, const std::string&) {
-        return std::move(handleMock);
-    }));
+            return std::move(handleMock);
+        }));
 
     /* Always calls GAIN and OFFSET, can use ON_CALL instead of EXPECT_CALL */
     EXPECT_CALL(env::mockEnv, get(StrEq("GAIN_temp5"))).WillOnce(Return(""));
@@ -99,8 +99,8 @@ TEST_F(SensorTest, SensorRequiresGpio)
     EXPECT_CALL(env::mockEnv, get(StrEq("REMOVERCS_temp5")))
         .WillOnce(Return(""));
 
-    auto sensor = std::make_unique<sensor::Sensor>(sensorKey,
-                                                   hwmonio_mock.get(), path);
+    auto sensor =
+        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
     EXPECT_FALSE(sensor == nullptr);
 }
 
@@ -126,8 +126,8 @@ TEST_F(SensorTest, SensorHasGainAndOffsetAdjustValue)
     EXPECT_CALL(env::mockEnv, get(StrEq("REMOVERCS_temp5")))
         .WillOnce(Return(""));
 
-    auto sensor = std::make_unique<sensor::Sensor>(sensorKey,
-                                                   hwmonio_mock.get(), path);
+    auto sensor =
+        std::make_unique<sensor::Sensor>(sensorKey, hwmonio_mock.get(), path);
     EXPECT_FALSE(sensor == nullptr);
 
     double startingValue = 1.0;
