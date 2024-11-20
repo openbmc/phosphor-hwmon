@@ -18,35 +18,28 @@ namespace hwmon
 
 uint64_t FanSpeed::target(uint64_t value)
 {
-    auto curValue = FanSpeedObject::target();
-
-    if (curValue != value)
+    try
     {
-        // Write target out to sysfs
-        try
-        {
-            _ioAccess->write(value, _type, _id, entry::target, hwmonio::retries,
-                             hwmonio::delay);
-        }
-        catch (const std::system_error& e)
-        {
-            using namespace sdbusplus::xyz::openbmc_project::Control::Device::
-                Error;
-            report<WriteFailure>(
-                xyz::openbmc_project::Control::Device::WriteFailure::
-                    CALLOUT_ERRNO(e.code().value()),
-                xyz::openbmc_project::Control::Device::WriteFailure::
-                    CALLOUT_DEVICE_PATH(_devPath.c_str()));
+        _ioAccess->write(value, _type, _id, entry::target, hwmonio::retries,
+                         hwmonio::delay);
+    }
+    catch (const std::system_error& e)
+    {
+        using namespace sdbusplus::xyz::openbmc_project::Control::Device::Error;
+        report<WriteFailure>(
+            xyz::openbmc_project::Control::Device::WriteFailure::CALLOUT_ERRNO(
+                e.code().value()),
+            xyz::openbmc_project::Control::Device::WriteFailure::
+                CALLOUT_DEVICE_PATH(_devPath.c_str()));
 
-            auto file = sysfs::make_sysfs_path(_ioAccess->path(), _type, _id,
-                                               entry::target);
+        auto file = sysfs::make_sysfs_path(_ioAccess->path(), _type, _id,
+                                           entry::target);
 
-            log<level::INFO>(std::format("Failing sysfs file: {} errno: {}",
-                                         file, e.code().value())
-                                 .c_str());
+        log<level::INFO>(std::format("Failing sysfs file: {} errno: {}", file,
+                                     e.code().value())
+                             .c_str());
 
-            exit(EXIT_FAILURE);
-        }
+        exit(EXIT_FAILURE);
     }
 
     return FanSpeedObject::target(value);
