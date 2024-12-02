@@ -22,6 +22,30 @@
       },
       "revId": "30cab6296637819aa95d5c64f67eb355b777dde3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "45418c56_c300fb0c",
+        "filename": "fan_speed.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2024-12-02T19:54:49Z",
+      "side": 0,
+      "message": "Yea, I agree I think it probably just didn\u0027t seem like it was necessary at the time.",
+      "parentUuid": "1ff59d22_7698e937",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 26
+      },
+      "revId": "30cab6296637819aa95d5c64f67eb355b777dde3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
