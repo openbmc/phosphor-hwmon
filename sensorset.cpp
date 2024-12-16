@@ -50,5 +50,3 @@ SensorSet::SensorSet(const std::string& path)
         _container[make_pair(match[1], match[2])].emplace(match[3]);
     }
 }
-
-// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

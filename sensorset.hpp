@@ -70,5 +70,3 @@ class SensorSet
      */
     container_t _container;
 };
-
-// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

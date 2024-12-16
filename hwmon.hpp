@@ -98,5 +98,3 @@ using Attributes =
 bool getAttributes(const std::string& type, Attributes& attributes);
 
 } //  namespace hwmon
-
-// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

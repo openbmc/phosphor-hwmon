@@ -73,5 +73,3 @@ std::string findHwmonFromDevPath(const std::string& devPath);
 std::string findCalloutPath(const std::string& instancePath);
 
 } // namespace sysfs
-
-// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

@@ -175,5 +175,3 @@ auto addThreshold(const std::string& sensorType, const std::string& sensorID,
 
     return iface;
 }
-
-// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
