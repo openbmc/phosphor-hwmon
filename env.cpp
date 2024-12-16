@@ -30,5 +30,3 @@ const char* EnvImpl::get(const char* key) const
 EnvImpl env_impl;
 
 } // namespace env
-
-// vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
