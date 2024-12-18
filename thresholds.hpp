@@ -26,18 +26,18 @@ struct Thresholds<WarningObject>
     static constexpr InterfaceType type = InterfaceType::WARN;
     static constexpr const char* envLo = "WARNLO";
     static constexpr const char* envHi = "WARNHI";
-    static SensorValueType (WarningObject::*const setLo)(SensorValueType);
-    static SensorValueType (WarningObject::*const setHi)(SensorValueType);
-    static SensorValueType (WarningObject::*const getLo)() const;
-    static SensorValueType (WarningObject::*const getHi)() const;
-    static bool (WarningObject::*const alarmLo)(bool);
-    static bool (WarningObject::*const alarmHi)(bool);
-    static bool (WarningObject::*const getAlarmLow)() const;
-    static bool (WarningObject::*const getAlarmHigh)() const;
-    static void (WarningObject::*const assertLowSignal)(SensorValueType);
-    static void (WarningObject::*const assertHighSignal)(SensorValueType);
-    static void (WarningObject::*const deassertLowSignal)(SensorValueType);
-    static void (WarningObject::*const deassertHighSignal)(SensorValueType);
+    static SensorValueType (WarningObject::* const setLo)(SensorValueType);
+    static SensorValueType (WarningObject::* const setHi)(SensorValueType);
+    static SensorValueType (WarningObject::* const getLo)() const;
+    static SensorValueType (WarningObject::* const getHi)() const;
+    static bool (WarningObject::* const alarmLo)(bool);
+    static bool (WarningObject::* const alarmHi)(bool);
+    static bool (WarningObject::* const getAlarmLow)() const;
+    static bool (WarningObject::* const getAlarmHigh)() const;
+    static void (WarningObject::* const assertLowSignal)(SensorValueType);
+    static void (WarningObject::* const assertHighSignal)(SensorValueType);
+    static void (WarningObject::* const deassertLowSignal)(SensorValueType);
+    static void (WarningObject::* const deassertHighSignal)(SensorValueType);
 };
 
 /**@brief Thresholds specialization for critical thresholds. */
@@ -47,18 +47,18 @@ struct Thresholds<CriticalObject>
     static constexpr InterfaceType type = InterfaceType::CRIT;
     static constexpr const char* envLo = "CRITLO";
     static constexpr const char* envHi = "CRITHI";
-    static SensorValueType (CriticalObject::*const setLo)(SensorValueType);
-    static SensorValueType (CriticalObject::*const setHi)(SensorValueType);
-    static SensorValueType (CriticalObject::*const getLo)() const;
-    static SensorValueType (CriticalObject::*const getHi)() const;
-    static bool (CriticalObject::*const alarmLo)(bool);
-    static bool (CriticalObject::*const alarmHi)(bool);
-    static bool (CriticalObject::*const getAlarmLow)() const;
-    static bool (CriticalObject::*const getAlarmHigh)() const;
-    static void (CriticalObject::*const assertLowSignal)(SensorValueType);
-    static void (CriticalObject::*const assertHighSignal)(SensorValueType);
-    static void (CriticalObject::*const deassertLowSignal)(SensorValueType);
-    static void (CriticalObject::*const deassertHighSignal)(SensorValueType);
+    static SensorValueType (CriticalObject::* const setLo)(SensorValueType);
+    static SensorValueType (CriticalObject::* const setHi)(SensorValueType);
+    static SensorValueType (CriticalObject::* const getLo)() const;
+    static SensorValueType (CriticalObject::* const getHi)() const;
+    static bool (CriticalObject::* const alarmLo)(bool);
+    static bool (CriticalObject::* const alarmHi)(bool);
+    static bool (CriticalObject::* const getAlarmLow)() const;
+    static bool (CriticalObject::* const getAlarmHigh)() const;
+    static void (CriticalObject::* const assertLowSignal)(SensorValueType);
+    static void (CriticalObject::* const assertHighSignal)(SensorValueType);
+    static void (CriticalObject::* const deassertLowSignal)(SensorValueType);
+    static void (CriticalObject::* const deassertHighSignal)(SensorValueType);
 };
 
 /** @brief checkThresholds
