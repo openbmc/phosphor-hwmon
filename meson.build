@@ -115,7 +115,7 @@ install_data(
 )
 
 force_devpath = ''
-if get_option('always-use-devpath').enabled()
+if get_option('always-use-devpath').allowed()
     force_devpath = ' || true'
 endif
 
@@ -132,7 +132,7 @@ configure_file(
 )
 
 subdir('msl')
-if not get_option('tests').disabled()
+if get_option('tests').allowed()
   subdir('test')
 endif
 subdir('tools')
