@@ -149,8 +149,8 @@ class MainLoop
      *
      * @param[in] sensor - Sensor to get the identifiers of
      */
-    SensorIdentifiers
-        getIdentifiers(SensorSet::container_t::const_reference sensor);
+    SensorIdentifiers getIdentifiers(
+        SensorSet::container_t::const_reference sensor);
 
     /**
      * @brief Used to create and add sensor objects
@@ -160,8 +160,8 @@ class MainLoop
      * @return - Optional
      *     Object state data on success, nothing on failure
      */
-    std::optional<ObjectStateData>
-        getObject(SensorSet::container_t::const_reference sensor);
+    std::optional<ObjectStateData> getObject(
+        SensorSet::container_t::const_reference sensor);
 };
 
 /** @brief Given a value and map of interfaces, update values and check

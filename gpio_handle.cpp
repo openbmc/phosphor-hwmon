@@ -13,8 +13,8 @@ namespace gpio
 
 using namespace phosphor::logging;
 
-std::unique_ptr<gpioplus::HandleInterface>
-    BuildGpioHandle(const std::string& gpiochip, const std::string& line)
+std::unique_ptr<gpioplus::HandleInterface> BuildGpioHandle(
+    const std::string& gpiochip, const std::string& line)
 {
     char *gpioEnd, *lineEnd;
     unsigned long chipId = std::strtoul(gpiochip.c_str(), &gpioEnd, 10);

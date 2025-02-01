@@ -9,8 +9,8 @@ GpioHandleInterface* gpioIntf;
 namespace gpio
 {
 
-std::unique_ptr<gpioplus::HandleInterface>
-    BuildGpioHandle(const std::string& gpiochip, const std::string& line)
+std::unique_ptr<gpioplus::HandleInterface> BuildGpioHandle(
+    const std::string& gpiochip, const std::string& line)
 {
     return (gpioIntf) ? gpioIntf->build(gpiochip, line) : nullptr;
 }

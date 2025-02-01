@@ -133,8 +133,8 @@ class Sensor
      *
      * @return - Shared pointer to the accuracy object
      */
-    std::shared_ptr<AccuracyObject>
-        addAccuracy(ObjectInfo& info, double accuracy);
+    std::shared_ptr<AccuracyObject> addAccuracy(ObjectInfo& info,
+                                                double accuracy);
 
     /**
      * @brief Add Priority interface and priority property for sensors
@@ -146,8 +146,8 @@ class Sensor
      * @return - Shared pointer to the priority object
      */
 
-    std::shared_ptr<PriorityObject>
-        addPriority(ObjectInfo& info, size_t priority);
+    std::shared_ptr<PriorityObject> addPriority(ObjectInfo& info,
+                                                size_t priority);
 
     /**
      * @brief Get the scale from the sensor.

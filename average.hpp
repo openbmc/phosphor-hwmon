@@ -34,8 +34,8 @@ class Average
      *      return {}, if sensorKey can not be found in averageMap
      *      return averageValue, if sensorKey can be found in averageMap
      */
-    std::optional<averageValue>
-        getAverageValue(const averageKey& sensorKey) const;
+    std::optional<averageValue> getAverageValue(
+        const averageKey& sensorKey) const;
 
     /** @brief Set average value in averageMap based on sensor key.
      *  This function will be called only when the env AVERAGE_xxx is set to
@@ -60,9 +60,9 @@ class Average
      *      return {}, if curInterval-preInterval=0
      *      return new calculated average value, if curInterval-preInterval>0
      */
-    static std::optional<int64_t>
-        calcAverage(int64_t preAverage, int64_t preInterval, int64_t curAverage,
-                    int64_t curInterval);
+    static std::optional<int64_t> calcAverage(
+        int64_t preAverage, int64_t preInterval, int64_t curAverage,
+        int64_t curInterval);
 
   private:
     /** @brief Store the previous average sensor map */

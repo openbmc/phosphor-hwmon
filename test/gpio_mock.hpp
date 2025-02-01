@@ -11,8 +11,8 @@ class GpioHandleInterface
 {
   public:
     virtual ~GpioHandleInterface() = default;
-    virtual std::unique_ptr<gpioplus::HandleInterface>
-        build(const std::string& gpiochip, const std::string& line) const = 0;
+    virtual std::unique_ptr<gpioplus::HandleInterface> build(
+        const std::string& gpiochip, const std::string& line) const = 0;
 };
 
 class GpioHandleMock : public GpioHandleInterface

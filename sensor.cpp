@@ -262,8 +262,8 @@ std::shared_ptr<StatusObject> Sensor::addStatus(ObjectInfo& info)
     return iface;
 }
 
-std::shared_ptr<AccuracyObject>
-    Sensor::addAccuracy(ObjectInfo& info, double accuracy)
+std::shared_ptr<AccuracyObject> Sensor::addAccuracy(ObjectInfo& info,
+                                                    double accuracy)
 {
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<InterfaceMap>(info);
@@ -278,8 +278,8 @@ std::shared_ptr<AccuracyObject>
     return iface;
 }
 
-std::shared_ptr<PriorityObject>
-    Sensor::addPriority(ObjectInfo& info, size_t priority)
+std::shared_ptr<PriorityObject> Sensor::addPriority(ObjectInfo& info,
+                                                    size_t priority)
 {
     auto& objPath = std::get<std::string>(info);
     auto& obj = std::get<InterfaceMap>(info);

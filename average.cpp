@@ -2,8 +2,8 @@
 
 #include <cassert>
 
-std::optional<Average::averageValue>
-    Average::getAverageValue(const Average::averageKey& sensorKey) const
+std::optional<Average::averageValue> Average::getAverageValue(
+    const Average::averageKey& sensorKey) const
 {
     const auto it = _previousAverageMap.find(sensorKey);
     if (it == _previousAverageMap.end())
@@ -20,9 +20,9 @@ void Average::setAverageValue(const Average::averageKey& sensorKey,
     _previousAverageMap[sensorKey] = sensorValue;
 }
 
-std::optional<int64_t>
-    Average::calcAverage(int64_t preAverage, int64_t preInterval,
-                         int64_t curAverage, int64_t curInterval)
+std::optional<int64_t> Average::calcAverage(
+    int64_t preAverage, int64_t preInterval, int64_t curAverage,
+    int64_t curInterval)
 {
     int64_t value = 0;
     // Estimate that the interval will overflow about 292471

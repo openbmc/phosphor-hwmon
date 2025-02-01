@@ -169,8 +169,8 @@ std::string MainLoop::getID(SensorSet::container_t::const_reference sensor)
     return id;
 }
 
-SensorIdentifiers
-    MainLoop::getIdentifiers(SensorSet::container_t::const_reference sensor)
+SensorIdentifiers MainLoop::getIdentifiers(
+    SensorSet::container_t::const_reference sensor)
 {
     std::string id = getID(sensor);
     std::string label;
@@ -198,8 +198,8 @@ SensorIdentifiers
  * object's state data is then returned for sensor state monitoring within
  * the main loop.
  */
-std::optional<ObjectStateData>
-    MainLoop::getObject(SensorSet::container_t::const_reference sensor)
+std::optional<ObjectStateData> MainLoop::getObject(
+    SensorSet::container_t::const_reference sensor)
 {
     auto properties = getIdentifiers(sensor);
     if (std::get<sensorID>(properties).empty() ||
