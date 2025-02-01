@@ -2,40 +2,42 @@ option(
     'busname-prefix',
     description: 'The DBus busname prefix.',
     type: 'string',
-    value: 'xyz.openbmc_project.Hwmon')
+    value: 'xyz.openbmc_project.Hwmon',
+)
 option(
     'negative-errno-on-fail',
     description: 'Set sensor value to -errno on read failures.',
-    type: 'boolean')
+    type: 'boolean',
+)
 option(
     'sensor-root',
     description: 'The DBus sensors namespace root.',
     type: 'string',
-    value: '/xyz/openbmc_project/sensors')
-option(
-    'tests', type: 'feature', description: 'Build tests.',
+    value: '/xyz/openbmc_project/sensors',
 )
+option('tests', type: 'feature', description: 'Build tests.')
 option(
     'update-functional-on-fail',
     description: 'Update functional property on read failures.  Incompatible with negative-errno-on-fail.',
-    type: 'boolean')
+    type: 'boolean',
+)
 option(
     'enable-max31785-msl',
     type: 'boolean',
     value: false,
-    description: 'Include building and installing the MAX31785 chip\'s minimum ship level checking application.'
+    description: 'Include building and installing the MAX31785 chip\'s minimum ship level checking application.',
 )
 
 
 option(
     'override-with-devpath',
     type: 'array',
-    description: 'Only use the devpath of the device even if OFPath exists'
+    description: 'Only use the devpath of the device even if OFPath exists',
 )
 
 option(
     'always-use-devpath',
     type: 'feature',
     value: 'disabled',
-    description: 'Only use the devpath for all devices.'
+    description: 'Only use the devpath for all devices.',
 )
