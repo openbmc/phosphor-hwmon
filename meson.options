@@ -8,6 +8,7 @@ option(
     'negative-errno-on-fail',
     description: 'Set sensor value to -errno on read failures.',
     type: 'boolean',
+    value: false,
 )
 option(
     'sensor-root',
