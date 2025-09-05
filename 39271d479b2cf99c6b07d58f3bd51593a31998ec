@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "fce76314_0f43600c",
         "filename": "read_cache.cpp",
@@ -20,10 +21,10 @@
         "endChar": 46
       },
       "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "06b092a9_731ba47b",
         "filename": "read_cache.cpp",
@@ -43,10 +44,10 @@
         "endChar": 37
       },
       "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "d4db5aed_e31057fc",
         "filename": "read_cache.cpp",
@@ -66,10 +67,10 @@
         "endChar": 36
       },
       "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "ec6b7d3f_cdb46afb",
         "filename": "read_cache.hpp",
@@ -83,8 +84,8 @@
       "side": 1,
       "message": "this shouldn\u0027t be phosphor-hwmon specific, right?\n\nIs there significant difference if we want to try it out with dbus-sensors?",
       "revId": "39271d479b2cf99c6b07d58f3bd51593a31998ec",
-      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
-      "unresolved": true
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
-  ]
+  ],
+  "submitRequirementResults": []
 }
