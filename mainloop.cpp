@@ -446,7 +446,7 @@ void MainLoop::init()
         auto interval = env::getEnv("INTERVAL");
         if (!interval.empty())
         {
-            _interval = std::strtoull(interval.c_str(), NULL, 10);
+            _interval = std::strtoull(interval.c_str(), nullptr, 10);
         }
     }
 }
