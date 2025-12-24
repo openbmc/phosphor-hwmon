@@ -49,7 +49,7 @@ class Sensor
     Sensor(const Sensor&) = delete;
     Sensor(Sensor&&) = default;
     Sensor& operator=(const Sensor&) = delete;
-    Sensor& operator=(Sensor&&) = default;
+    Sensor& operator=(Sensor&&) = delete;
     ~Sensor() = default;
 
     /**
