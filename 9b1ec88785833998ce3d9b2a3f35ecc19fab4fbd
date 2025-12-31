@@ -1,0 +1,7 @@
+Code-Review+2: Brandon Kim <brandonkim@google.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: Jayanth Othayoth <ojayanth@gmail.com>
+Submitted-at: Wed, 31 Dec 2025 04:04:37 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-hwmon/+/86177
+Project: openbmc/phosphor-hwmon
+Branch: refs/heads/master
