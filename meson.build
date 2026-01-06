@@ -13,9 +13,14 @@ conf.set_quoted('SENSOR_ROOT', get_option('sensor-root'))
 conf.set10('NEGATIVE_ERRNO_ON_FAIL', get_option('negative-errno-on-fail'))
 conf.set10('UPDATE_FUNCTIONAL_ON_FAIL', get_option('update-functional-on-fail'))
 
+phosphor_logging_dep = dependency('phosphor-logging')
+
 sysfs_headers = include_directories('.')
 
-sysfs_deps = [dependency('stdplus')]
+sysfs_deps = [
+    dependency('stdplus'),
+    phosphor_logging_dep,
+]
 
 sysfs_lib = static_library(
     'sysfs',
@@ -35,12 +40,12 @@ hwmon_headers = include_directories('.')
 hwmon_deps = [
     dependency('gpioplus'),
     dependency('phosphor-dbus-interfaces'),
-    dependency('phosphor-logging'),
     dependency('sdbusplus'),
     dependency('sdeventplus'),
     dependency('stdplus'),
     dependency('threads'),
     sysfs_dep,
+    phosphor_logging_dep,
 ]
 
 hwmon_lib = static_library(

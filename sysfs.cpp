@@ -15,7 +15,9 @@
  */
 #include "sysfs.hpp"
 
-#include <stdplus/print.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <algorithm>
 #include <cerrno>
@@ -60,7 +62,15 @@ std::string findPhandleMatch(const std::string& iochanneldir,
     ioChannelsFile.read(reinterpret_cast<char*>(&ioChannelsValue),
                         sizeof(ioChannelsValue));
 
-    for (const auto& ofInst : fs::recursive_directory_iterator(phandledir))
+    std::error_code ec;
+    fs::recursive_directory_iterator it(phandledir, ec);
+    if (ec)
+    {
+        lg2::error("Unable to run recursive_directory_iterator: {ERR}", "ERR",
+                   ec.message());
+        return emptyString;
+    }
+    for (const auto& ofInst : it)
     {
         auto path = ofInst.path();
         if ("phandle" != path.filename())
@@ -127,7 +137,16 @@ std::string findCalloutPath(const std::string& instancePath)
     // If a match is found, use the corresponding /sys/devices
     // iio device as the callout device.
     static constexpr auto iioDevices = "/sys/bus/iio/devices";
-    for (const auto& iioDev : fs::recursive_directory_iterator(iioDevices))
+    std::error_code ec;
+    fs::recursive_directory_iterator it(iioDevices, ec);
+    if (ec)
+    {
+        lg2::error("Unable to run recursive_directory_iterator: {ERR}", "ERR",
+                   ec.message());
+        return emptyString;
+    }
+
+    for (const auto& iioDev : it)
     {
         p = iioDev.path();
         p /= "of_node";
@@ -232,9 +251,8 @@ std::string findHwmonFromDevPath(const std::string& devPath)
     }
     catch (const std::exception& e)
     {
-        stdplus::print(stderr,
-                       "Unable to find hwmon directory from the dev path: {}\n",
-                       devPath.c_str());
+        lg2::error("Unable to find hwmon directory from the dev path: {ERR}",
+                   "ERR", devPath);
     }
     return emptyString;
 }
