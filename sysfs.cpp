@@ -60,7 +60,16 @@ std::string findPhandleMatch(const std::string& iochanneldir,
     ioChannelsFile.read(reinterpret_cast<char*>(&ioChannelsValue),
                         sizeof(ioChannelsValue));
 
-    for (const auto& ofInst : fs::recursive_directory_iterator(phandledir))
+    std::error_code ec;
+    fs::recursive_directory_iterator it(phandledir, ec);
+    if (ec)
+    {
+        stdplus::print(stderr,
+                       "Unable to run recursive_directory_iterator: {}\n",
+                       ec.message());
+        return emptyString;
+    }
+    for (const auto& ofInst : it)
     {
         auto path = ofInst.path();
         if ("phandle" != path.filename())
@@ -127,7 +136,17 @@ std::string findCalloutPath(const std::string& instancePath)
     // If a match is found, use the corresponding /sys/devices
     // iio device as the callout device.
     static constexpr auto iioDevices = "/sys/bus/iio/devices";
-    for (const auto& iioDev : fs::recursive_directory_iterator(iioDevices))
+    std::error_code ec;
+    fs::recursive_directory_iterator it(iioDevices, ec);
+    if (ec)
+    {
+        stdplus::print(stderr,
+                       "Unable to run recursive_directory_iterator: {}\n",
+                       ec.message());
+        return emptyString;
+    }
+
+    for (const auto& iioDev : it)
     {
         p = iioDev.path();
         p /= "of_node";
