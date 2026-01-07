@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c4a65b1f_27ca5c12",
+        "filename": "sysfs.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2026-01-07T18:47:50Z",
+      "side": 1,
+      "message": "The rest of the project uses phosphor-logging, may as well use here too?",
+      "revId": "68ed9ec36a5d575b4701a670ff4fd598518406b8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
