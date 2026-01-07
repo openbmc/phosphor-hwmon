@@ -22,6 +22,30 @@
       },
       "revId": "ab4d21f3b07f5a3d3df5ea857c5d8fa06e9795e8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8df369ee_63155cf0",
+        "filename": "sysfs.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2026-01-07T23:36:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1e9a6a7b_86343fc2",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 35
+      },
+      "revId": "ab4d21f3b07f5a3d3df5ea857c5d8fa06e9795e8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
