@@ -9,7 +9,6 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
-using ::testing::Invoke;
 using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::Return;
@@ -35,11 +34,11 @@ void SetupDbusObject(sdbusplus::SdBusMock* sdbus_mock, const std::string& path,
         EXPECT_CALL(*sdbus_mock,
                     sd_bus_emit_properties_changed_strv(IsNull(), StrEq(path),
                                                         StrEq(intf), NotNull()))
-            .WillOnce(Invoke(
+            .WillOnce(
                 [=](sd_bus*, const char*, const char*, const char** names) {
                     EXPECT_STREQ(property.c_str(), names[0]);
                     return 0;
-                }));
+                });
     }
 
     return;
@@ -135,11 +134,10 @@ TEST(FanPwmTest, WriteTargetValue)
     EXPECT_CALL(sdbus_mock,
                 sd_bus_emit_properties_changed_strv(
                     IsNull(), StrEq("asdf"), StrEq(FanPwmIntf), NotNull()))
-        .WillOnce(
-            Invoke([&](sd_bus*, const char*, const char*, const char** names) {
-                EXPECT_EQ(0, strncmp("Target", names[0], 6));
-                return 0;
-            }));
+        .WillOnce([&](sd_bus*, const char*, const char*, const char** names) {
+            EXPECT_EQ(0, strncmp("Target", names[0], 6));
+            return 0;
+        });
 
     EXPECT_EQ(target, f.target(target));
 }
