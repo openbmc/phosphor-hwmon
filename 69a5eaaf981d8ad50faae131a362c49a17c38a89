@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed114031_8e4c18b2",
+        "filename": "hwmonio.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000388
+      },
+      "writtenOn": "2026-01-14T22:23:23Z",
+      "side": 1,
+      "message": "nit: did this have to go on the same line?",
+      "range": {
+        "startLine": 67,
+        "startChar": 9,
+        "endLine": 67,
+        "endChar": 18
+      },
+      "revId": "69a5eaaf981d8ad50faae131a362c49a17c38a89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
