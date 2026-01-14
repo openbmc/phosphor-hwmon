@@ -22,6 +22,30 @@
       },
       "revId": "69a5eaaf981d8ad50faae131a362c49a17c38a89",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b825d3d7_0fdee949",
+        "filename": "hwmonio.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2026-01-14T22:28:05Z",
+      "side": 1,
+      "message": "since there was no comment separating them clang-format did it. (must be a new version)\n\nHow about I\u0027ll add a comment for it so then everything will be consistent.",
+      "parentUuid": "ed114031_8e4c18b2",
+      "range": {
+        "startLine": 67,
+        "startChar": 9,
+        "endLine": 67,
+        "endChar": 18
+      },
+      "revId": "69a5eaaf981d8ad50faae131a362c49a17c38a89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
