@@ -103,6 +103,12 @@ static constexpr auto retryableErrors = {
      * failure, attempt to get the rest of the data.
      */
     EMSGSIZE,
+
+    /*
+     * On multi-master buses, if things line up right these
+     * can occur and a retry will succeed.
+     */
+    EPROTO
 };
 
 HwmonIO::HwmonIO(const std::string& path, const FileSystemInterface* intf) :
