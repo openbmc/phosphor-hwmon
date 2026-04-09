@@ -44,27 +44,59 @@ int main(int argc, char** argv)
 
     CLI11_PARSE(app, argc, argv);
 
-    // Parse out path argument.
-    auto path = devpath;
-    auto param = path;
-    if (!path.empty())
+    std::string path;
+    std::string param;
+
+    // This path may either be a device path (starts with /devices),
+    // a bus device identifier (when USE_BUS_DEVICE is enabled),
+    // or an open firmware device tree path.
+    if (!devpath.empty())
     {
-        // This path may either be a device path (starts with
-        // /devices), or an open firmware device tree path.
-        if (path.substr(0, 8) == "/devices")
+        param = devpath;
+
+        if constexpr (USE_BUS_DEVICE)
         {
-            path = sysfs::findHwmonFromDevPath(path);
+            auto fullDevPath = sysfs::findDevPathFromBusDevice(devpath);
+            if (!fullDevPath.empty())
+            {
+                path = sysfs::findHwmonFromDevPath(fullDevPath);
+                if (path.empty())
+                {
+                    exit_with_error(
+                        app.help("", CLI::AppFormatMode::All),
+                        "Unable to find hwmon device from bus device path.");
+                }
+            }
         }
         else
         {
-            path = sysfs::findHwmonFromOFPath(path);
+            // When disabled, use the original logic based on path format
+            if (devpath.substr(0, 8) == "/devices")
+            {
+                path = sysfs::findHwmonFromDevPath(devpath);
+                if (path.empty())
+                {
+                    exit_with_error(
+                        app.help("", CLI::AppFormatMode::All),
+                        "Unable to find hwmon device from device path.");
+                }
+            }
+            else
+            {
+                path = sysfs::findHwmonFromOFPath(devpath);
+                if (path.empty())
+                {
+                    exit_with_error(
+                        app.help("", CLI::AppFormatMode::All),
+                        "Unable to find hwmon device from OF path.");
+                }
+            }
         }
     }
-
-    if (path.empty())
+    else if (!syspath.empty())
     {
         path = syspath;
-        param = path;
+        param = syspath;
     }
 
     if (path.empty())

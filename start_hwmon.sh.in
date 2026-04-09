@@ -1,18 +1,64 @@
 #!/bin/bash
 
+# This script is triggered by udev rules when hwmon devices are added or
+# removed. It determines the config file path to use and starts/stops the
+# corresponding systemd service instance, passing it the path as a template
+# parameter.
+#
+# Arguments:
+#   $1 (action)      - "start" or "stop"
+#   $2 (devpath)     - Device path from udev %p (e.g., /devices/.../hwmon/hwmon0)
+#   $3 (of_fullname) - OpenFirmware path from udev %E{OF_FULLNAME} (if available)
+#
+# Path Selection (controlled by meson options):
+#
+#   DEFAULT (no options):
+#     - Uses OF_FULLNAME if present, otherwise uses full /sys/devices path
+#
+#   always-use-devpath:
+#     - Always uses full /sys/devices path
+#
+#   override-with-devpath:
+#     - Uses OF_FULLNAME by default
+#     - For devices in the list, uses /sys/devices path instead
+#
+#   use-bus-device:
+#     - Extracts the bus device identifier from the device path
+#     - Format: <bustype>,<device> (e.g., i2c,3-0068)
+#     - Currently supports I2C. Other buses fall back to full devpath
+
 action=$1
 devpath=$2
 of_fullname=$3
 
-#Use of_fullname if it's there, otherwise use devpath.
-function use_devpath(){
-    path=$devpath
+# Strip off the trailing hwmon info
+if [[ "$devpath" =~ (.*)/hwmon/hwmon[0-9]+$ ]];
+then
+    devpath=${BASH_REMATCH[1]}
+fi
 
-    if [[ "$path" =~ (.*)/hwmon/hwmon[0-9]+$ ]];
+function extract_bus_device(){
+    local devpath=$1
+    
+    # Convert .../i2c-N/N-ADDR into i2c,N-ADDR
+    if [[ "$devpath" =~ .*/i2c-[0-9]+/([0-9]+-[0-9a-f]+)$ ]];
     then
-        path=${BASH_REMATCH[1]}
+        echo "i2c,${BASH_REMATCH[1]}"
+        return 0
     fi
-    echo "${path}"
+    
+    # Support for other bus types can be added here
+    
+    echo "$devpath"
+}
+
+function use_devpath(){
+    if [ "@USE_BUS_DEVICE@" = "enabled" ];
+    then
+        extract_bus_device "$devpath"
+    else
+        echo "$devpath"
+    fi
 }
 
 path=$of_fullname
@@ -20,17 +66,22 @@ if [ -z "${path}" ]@FORCE_DEVPATH@
 then
     path="$(use_devpath)"
 else
-    override_with_devpath=(@OVERRIDE_WITH_DEVPATH@)
-    if [[ "$path" =~ .*/(.*)$ ]];
+    if [ "@USE_BUS_DEVICE@" = "enabled" ];
     then
-        of_name="${BASH_REMATCH[1]}"
-        for i in ${!override_with_devpath[@]}; do
-            if [[ "${override_with_devpath[$i]}" == "${of_name}" ]];
-            then
-                path="$(use_devpath)"
-                break
-            fi
-        done
+        path="$(use_devpath)"
+    else
+        override_with_devpath=(@OVERRIDE_WITH_DEVPATH@)
+        if [[ "$path" =~ .*/(.*)$ ]];
+        then
+            of_name="${BASH_REMATCH[1]}"
+            for i in ${!override_with_devpath[@]}; do
+                if [[ "${override_with_devpath[$i]}" == "${of_name}" ]];
+                then
+                    path="$(use_devpath)"
+                    break
+                fi
+            done
+        fi
     fi
 fi
 
