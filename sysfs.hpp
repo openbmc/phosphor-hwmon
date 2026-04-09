@@ -61,6 +61,17 @@ std::string findHwmonFromOFPath(const std::string& ofNode);
  */
 std::string findHwmonFromDevPath(const std::string& devPath);
 
+/** @brief Finds the full device path from the bus device identifier
+ *
+ *  @param[in] busDevice - Bus device identifier
+ *                         Example: "i2c,3-006b"
+ *
+ *  @return Full device path starting with /devices or empty string if not found
+ *
+ *  @note Currently only I2C devices are supported.
+ */
+std::string findDevPathFromBusDevice(std::string_view busDevice);
+
 /** @brief Return the path to use for a call out.
  *
  *  Return an empty string if a callout path cannot be
