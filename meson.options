@@ -42,3 +42,10 @@ option(
     value: 'disabled',
     description: 'Only use the devpath for all devices.',
 )
+
+option(
+    'use-bus-device',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Always use bus device identifiers (e.g., i2c,3-006b) for all devices.',
+)
