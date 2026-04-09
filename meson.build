@@ -7,11 +7,28 @@ project(
     meson_version: '>=1.1.1',
 )
 
+# Validate mutually exclusive options
+options_enabled = 0
+if get_option('use-bus-device').allowed()
+    options_enabled += 1
+endif
+if get_option('always-use-devpath').allowed()
+    options_enabled += 1
+endif
+if get_option('override-with-devpath').length() > 0
+    options_enabled += 1
+endif
+
+if options_enabled > 1
+    error('use-bus-device, always-use-devpath, and override-with-devpath are mutually exclusive')
+endif
+
 conf = configuration_data()
 conf.set_quoted('BUSNAME_PREFIX', get_option('busname-prefix'))
 conf.set_quoted('SENSOR_ROOT', get_option('sensor-root'))
 conf.set10('NEGATIVE_ERRNO_ON_FAIL', get_option('negative-errno-on-fail'))
 conf.set10('UPDATE_FUNCTIONAL_ON_FAIL', get_option('update-functional-on-fail'))
+conf.set10('USE_BUS_DEVICE', get_option('use-bus-device').allowed())
 
 phosphor_logging_dep = dependency('phosphor-logging')
 
@@ -114,12 +131,18 @@ if get_option('always-use-devpath').allowed()
     force_devpath = ' || true'
 endif
 
+use_bus_device = ''
+if get_option('use-bus-device').allowed()
+    use_bus_device = 'enabled'
+endif
+
 configure_file(
     input: 'start_hwmon.sh.in',
     output: 'start_hwmon.sh',
     configuration: {
         'OVERRIDE_WITH_DEVPATH': ' '.join(get_option('override-with-devpath')),
         'FORCE_DEVPATH': force_devpath,
+        'USE_BUS_DEVICE': use_bus_device,
     },
     install_dir: get_option('bindir'),
     install_mode: 'rwxr-xr-x',
