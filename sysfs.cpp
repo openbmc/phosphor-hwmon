@@ -255,4 +255,70 @@ std::string findHwmonFromDevPath(const std::string& devPath)
     return emptyString;
 }
 
+static std::string resolveI2CDevicePath(std::string_view deviceName)
+{
+    fs::path sysPath{"/sys/bus/i2c/devices"};
+    sysPath /= std::string(deviceName);
+
+    if (!fs::exists(sysPath))
+    {
+        lg2::error("I2C device not found: {DEVICE} at {PATH}", "DEVICE",
+                   deviceName, "PATH", sysPath);
+        return emptyString;
+    }
+
+    try
+    {
+        auto realPath = fs::canonical(sysPath);
+        auto realPathStr = realPath.string();
+
+        auto devicesPos = realPathStr.find("/devices/");
+        if (devicesPos != std::string::npos)
+        {
+            return realPathStr.substr(devicesPos + 1); // Skip /sys prefix
+        }
+
+        lg2::error("Unable to extract device path from: {PATH}", "PATH",
+                   realPathStr);
+        return emptyString;
+    }
+    catch (const std::system_error& e)
+    {
+        lg2::error("Error resolving I2C device path: {DEVICE} - {ERR}",
+                   "DEVICE", deviceName, "ERR", e);
+        return emptyString;
+    }
+}
+
+std::string findDevPathFromBusDevice(std::string_view busDevice)
+{
+    auto commaPos = busDevice.find(',');
+    if (commaPos == std::string_view::npos)
+    {
+        lg2::error("Bus device must include bus type (format: bustype,device): "
+                   "{BUSDEV}",
+                   "BUSDEV", busDevice);
+        return emptyString;
+    }
+
+    auto busType = busDevice.substr(0, commaPos);
+    auto deviceName = busDevice.substr(commaPos + 1);
+
+    if (busType.empty() || deviceName.empty())
+    {
+        lg2::error("Invalid bus device format: {BUSDEV}", "BUSDEV", busDevice);
+        return emptyString;
+    }
+
+    // Currently only I2C is supported
+    if (busType != "i2c")
+    {
+        lg2::error("Unsupported bus type (only i2c supported): {BUSTYPE}",
+                   "BUSTYPE", busType);
+        return emptyString;
+    }
+
+    return resolveI2CDevicePath(deviceName);
+}
+
 } // namespace sysfs
