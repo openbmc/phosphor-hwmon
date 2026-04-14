@@ -16,6 +16,24 @@
       "message": "fix",
       "revId": "3fa15153449f332048a02214c92818a327224ac7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "83693054_7ec10597",
+        "filename": "start_hwmon.sh.in",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2026-04-14T21:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b056fb9_2673d2b3",
+      "revId": "3fa15153449f332048a02214c92818a327224ac7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
