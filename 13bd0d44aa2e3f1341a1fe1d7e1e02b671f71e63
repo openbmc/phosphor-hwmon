@@ -1,6 +1,29 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "69d65a41_cce77d41",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-04-21T12:22:14Z",
+      "side": 1,
+      "message": "nit: by",
+      "range": {
+        "startLine": 22,
+        "startChar": 9,
+        "endLine": 22,
+        "endChar": 14
+      },
+      "revId": "13bd0d44aa2e3f1341a1fe1d7e1e02b671f71e63",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "36c83c83_6eeaa531",
@@ -14,6 +37,23 @@
       "writtenOn": "2026-04-15T12:39:31Z",
       "side": 1,
       "message": "(apologies, I\u0027m OOO for 7 business days) will take a look next later next week - let me know if this is urgent)",
+      "revId": "13bd0d44aa2e3f1341a1fe1d7e1e02b671f71e63",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "46e986b7_8d210ab4",
+        "filename": "start_hwmon.sh.in",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-04-21T12:22:14Z",
+      "side": 1,
+      "message": "nit: I prefer all functions, and then any global code logic. Just a little confusing when you have some code, then functions, then more code.",
       "revId": "13bd0d44aa2e3f1341a1fe1d7e1e02b671f71e63",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
