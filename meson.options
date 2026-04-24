@@ -22,13 +22,6 @@ option(
     description: 'Update functional property on read failures.  Incompatible with negative-errno-on-fail.',
     type: 'boolean',
 )
-option(
-    'enable-max31785-msl',
-    type: 'boolean',
-    value: false,
-    description: 'Include building and installing the MAX31785 chip\'s minimum ship level checking application.',
-)
-
 
 option(
     'override-with-devpath',

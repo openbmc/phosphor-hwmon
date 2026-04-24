@@ -126,8 +126,4 @@ configure_file(
     install: true,
 )
 
-subdir('msl')
-if get_option('tests').allowed()
-    subdir('test')
-endif
 subdir('tools')
