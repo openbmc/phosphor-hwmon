@@ -94,7 +94,11 @@ cpp = meson.get_compiler('cpp')
 if cpp.has_header('CLI/CLI.hpp')
     CLI11_dep = declare_dependency()
 else
-    CLI11_dep = dependency('CLI11', required: true)
+    CLI11_dep = dependency(
+        'CLI11',
+        include_type: 'system',
+        default_options: ['tests=disabled'],
+    )
 endif
 
 executable(
