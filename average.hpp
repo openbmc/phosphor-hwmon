@@ -7,7 +7,7 @@
 #include <vector>
 
 /** @class AverageHandling
- *  @brief Handle avergae value when AVERAGE_* is set in env
+ *  @brief Handle average value when AVERAGE_* is set in env
  */
 class Average
 {
